@@ -21,6 +21,9 @@ dist/
 data/raw/
 eval/results/*.jsonl
 
+# Report screenshots (regenerate with scripts/screenshots.py)
+screenshots/
+
 # Editors / OS
 .vscode/*
 !.vscode/extensions.json

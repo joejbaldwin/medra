@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MeDRA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <div>
+          <div class="logo">Me<span>DRA</span></div>
+          <div class="tagline">Mapa de Despliegue del Razonamiento Agente</div>
+        </div>
+      </div>
+      <div class="controls">
+        <label class="field">
+          <span>Traza</span>
+          <select id="sample" aria-label="Traza de ejemplo"></select>
+        </label>
+        <label class="field">
+          <span>Velocidad</span>
+          <select id="speed" aria-label="Velocidad">
+            <option value="8">×0,5</option>
+            <option value="15" selected>×1</option>
+            <option value="30">×2</option>
+            <option value="75">×5</option>
+          </select>
+        </label>
+        <button id="start" class="primary" type="button">Reproducir</button>
+        <span id="status" class="status" data-state="idle">Listo</span>
+        <button id="theme" class="ghost" type="button" aria-label="Cambiar tema">◐</button>
+      </div>
+    </header>
+
+    <main class="board">
+      <section class="card">
+        <h2>Conceptos y menciones</h2>
+        <p class="sub">Tamaño = menciones · prototipo: recuento de palabras</p>
+        <div class="map"><svg id="map" role="img" aria-label="Mapa de conceptos"></svg></div>
+        <p id="stats" class="stats"></p>
+      </section>
+
+      <section class="card text-card">
+        <h2>Texto original</h2>
+        <p id="title" class="sub">Elige una traza y pulsa Reproducir.</p>
+        <p id="prompt" class="prompt" hidden></p>
+        <div id="stream" class="stream" aria-live="off"><span id="committed"></span><span id="pending" class="pending"></span><span id="caret" class="caret" hidden></span></div>
+        <div id="answer-block" class="answer" hidden>
+          <h3>Respuesta</h3>
+          <p id="answer"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

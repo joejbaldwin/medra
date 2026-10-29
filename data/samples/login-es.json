@@ -1,0 +1,9 @@
+{
+  "id": "login-es",
+  "title": "Página de login",
+  "language": "es",
+  "prompt": "Crea una página de login.",
+  "reasoning": "Vale, el usuario quiere una página de login. Necesito un formulario con email y contraseña. ¿Hace falta registro también? Por ahora me centraré en el inicio de sesión: el login es la pieza principal y el registro puede venir después.\n\nPrimero los campos. El email debe tener un formato válido y ninguno puede quedar vacío. Quizá convenga mostrar el error junto al campo, sin borrar lo que ya se ha escrito. El botón de login se desactiva hasta que la validación pase.\n\nEspera, falta la seguridad. La contraseña no debería almacenarse en texto plano; necesito un hash y la comprobación debe hacerse en el servidor. Además, si el login falla, el mensaje no debe revelar si el email existe.\n\nDespués está la sesión. Podría usar JWT, aunque una cookie de sesión también serviría. Depende del backend. Tengo que revisar cómo mantener la sesión y cuándo caduca. Si el JWT caduca, el login vuelve a pedir la contraseña.",
+  "answer": "Propongo un formulario con email y contraseña, validación en el cliente, contraseña con hash comprobada en el servidor y una sesión con JWT de caducidad corta.",
+  "origin": "Traza ilustrativa escrita por el grupo para la demo (medra-demo); no es salida de un modelo."
+}

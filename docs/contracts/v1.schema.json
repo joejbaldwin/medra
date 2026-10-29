@@ -1,0 +1,1294 @@
+{
+  "$defs": {
+    "Cluster": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label_terms": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "term_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label_terms",
+        "term_ids"
+      ],
+      "title": "Cluster",
+      "type": "object"
+    },
+    "Cooccurrence": {
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "type": "string"
+        },
+        "b": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "pmi": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "a",
+        "b",
+        "count",
+        "pmi"
+      ],
+      "title": "Cooccurrence",
+      "type": "object"
+    },
+    "Edge": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "a": {
+          "type": "string"
+        },
+        "b": {
+          "type": "string"
+        },
+        "width": {
+          "type": "number"
+        },
+        "colour_slot": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "a",
+        "b",
+        "width",
+        "colour_slot"
+      ],
+      "title": "Edge",
+      "type": "object"
+    },
+    "EndMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "end",
+          "default": "end",
+          "type": "string"
+        },
+        "reason": {
+          "default": "completed",
+          "enum": [
+            "completed",
+            "cancelled",
+            "error"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "reason"
+      ],
+      "title": "EndMessage",
+      "type": "object"
+    },
+    "ErrorMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "error",
+          "default": "error",
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "message"
+      ],
+      "title": "ErrorMessage",
+      "type": "object"
+    },
+    "HelloMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "hello",
+          "default": "hello",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "1.0",
+          "type": "string"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "type",
+        "schema_version",
+        "session_id",
+        "source",
+        "title",
+        "prompt",
+        "language"
+      ],
+      "title": "HelloMessage",
+      "type": "object"
+    },
+    "Highlight": {
+      "additionalProperties": false,
+      "description": "Spans to underline when a node or topic is selected.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "node",
+            "topic"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "spans": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "spans"
+      ],
+      "title": "Highlight",
+      "type": "object"
+    },
+    "Marker": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "e.g. backtrack, alternative, verification, conclusion.",
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "span": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "text",
+        "span"
+      ],
+      "title": "Marker",
+      "type": "object"
+    },
+    "MiningMessage": {
+      "additionalProperties": false,
+      "description": "Optional: the raw miner output, for a debug panel.",
+      "properties": {
+        "type": {
+          "const": "mining",
+          "default": "mining",
+          "type": "string"
+        },
+        "mining": {
+          "$ref": "#/$defs/MiningUpdate"
+        }
+      },
+      "required": [
+        "type",
+        "mining"
+      ],
+      "title": "MiningMessage",
+      "type": "object"
+    },
+    "MiningUpdate": {
+      "additionalProperties": false,
+      "description": "Full snapshot of the miner's state after a commit.\n\nEmitted each time at least one sentence is committed. It is a snapshot,\nnot a diff: Layer 2 and 3 run in the same process, so this costs no\nnetwork traffic, and it keeps the \"incremental == batch\" test simple.\nDiffing happens in Layer 3, before the network.",
+      "properties": {
+        "schema_version": {
+          "default": "1.0",
+          "type": "string"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "t": {
+          "type": "number"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ISO 639-1, e.g. 'en' or 'es'."
+        },
+        "text_length": {
+          "description": "Reasoning characters received so far.",
+          "type": "integer"
+        },
+        "committed_upto": {
+          "description": "Characters analysed; text after this is pending.",
+          "type": "integer"
+        },
+        "final": {
+          "default": false,
+          "type": "boolean"
+        },
+        "sentences": {
+          "items": {
+            "$ref": "#/$defs/Sentence"
+          },
+          "type": "array"
+        },
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "type": "array"
+        },
+        "terms": {
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "type": "array"
+        },
+        "tfidf": {
+          "items": {
+            "$ref": "#/$defs/SegmentKeywords"
+          },
+          "type": "array"
+        },
+        "cooc": {
+          "items": {
+            "$ref": "#/$defs/Cooccurrence"
+          },
+          "type": "array"
+        },
+        "clusters": {
+          "items": {
+            "$ref": "#/$defs/Cluster"
+          },
+          "type": "array"
+        },
+        "markers": {
+          "items": {
+            "$ref": "#/$defs/Marker"
+          },
+          "type": "array"
+        },
+        "stats": {
+          "$ref": "#/$defs/Stats"
+        }
+      },
+      "required": [
+        "schema_version",
+        "session_id",
+        "seq",
+        "t",
+        "language",
+        "text_length",
+        "committed_upto",
+        "final",
+        "sentences",
+        "segments",
+        "terms",
+        "tfidf",
+        "cooc",
+        "clusters",
+        "markers",
+        "stats"
+      ],
+      "title": "MiningUpdate",
+      "type": "object"
+    },
+    "Node": {
+      "additionalProperties": false,
+      "description": "A bubble in the concept map. The browser runs the physics.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "topic_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "colour_slot": {
+          "description": "Index into the dashboard's categorical palette.",
+          "type": "integer"
+        },
+        "seed_xy": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Starting position in a 0..1 box; the force layout moves it."
+        },
+        "emphasis": {
+          "default": 0.0,
+          "description": "0..1, e.g. recently mentioned.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "count",
+        "radius",
+        "topic_id",
+        "colour_slot",
+        "seed_xy",
+        "emphasis"
+      ],
+      "title": "Node",
+      "type": "object"
+    },
+    "Paragraph": {
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {
+          "type": "integer"
+        },
+        "start": {
+          "type": "integer"
+        },
+        "end": {
+          "type": "integer"
+        },
+        "topic_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "label": {
+          "type": "string"
+        },
+        "provisional": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "segment_id",
+        "start",
+        "end",
+        "topic_id",
+        "label",
+        "provisional"
+      ],
+      "title": "Paragraph",
+      "type": "object"
+    },
+    "Removed": {
+      "additionalProperties": false,
+      "properties": {
+        "nodes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "topics": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "paragraphs": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "highlights": {
+          "description": "'kind:id' keys.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "steps": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes",
+        "edges",
+        "topics",
+        "paragraphs",
+        "highlights",
+        "steps"
+      ],
+      "title": "Removed",
+      "type": "object"
+    },
+    "SampleInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        },
+        "words": {
+          "type": "integer"
+        },
+        "origin": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "language",
+        "words",
+        "origin"
+      ],
+      "title": "SampleInfo",
+      "type": "object"
+    },
+    "Segment": {
+      "additionalProperties": false,
+      "description": "A 'tramo': a run of sentences about one step of the reasoning.",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "start": {
+          "type": "integer"
+        },
+        "end": {
+          "type": "integer"
+        },
+        "provisional": {
+          "description": "The boundary may still move; drawn dashed.",
+          "type": "boolean"
+        },
+        "marker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Discourse marker that opened it."
+        },
+        "step_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "boundary_score": {
+          "default": 0.0,
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "start",
+        "end",
+        "provisional",
+        "marker",
+        "step_type",
+        "boundary_score"
+      ],
+      "title": "Segment",
+      "type": "object"
+    },
+    "SegmentKeywords": {
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {
+          "type": "integer"
+        },
+        "terms": {
+          "description": "Top-k by TF-IDF, highest first.",
+          "items": {
+            "$ref": "#/$defs/TermWeight"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "segment_id",
+        "terms"
+      ],
+      "title": "SegmentKeywords",
+      "type": "object"
+    },
+    "Sentence": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "start": {
+          "type": "integer"
+        },
+        "end": {
+          "type": "integer"
+        },
+        "segment_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "start",
+        "end",
+        "segment_id"
+      ],
+      "title": "Sentence",
+      "type": "object"
+    },
+    "SessionConfig": {
+      "additionalProperties": false,
+      "description": "Body of POST /sessions. More sources are added in later schema versions.",
+      "properties": {
+        "source": {
+          "const": "replay",
+          "default": "replay",
+          "type": "string"
+        },
+        "sample": {
+          "description": "Sample trace id, as listed by GET /datasets.",
+          "type": "string"
+        },
+        "words_per_second": {
+          "default": 15.0,
+          "description": "0 = as fast as possible.",
+          "minimum": 0,
+          "type": "number"
+        },
+        "chunking": {
+          "default": "word",
+          "enum": [
+            "word",
+            "random"
+          ],
+          "type": "string"
+        },
+        "seed": {
+          "default": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source",
+        "sample",
+        "words_per_second",
+        "chunking",
+        "seed"
+      ],
+      "title": "SessionConfig",
+      "type": "object"
+    },
+    "SessionCreated": {
+      "additionalProperties": false,
+      "properties": {
+        "session_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id"
+      ],
+      "title": "SessionCreated",
+      "type": "object"
+    },
+    "Stats": {
+      "additionalProperties": false,
+      "properties": {
+        "words": {
+          "default": 0,
+          "type": "integer"
+        },
+        "sentences": {
+          "default": 0,
+          "type": "integer"
+        },
+        "segments": {
+          "default": 0,
+          "type": "integer"
+        },
+        "lexical_diversity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "hedges_per_100w": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "extra": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "words",
+        "sentences",
+        "segments",
+        "lexical_diversity",
+        "hedges_per_100w",
+        "extra"
+      ],
+      "title": "Stats",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {
+          "type": "integer"
+        },
+        "step_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "topic_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "arcs_back_to": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "segment_id",
+        "step_type",
+        "topic_id",
+        "arcs_back_to"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Term": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Lemma or n-gram; the key used by every other field.",
+          "type": "string"
+        },
+        "surface_forms": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "df_segments": {
+          "description": "Number of segments the term appears in.",
+          "type": "integer"
+        },
+        "spans": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "first_seen": {
+          "description": "Offset of the first mention.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "surface_forms",
+        "count",
+        "df_segments",
+        "spans",
+        "first_seen"
+      ],
+      "title": "Term",
+      "type": "object"
+    },
+    "TermWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "term_id": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "term_id",
+        "weight"
+      ],
+      "title": "TermWeight",
+      "type": "object"
+    },
+    "TextChunk": {
+      "additionalProperties": false,
+      "description": "A piece of streamed text. Boundaries are arbitrary (may split a word).",
+      "properties": {
+        "schema_version": {
+          "default": "1.0",
+          "type": "string"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "seq": {
+          "description": "Strictly increasing within a session.",
+          "type": "integer"
+        },
+        "channel": {
+          "description": "reasoning = chain-of-thought, answer = final answer.",
+          "enum": [
+            "reasoning",
+            "answer",
+            "meta"
+          ],
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "t": {
+          "description": "Seconds since session start.",
+          "type": "number"
+        },
+        "final": {
+          "default": false,
+          "description": "Last chunk of this channel.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_version",
+        "session_id",
+        "seq",
+        "channel",
+        "text",
+        "t",
+        "final"
+      ],
+      "title": "TextChunk",
+      "type": "object"
+    },
+    "TextMessage": {
+      "additionalProperties": false,
+      "description": "Raw text, passed straight through so the stream feels live.",
+      "properties": {
+        "type": {
+          "const": "text",
+          "default": "text",
+          "type": "string"
+        },
+        "chunk": {
+          "$ref": "#/$defs/TextChunk"
+        }
+      },
+      "required": [
+        "type",
+        "chunk"
+      ],
+      "title": "TextMessage",
+      "type": "object"
+    },
+    "TickerItem": {
+      "additionalProperties": false,
+      "description": "One entry of the 'pipeline working' strip: form -> lemma -> outcome.",
+      "properties": {
+        "form": {
+          "type": "string"
+        },
+        "lemma": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "form",
+        "lemma",
+        "outcome"
+      ],
+      "title": "TickerItem",
+      "type": "object"
+    },
+    "Timeline": {
+      "additionalProperties": false,
+      "properties": {
+        "x_axis": {
+          "const": "words",
+          "default": "words",
+          "type": "string"
+        },
+        "x_max": {
+          "type": "number"
+        },
+        "series": {
+          "items": {
+            "$ref": "#/$defs/TimelineSeries"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "x_axis",
+        "x_max",
+        "series"
+      ],
+      "title": "Timeline",
+      "type": "object"
+    },
+    "TimelineSeries": {
+      "additionalProperties": false,
+      "properties": {
+        "topic_id": {
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "topic_id",
+        "points"
+      ],
+      "title": "TimelineSeries",
+      "type": "object"
+    },
+    "Topic": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "colour_slot": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "colour_slot"
+      ],
+      "title": "Topic",
+      "type": "object"
+    },
+    "ViewMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "view",
+          "default": "view",
+          "type": "string"
+        },
+        "view": {
+          "$ref": "#/$defs/ViewUpdate"
+        }
+      },
+      "required": [
+        "type",
+        "view"
+      ],
+      "title": "ViewMessage",
+      "type": "object"
+    },
+    "ViewUpdate": {
+      "additionalProperties": false,
+      "description": "What the screen should show, as a diff against the previous update.\n\nThe first update of a session has kind=\"snapshot\". After that, each list\nholds only items that were added or changed (upsert by id), and `removed`\nlists ids to delete. `timeline` and `stats`, when present, replace the\nprevious value whole. `ticker` items are appended.",
+      "properties": {
+        "schema_version": {
+          "default": "1.0",
+          "type": "string"
+        },
+        "session_id": {
+          "type": "string"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "t": {
+          "type": "number"
+        },
+        "kind": {
+          "enum": [
+            "snapshot",
+            "diff"
+          ],
+          "type": "string"
+        },
+        "committed_upto": {
+          "type": "integer"
+        },
+        "final": {
+          "default": false,
+          "type": "boolean"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/Node"
+          },
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/Edge"
+          },
+          "type": "array"
+        },
+        "topics": {
+          "items": {
+            "$ref": "#/$defs/Topic"
+          },
+          "type": "array"
+        },
+        "paragraphs": {
+          "items": {
+            "$ref": "#/$defs/Paragraph"
+          },
+          "type": "array"
+        },
+        "highlights": {
+          "items": {
+            "$ref": "#/$defs/Highlight"
+          },
+          "type": "array"
+        },
+        "timeline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timeline"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "type": "array"
+        },
+        "ticker": {
+          "items": {
+            "$ref": "#/$defs/TickerItem"
+          },
+          "type": "array"
+        },
+        "stats": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Stats"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "removed": {
+          "$ref": "#/$defs/Removed"
+        }
+      },
+      "required": [
+        "schema_version",
+        "session_id",
+        "seq",
+        "t",
+        "kind",
+        "committed_upto",
+        "final",
+        "nodes",
+        "edges",
+        "topics",
+        "paragraphs",
+        "highlights",
+        "timeline",
+        "steps",
+        "ticker",
+        "stats",
+        "removed"
+      ],
+      "title": "ViewUpdate",
+      "type": "object"
+    }
+  },
+  "description": "Not a message: a container so every contract lands in one schema.",
+  "properties": {
+    "text_chunk": {
+      "$ref": "#/$defs/TextChunk"
+    },
+    "mining_update": {
+      "$ref": "#/$defs/MiningUpdate"
+    },
+    "view_update": {
+      "$ref": "#/$defs/ViewUpdate"
+    },
+    "server_message": {
+      "discriminator": {
+        "mapping": {
+          "end": "#/$defs/EndMessage",
+          "error": "#/$defs/ErrorMessage",
+          "hello": "#/$defs/HelloMessage",
+          "mining": "#/$defs/MiningMessage",
+          "text": "#/$defs/TextMessage",
+          "view": "#/$defs/ViewMessage"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/HelloMessage"
+        },
+        {
+          "$ref": "#/$defs/TextMessage"
+        },
+        {
+          "$ref": "#/$defs/ViewMessage"
+        },
+        {
+          "$ref": "#/$defs/MiningMessage"
+        },
+        {
+          "$ref": "#/$defs/EndMessage"
+        },
+        {
+          "$ref": "#/$defs/ErrorMessage"
+        }
+      ],
+      "title": "ServerMessage"
+    },
+    "session_config": {
+      "$ref": "#/$defs/SessionConfig"
+    },
+    "session_created": {
+      "$ref": "#/$defs/SessionCreated"
+    },
+    "sample_info": {
+      "$ref": "#/$defs/SampleInfo"
+    }
+  },
+  "required": [
+    "text_chunk",
+    "mining_update",
+    "view_update",
+    "server_message",
+    "session_config",
+    "session_created",
+    "sample_info"
+  ],
+  "title": "MedraContracts",
+  "type": "object",
+  "$comment": "MeDRA contracts, schema_version 1.0. Generated; do not edit."
+}

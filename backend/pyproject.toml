@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medra"
+version = "0.1.0"
+description = "MeDRA: real-time text mining of a model's chain-of-thought"
+requires-python = ">=3.11"
+# Exact versions are pinned in requirements.lock (pip freeze) for reproducibility.
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx>=0.27"]
+# scripts/screenshots.py (report figures); browsers come from `playwright install`
+figures = ["playwright>=1.45"]
+
+[project.scripts]
+medra-source = "medra.cli:source_main"
+medra-mine = "medra.cli:mine_main"
+medra-present = "medra.cli:present_main"
+medra-serve = "medra.cli:serve_main"
+
+[tool.setuptools.packages.find]
+include = ["medra*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

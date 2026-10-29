@@ -9,16 +9,28 @@ from __future__ import annotations
 
 import secrets
 from collections import OrderedDict
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 
 from medra.contracts import ErrorMessage, SampleInfo, SessionConfig, SessionCreated
-from medra.mining import StubMiner
+from medra.mining import TextMiner
+from medra.mining.language import LANGUAGES, load_nlp
 from medra.pipeline import run_pipeline
 from medra.present import StubPresenter
 from medra.sources import ReplaySource, list_samples, load_trace
 
-app = FastAPI(title="MeDRA")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Load the spaCy models once at startup (about a second each) instead of
+    # stalling the first session that needs them.
+    for lang in LANGUAGES:
+        load_nlp(lang)
+    yield
+
+
+app = FastAPI(title="MeDRA", lifespan=lifespan)
 
 # Sessions created but not yet connected. Bounded so abandoned ones don't pile up.
 MAX_PENDING = 100
@@ -64,7 +76,7 @@ async def stream_session(ws: WebSocket, session_id: str) -> None:
         seed=config.seed,
     )
     try:
-        async for message in run_pipeline(session_id, source, StubMiner(session_id), StubPresenter()):
+        async for message in run_pipeline(session_id, source, TextMiner(session_id), StubPresenter()):
             await ws.send_text(message.model_dump_json())
         await ws.close()
     except WebSocketDisconnect:

@@ -19,9 +19,9 @@ from typing import Iterable, Iterator
 from pydantic import BaseModel
 
 from medra.contracts import MiningUpdate, TextChunk
-from medra.mining import StubMiner
-from medra.present import StubPresenter
-from medra.sources import ReplaySource, load_trace
+
+# Each command imports only its own layer (inside its function): the source
+# and presenter commands should not pay for loading spaCy and scikit-learn.
 
 
 def write_jsonl(model: BaseModel) -> None:
@@ -47,6 +47,7 @@ def source_main(argv: list[str] | None = None) -> None:
     replay.add_argument("--seed", type=int, default=0)
     replay.add_argument("--session-id", default="cli")
     args = parser.parse_args(argv)
+    from medra.sources import ReplaySource, load_trace
 
     source = ReplaySource(
         load_trace(args.sample), args.session_id, words_per_second=args.wps, chunking=args.chunking, seed=args.seed
@@ -60,10 +61,14 @@ def source_main(argv: list[str] | None = None) -> None:
 
 
 def mine_main(argv: list[str] | None = None) -> None:
-    argparse.ArgumentParser(prog="medra-mine", description="Layer 2: TextChunks in, MiningUpdates out.").parse_args(argv)
-    miner: StubMiner | None = None
+    parser = argparse.ArgumentParser(prog="medra-mine", description="Layer 2: TextChunks in, MiningUpdates out.")
+    parser.add_argument("--miner", choices=["text", "stub"], default="text")
+    args = parser.parse_args(argv)
+    from medra.mining import Miner, make_miner
+
+    miner: Miner | None = None
     for chunk in read_jsonl(sys.stdin, TextChunk):
-        miner = miner or StubMiner(chunk.session_id)
+        miner = miner or make_miner(args.miner, chunk.session_id)
         update = miner.feed(chunk)
         if update is not None:
             write_jsonl(update)
@@ -71,6 +76,8 @@ def mine_main(argv: list[str] | None = None) -> None:
 
 def present_main(argv: list[str] | None = None) -> None:
     argparse.ArgumentParser(prog="medra-present", description="Layer 3: MiningUpdates in, ViewUpdates out.").parse_args(argv)
+    from medra.present import StubPresenter
+
     presenter = StubPresenter()
     for update in read_jsonl(sys.stdin, MiningUpdate):
         view = presenter.present(update)

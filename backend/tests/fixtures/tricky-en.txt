@@ -1,0 +1,13 @@
+Okay, let me think about binary search. The array has n elements, e.g. 16 or 32.
+First, compute the middle index: `mid = (lo + hi) // 2`. Wait, what about overflow?
+
+```python
+def search(xs, target):
+    lo, hi = 0, len(xs) - 1
+    return lo
+```
+
+The cost is $O(\log n)$, approx. 4 steps for 16 elements. Dr. Knuth discusses binary search in detail.
+
+Alternatively, a linear scan costs $5 per element... no. Let me check: \[ T(n) = T(n/2) + 1 \] so binary search is logarithmic. <think>hidden</think> Binary search wins!
+Is the array sorted? It must be sorted for binary search.

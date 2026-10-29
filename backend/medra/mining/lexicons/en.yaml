@@ -1,0 +1,31 @@
+# English lexicon for the miner. Added on top of spaCy's own stopword list.
+
+# Chain-of-thought filler: words that are frequent in reasoning traces but say
+# nothing about the topic. Compared against lowercased lemmas.
+# Quote words YAML would read as booleans (yes, no, on, off).
+stopwords:
+  - okay
+  - ok
+  - alright
+  - hmm
+  - hm
+  - yeah
+  - "yes"
+  - wait
+  - maybe
+  - perhaps
+  - actually
+  - basically
+  - probably
+  - sure
+  - right
+  - thing
+  - something
+  - anything
+  - lot
+  - bit
+  - kind
+  - sort
+  - way
+  - let
+  - approx

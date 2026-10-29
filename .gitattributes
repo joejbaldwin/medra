@@ -1,0 +1,5 @@
+# LF everywhere: offsets in test fixtures and sample traces must not change
+# with the platform's line endings.
+* text=auto eol=lf
+*.png binary
+*.pdf binary

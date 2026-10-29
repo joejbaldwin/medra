@@ -12,6 +12,11 @@ dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "pydantic>=2.7",
+    "pyyaml>=6",
+    "spacy>=3.8,<3.9",
+    "scikit-learn>=1.5",
+    "en_core_web_md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl",
+    "es_core_news_md @ https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.8.0/es_core_news_md-3.8.0-py3-none-any.whl",
 ]
 
 [project.optional-dependencies]
@@ -27,6 +32,9 @@ medra-serve = "medra.cli:serve_main"
 
 [tool.setuptools.packages.find]
 include = ["medra*"]
+
+[tool.setuptools.package-data]
+"medra.mining" = ["lexicons/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,20 @@
+# Spanish lexicon for the miner. Added on top of spaCy's own stopword list.
+
+# Relleno típico del razonamiento: frecuente en las trazas pero sin contenido
+# temático. Se compara con los lemas en minúsculas.
+stopwords:
+  - vale
+  - bueno
+  - pues
+  - eh
+  - hmm
+  - ok
+  - okay
+  - quizá
+  - quizás
+  - tal
+  - cosa
+  - algo
+  - vez
+  - manera
+  - espera

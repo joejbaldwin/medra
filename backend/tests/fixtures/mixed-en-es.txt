@@ -1,0 +1,3 @@
+The user asks for a login page with a password field. I need to check the password on the server.
+
+Vale, ahora lo pienso en español. La contraseña debe guardarse con un hash en el servidor. El formulario de inicio de sesión necesita validación.

@@ -27,3 +27,10 @@ eval/results/*.jsonl
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local agent context (project brief, plan, course material): never committed
+context/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.claude/

@@ -31,8 +31,9 @@ from typing import Annotated, Literal, Union
 from pydantic import BaseModel, ConfigDict, Field
 
 # 1.1 (step 3): added MiningUpdate.recent_tokens, TickerItem.pos and TickerItem.node_id.
+# 1.2 (step 4): added Sentence.words, Step.marker, Step.marker_span and Step.words.
 # Minor versions only add fields with defaults, so 1.0 producers stay valid.
-SCHEMA_VERSION = "1.1"
+SCHEMA_VERSION = "1.2"
 
 Span = tuple[int, int]
 """Half-open character range [start, end) into the reasoning text."""
@@ -74,6 +75,7 @@ class Sentence(_Model):
     start: int
     end: int
     segment_id: int | None = None
+    words: int = Field(default=0, description="Word tokens in the sentence (the timeline's x axis).")
 
 
 class Segment(_Model):
@@ -242,10 +244,17 @@ class Timeline(_Model):
 
 
 class Step(_Model):
+    """One node of the step graph: a segment, with how it was opened."""
+
     segment_id: int
     step_type: str | None
     topic_id: str | None
-    arcs_back_to: list[int] = Field(default_factory=list)
+    arcs_back_to: list[int] = Field(
+        default_factory=list, description="Earlier segments whose topic this step returns to ('retoma')."
+    )
+    marker: str | None = Field(default=None, description="Discourse marker that opened the step.")
+    marker_span: Span | None = None
+    words: int = 0
 
 
 class TickerItem(_Model):

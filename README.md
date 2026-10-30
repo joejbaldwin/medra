@@ -34,7 +34,9 @@ npm install
 npm run dev                                   # open http://localhost:5173
 ```
 
-Pick a trace, press **Reproducir**: the text streams in on the right and the bubbles grow on the left.
+Pick a trace, press **Reproducir**: the text streams in on the right, split into segments
+(«tramos») coloured by topic; on the left the bubbles grow and the topic timeline fills in.
+The **Pasos** tab shows one node per segment, labelled with the discourse marker that opened it.
 
 Each layer is also a command reading and writing JSON Lines:
 
@@ -61,18 +63,19 @@ highlights exactly its mentions (and clicking a mention selects the bubble):
 
 With the backend and dashboard running, `scripts/screenshots.py` replays a trace in a headless
 browser and saves streaming and final captures (light and dark) to `screenshots/` (not committed);
-`--select ID` adds one with that bubble selected:
+`--select ID` adds one with that bubble selected, `--topic N` one with the N-th topic selected, and
+`--step N` one of the steps view with the N-th step selected:
 
 ```sh
 .venv/Scripts/python -m pip install -e "backend[figures]"
 .venv/Scripts/python -m playwright install chromium-headless-shell
-.venv/Scripts/python scripts/screenshots.py --prefix step3 --select contraseña --channel chromium-headless-shell
+.venv/Scripts/python scripts/screenshots.py --prefix step4 --select contraseña --topic 1 --step 3 --channel chromium-headless-shell
 ```
 
 ## Contracts
 
 The messages between layers are Pydantic models in [backend/medra/contracts.py](backend/medra/contracts.py),
-frozen as schema v1 in [docs/contracts/v1.schema.json](docs/contracts/v1.schema.json) (currently 1.1;
+frozen as schema v1 in [docs/contracts/v1.schema.json](docs/contracts/v1.schema.json) (currently 1.2;
 minor versions only add fields with defaults). The dashboard's TypeScript types are generated from
 that schema. After changing a contract, bump `SCHEMA_VERSION`, then:
 

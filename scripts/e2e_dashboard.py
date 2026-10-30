@@ -25,20 +25,19 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from medra.contracts import TextChunk  # noqa: E402
+from medra.contracts import MiningUpdate, TextChunk  # noqa: E402
 from medra.mining import TextMiner  # noqa: E402
 from medra.sources import ReplaySource, load_trace  # noqa: E402
 
 
-def expected_spans(sample: str) -> dict[str, list[tuple[int, int]]]:
+def mine_final(sample: str) -> MiningUpdate:
     source = ReplaySource(load_trace(sample), "e2e", words_per_second=0)
 
     async def chunks() -> list[TextChunk]:
         return [c async for c in source.stream()]
 
     miner = TextMiner("e2e")
-    final = [u for u in (miner.feed(c) for c in asyncio.run(chunks())) if u][-1]
-    return {t.id: [tuple(s) for s in t.spans] for t in final.terms}
+    return [u for u in (miner.feed(c) for c in asyncio.run(chunks())) if u][-1]
 
 
 def merge(pieces: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -58,7 +57,8 @@ def main() -> int:
     parser.add_argument("--sample", default="login-es")
     parser.add_argument("--channel", default="chromium-headless-shell")
     args = parser.parse_args()
-    truth = expected_spans(args.sample)
+    final = mine_final(args.sample)
+    truth = {t.id: [tuple(s) for s in t.spans] for t in final.terms}
 
     failures = 0
     with sync_playwright() as p:
@@ -66,10 +66,31 @@ def main() -> int:
         page.goto(args.url)
         page.wait_for_selector(f"#sample option[value='{args.sample}']", state="attached")
         page.select_option("#sample", args.sample)
-        page.select_option("#speed", "75")
+        page.select_option("#speed", "30")
         page.click("#start")
+
+        # Step 4 goal: paragraph blocks and the topic chart update while the text streams.
+        page.wait_for_function(
+            "document.getElementById('status').dataset.state === 'live'"
+            " && document.querySelectorAll('#chart g.c-topic').length > 0"
+            " && document.querySelectorAll('#stream .para[data-seg]').length >= 2",
+            timeout=60_000,
+        )
+        print(f"{args.sample}: topic curves and paragraph blocks shown while streaming")
         page.wait_for_function("document.getElementById('status').dataset.state === 'done'", timeout=120_000)
         page.wait_for_timeout(1500)
+
+        # Discourse markers highlighted in the text = the miner's segment openers.
+        markers = page.eval_on_selector_all("#stream .mk", "els => els.map(e => e.textContent)")
+        want_markers = [s.marker for s in final.segments if s.marker]
+        ok = "".join(markers) == "".join(want_markers)
+        failures += not ok
+        print(f"{args.sample}: markers in the text {markers} {'ok' if ok else f'!= {want_markers}'}")
+        curves = page.eval_on_selector_all("#chart g.c-topic", "els => els.length")
+        legend = page.eval_on_selector_all("#legend button", "els => els.length")
+        ok = curves == legend == len(final.clusters)
+        failures += not ok
+        print(f"{args.sample}: {curves} topic curves, {legend} legend entries, {len(final.clusters)} topics mined")
 
         # Every paragraph block must show exactly the source text of its range.
         source = load_trace(args.sample).reasoning
@@ -110,6 +131,20 @@ def main() -> int:
             failures += not ok
             print(f"  {'ok' if ok else 'FAIL':4} {node_id!r}: {len(got)} mentions highlighted, "
                   f"{len(want)} expected; clicking its first mention selects {back!r}")
+
+        # Steps view: one node per paragraph block; selecting a step highlights its paragraph.
+        page.click("#tab-pasos")
+        page.wait_for_timeout(300)
+        steps = page.eval_on_selector_all("g.s-node", "els => els.map(e => e.dataset.seg)")
+        ok = len(steps) == len(blocks)
+        failures += not ok
+        print(f"{args.sample}: {len(steps)} steps for {len(blocks)} paragraph blocks")
+        if steps:
+            page.click(f"g.s-node[data-seg='{steps[-1]}']")
+            lit = page.eval_on_selector_all("#stream .para.sel", "els => els.map(e => e.dataset.seg)")
+            ok = lit == [steps[-1]]
+            failures += not ok
+            print(f"{args.sample}: clicking the last step highlights paragraph {lit}")
     print("all bubbles underline exactly their mentions" if not failures else f"{failures} failures")
     return 1 if failures else 0
 

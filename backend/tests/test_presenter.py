@@ -5,7 +5,17 @@ import asyncio
 import pytest
 
 from conftest import replay_chunks
-from medra.contracts import Cooccurrence, MiningUpdate, Node, SegmentKeywords, Term, TermWeight
+from medra.contracts import (
+    Cluster,
+    Cooccurrence,
+    MiningUpdate,
+    Node,
+    Segment,
+    SegmentKeywords,
+    Sentence,
+    Term,
+    TermWeight,
+)
 from medra.mining import TextMiner
 from medra.pipeline import run_pipeline
 from medra.present import ViewPresenter
@@ -13,6 +23,8 @@ from medra.present.edges import MAX_PER_NODE, select_edges
 from medra.present.presenter import label_for
 from medra.present.select import BubbleSelector, nested_words
 from medra.present.sizing import R_MAX, R_MIN, radius
+from medra.present.timeline import MAX_POINTS, build_timeline
+from medra.present.topics import NO_TOPIC, SlotAllocator, build_steps, seed_for
 from medra.sources import ReplaySource, load_trace
 
 
@@ -141,6 +153,88 @@ def test_ticker_reports_token_decisions():
     items = [t for v in views for t in v.ticker]
     assert {"term", "stopword", "pos"} <= {t.outcome for t in items}
     assert any(t.node_id == "contraseña" for t in items)
+
+
+# ---------------------------------------------------------------- topics, steps, timeline (step 4)
+
+
+def test_topic_colour_slots_are_stable_and_reused():
+    slots = SlotAllocator()
+    assert slots.assign(["t0", "t1"]) == {"t0": 0, "t1": 1}
+    assert slots.assign(["t1", "t2"]) == {"t1": 1, "t2": 0}  # t1 keeps its colour; t0's slot is free again
+    assert slots.assign([f"t{i}" for i in range(9)])["t8"] == NO_TOPIC  # more topics than colours
+
+
+def test_bubbles_take_their_topics_colour_and_sector():
+    _, presenter, mining, _ = run("odd-sum-en")
+    topic_of = {tid: c.id for c in mining[-1].clusters for tid in c.term_ids}
+    colour = {t.id: t.colour_slot for t in presenter.topics.sent.values()}
+    for node in presenter.nodes.sent.values():
+        assert node.topic_id == topic_of.get(node.id)
+        assert node.colour_slot == (colour[node.topic_id] if node.topic_id else NO_TOPIC)
+        assert node.seed_xy == seed_for(node.colour_slot)
+
+
+def test_steps_follow_segments_with_markers_and_words():
+    _, presenter, mining, _ = run("odd-sum-en")
+    final = mining[-1]
+    steps = [presenter.steps.sent[s.id] for s in final.segments]
+    text = load_trace("odd-sum-en").reasoning
+    assert [s.step_type for s in steps] == [None, "planning", "verification", "alternative", "conclusion"]
+    assert [text[a:b] for s in steps if s.marker_span for a, b in [s.marker_span]] == [
+        "One approach", "Wait, let me check", "Alternatively", "So",
+    ]
+    assert sum(s.words for s in steps) == final.stats.words
+    paragraphs = presenter.paragraphs.sent
+    assert all(s.topic_id == paragraphs[s.segment_id].topic_id for s in steps)
+
+
+def test_retoma_arc_when_a_topic_comes_back():
+    segments = [Segment(id=i, start=i * 10, end=i * 10 + 9, provisional=False) for i in range(4)]
+    topic_of = {0: "a", 1: "b", 2: "b", 3: "a"}
+    steps = build_steps(update([], segments=segments), topic_of)
+    assert [s.arcs_back_to for s in steps] == [[], [], [], [0]]  # b->b is a continuation, not a return
+
+
+def test_timeline_peaks_where_a_topic_is_mentioned():
+    # 3 sentences of 10 words; topic t0 is mentioned in the first and last.
+    sentences = [Sentence(id=i, start=i * 100, end=i * 100 + 99, segment_id=0, words=10) for i in range(3)]
+    terms = [term("a", 2, spans=[(0, 5), (250, 255)])]
+    timeline = build_timeline(update(terms, sentences=sentences), [Cluster(id="t0", label_terms=["a"], term_ids=["a"])])
+    assert timeline.x_max == 30
+    (series,) = timeline.series
+    ys = dict(series.points)
+    assert len(series.points) == 31 and ys[0.0] == pytest.approx(1.0) and ys[15.0] < ys[0.0]
+    peak_x = max(series.points, key=lambda p: p[1])[0]
+    assert peak_x in (0.0, 25.0)  # second mention: 2.5 sentences in = word 25
+
+
+def test_long_traces_are_sampled_at_most_max_points():
+    sentences = [Sentence(id=i, start=i * 100, end=i * 100 + 99, segment_id=0, words=20) for i in range(500)]
+    terms = [term("a", 3, spans=[(5, 6), (20000, 20001), (49000, 49001)])]
+    timeline = build_timeline(update(terms, sentences=sentences), [Cluster(id="t0", label_terms=["a"], term_ids=["a"])])
+    (series,) = timeline.series
+    assert len(series.points) == MAX_POINTS and series.points[-1][0] == timeline.x_max
+    # σ grows with the sample spacing, so every mention still shows as a bump.
+    for word in (1, 4000, 9800):  # the three mentions, in words
+        nearest = min(series.points, key=lambda p: abs(p[0] - word))
+        assert nearest[1] > 0.5
+
+
+def test_topics_and_steps_diffs_rebuild_the_state():
+    _, presenter, _, views = run("login-es")
+    topics, steps = {}, {}
+    timeline = None
+    for v in views:
+        topics.update({t.id: t for t in v.topics})
+        steps.update({s.segment_id: s for s in v.steps})
+        for i in v.removed.topics:
+            del topics[i]
+        for i in v.removed.steps:
+            del steps[i]
+        timeline = v.timeline or timeline
+    assert topics == presenter.topics.sent and steps == presenter.steps.sent
+    assert timeline == presenter.timeline and {s.topic_id for s in timeline.series} == set(topics)
 
 
 # ---------------------------------------------------------------- throttling

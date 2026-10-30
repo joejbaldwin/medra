@@ -92,6 +92,10 @@ export interface Sentence {
   start: number;
   end: number;
   segment_id: number | null;
+  /**
+   * Word tokens in the sentence (the timeline's x axis).
+   */
+  words: number;
 }
 /**
  * A 'tramo': a run of sentences about one step of the reasoning.
@@ -342,6 +346,8 @@ export interface TimelineSeries {
   points: [number, number][];
 }
 /**
+ * One node of the step graph: a segment, with how it was opened.
+ *
  * This interface was referenced by `MedraContracts`'s JSON-Schema
  * via the `definition` "Step".
  */
@@ -349,7 +355,16 @@ export interface Step {
   segment_id: number;
   step_type: string | null;
   topic_id: string | null;
+  /**
+   * Earlier segments whose topic this step returns to ('retoma').
+   */
   arcs_back_to: number[];
+  /**
+   * Discourse marker that opened the step.
+   */
+  marker: string | null;
+  marker_span: [number, number] | null;
+  words: number;
 }
 /**
  * One entry of the 'pipeline working' strip: form -> lemma -> outcome.

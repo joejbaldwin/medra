@@ -1,17 +1,20 @@
 // Splitting text into pieces by the marks (mention spans) that cover them.
 // Marks can overlap: "arithmetic series" and "series formula" share "series",
-// so a piece carries every mark id that covers it.
+// so a piece carries every mark id that covers it. Discourse markers ("Wait,")
+// are marks too, flagged separately: they are shown, but are not bubbles.
 
 export interface Mark {
   start: number;
   end: number;
   id: string;
+  marker?: boolean;
 }
 
 export interface Piece {
   start: number;
   end: number;
-  ids: string[]; // marks covering the whole piece, longest mark first
+  ids: string[]; // bubble marks covering the whole piece, longest mark first
+  marker: boolean; // inside a discourse marker
 }
 
 /** Pieces covering [start, end) in order; boundaries wherever a mark starts or ends. */
@@ -30,8 +33,9 @@ export function splitByMarks(start: number, end: number, marks: Mark[]): Piece[]
     const a = points[i];
     const b = points[i + 1];
     const covering = inside.filter((m) => m.start <= a && m.end >= b);
-    covering.sort((x, y) => y.end - y.start - (x.end - x.start) || x.id.localeCompare(y.id));
-    pieces.push({ start: a, end: b, ids: covering.map((m) => m.id) });
+    const bubbles = covering.filter((m) => !m.marker);
+    bubbles.sort((x, y) => y.end - y.start - (x.end - x.start) || x.id.localeCompare(y.id));
+    pieces.push({ start: a, end: b, ids: bubbles.map((m) => m.id), marker: covering.some((m) => m.marker) });
   }
   return pieces;
 }

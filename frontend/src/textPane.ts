@@ -1,21 +1,32 @@
-// "Texto original": the live text as paragraph blocks (one per segment), with
-// the mentions of each bubble underlined. The pending tail (not yet analysed)
-// is grey with a caret. Clicking a mention selects its bubble.
-import type { Paragraph } from "./contracts";
+// "Texto original": the live text as paragraph blocks (one per segment, in its
+// topic's colour), with the mentions of each bubble underlined and the
+// discourse marker that opened the segment highlighted. The pending tail (not
+// yet analysed) is grey with a caret. Clicking a mention selects its bubble.
 import { marksIn, splitByMarks, type Mark } from "./spans";
+
+/** A paragraph block as the pane draws it (decided in main.ts from the view). */
+export interface Block {
+  segment_id: number;
+  start: number;
+  end: number;
+  label: string;
+  slot: number;
+  provisional: boolean;
+}
 
 export class TextPane {
   onSelect: (nodeId: string) => void = () => {};
 
   private text = "";
   private committedUpto = 0;
-  private paragraphs: Paragraph[] = [];
+  private paragraphs: Block[] = [];
   private marks: Mark[] = []; // all mention spans, sorted by start
   private blocks = new Map<number, { el: HTMLDivElement; key: string }>();
   private pendingBlock: HTMLDivElement;
   private pending: HTMLSpanElement;
   private caret: HTMLSpanElement;
   private active: string | null = null;
+  private activeSegments = new Set<number>();
 
   constructor(private root: HTMLElement) {
     this.pendingBlock = div("para pending-para");
@@ -36,6 +47,7 @@ export class TextPane {
     this.marks = [];
     this.blocks.clear();
     this.active = null;
+    this.activeSegments = new Set();
     this.root.replaceChildren();
   }
 
@@ -53,7 +65,7 @@ export class TextPane {
    *  `text` must be the full text received so far: setText runs once per
    *  animation frame, so the pane's copy can be a frame behind, and a block
    *  rendered from it would miss its last words (and be cached that way). */
-  setView(text: string, committedUpto: number, paragraphs: Paragraph[], marks: Mark[]): void {
+  setView(text: string, committedUpto: number, paragraphs: Block[], marks: Mark[]): void {
     const follow = this.atBottom();
     this.text = text;
     this.committedUpto = committedUpto;
@@ -77,7 +89,8 @@ export class TextPane {
       block.el.dataset.seg = String(p.segment_id);
       block.el.dataset.start = String(p.start);
       block.el.dataset.end = String(p.end);
-      block.el.dataset.label = `Tramo ${i + 1}${p.label ? ` · ${p.label}` : ""}`;
+      block.el.dataset.label = p.label;
+      block.el.style.setProperty("--c", `var(--c${p.slot % 6})`);
       block.el.classList.toggle("provisional", p.provisional);
       if (this.root.children[i] !== block.el) this.root.insertBefore(block.el, this.root.children[i] ?? null);
     });
@@ -91,9 +104,11 @@ export class TextPane {
     this.renderPending(follow);
   }
 
-  /** Highlight the mentions of one bubble (or none). */
-  setActive(nodeId: string | null): void {
+  /** Highlight the mentions of one bubble (or none), and the paragraphs of a
+   *  selected step or topic. */
+  setActive(nodeId: string | null, segments: Set<number> = new Set()): void {
     this.active = nodeId;
+    this.activeSegments = segments;
     this.applyActive();
   }
 
@@ -102,16 +117,21 @@ export class TextPane {
     hit?.scrollIntoView({ block: "center", behavior: "smooth" });
   }
 
+  scrollToSegment(segmentId: number): void {
+    this.blocks.get(segmentId)?.el.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
   private renderRange(start: number, end: number, marks: Mark[]): Node[] {
     return splitByMarks(start, end, marks).map((piece) => {
       const t = this.text.slice(piece.start, piece.end);
-      if (!piece.ids.length) return document.createTextNode(t);
-      const m = span("m");
+      if (!piece.ids.length && !piece.marker) return document.createTextNode(t);
+      const m = span(piece.ids.length ? "m" : "mk");
+      if (piece.ids.length && piece.marker) m.classList.add("mk");
       m.textContent = t;
-      // JSON, not space-separated: n-gram ids contain spaces ("odd number").
-      m.dataset.ids = JSON.stringify(piece.ids);
       m.dataset.start = String(piece.start); // character offsets, for traceability checks
       m.dataset.end = String(piece.end);
+      // JSON, not space-separated: n-gram ids contain spaces ("odd number").
+      if (piece.ids.length) m.dataset.ids = JSON.stringify(piece.ids);
       return m;
     });
   }
@@ -120,6 +140,7 @@ export class TextPane {
     for (const m of this.root.querySelectorAll<HTMLElement>(".m")) {
       m.classList.toggle("hl", !!this.active && idsOf(m).includes(this.active));
     }
+    for (const [seg, block] of this.blocks) block.el.classList.toggle("sel", this.activeSegments.has(seg));
   }
 
   private renderPending(follow = this.atBottom()): void {

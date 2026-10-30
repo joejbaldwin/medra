@@ -38,12 +38,41 @@
     </header>
 
     <main class="board">
-      <section class="card">
-        <h2>Conceptos y menciones</h2>
-        <p class="sub">Tamaño = menciones · Enlace = coocurrencia en la misma oración</p>
-        <div class="map"><svg id="map" role="img" aria-label="Mapa de conceptos"></svg></div>
-        <p id="map-info" class="hint">Selecciona un término para ver sus menciones.</p>
-        <p id="stats" class="stats"></p>
+      <section class="viz" aria-label="Visualizaciones">
+        <div class="tabs" role="tablist" aria-label="Visualización">
+          <button role="tab" id="tab-conceptos" aria-selected="true" aria-controls="view-conceptos" data-view="conceptos" type="button">Conceptos</button>
+          <button role="tab" id="tab-pasos" aria-selected="false" aria-controls="view-pasos" data-view="pasos" type="button">Pasos</button>
+        </div>
+
+        <div class="view" id="view-conceptos" role="tabpanel" aria-labelledby="tab-conceptos">
+          <article class="card">
+            <h2>Conceptos y menciones</h2>
+            <p class="sub">Tamaño = menciones · Color = tema · Enlace = coocurrencia en la misma oración</p>
+            <div class="map"><svg id="map" role="img" aria-label="Mapa de conceptos"></svg></div>
+            <p id="map-info" class="hint">Selecciona un término para ver sus menciones.</p>
+            <p id="stats" class="stats"></p>
+          </article>
+          <article class="card">
+            <h2>Temas a lo largo de la traza</h2>
+            <p class="sub">Densidad de menciones por tema (ventana de ±6 palabras). Haz clic en una curva o en la leyenda para seleccionar un tema.</p>
+            <div class="chart-wrap">
+              <svg id="chart" role="img" aria-label="Temas a lo largo de la traza"></svg>
+              <div class="tip" id="tip" hidden></div>
+            </div>
+            <div id="legend" class="legend"></div>
+          </article>
+        </div>
+
+        <div class="view" id="view-pasos" role="tabpanel" aria-labelledby="tab-pasos" hidden>
+          <article class="card">
+            <h2>Pasos del agente</h2>
+            <p class="sub">Un paso por tramo; el marcador del discurso que lo abre va sobre la flecha. Arco discontinuo = vuelve a un tema anterior.</p>
+            <div id="steps-wrap" class="steps-wrap"><svg id="steps" role="img" aria-label="Grafo de pasos"></svg></div>
+          </article>
+          <article class="card" id="step-detail">
+            <p class="hint">Haz clic en un paso para ver su tipo, el marcador que lo abrió y sus términos con más peso.</p>
+          </article>
+        </div>
       </section>
 
       <section class="card text-card">

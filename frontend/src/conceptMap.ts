@@ -37,8 +37,11 @@ export class ConceptMap {
       .force("charge", d3.forceManyBody<Bubble>().strength(-20))
       .force("collide", d3.forceCollide<Bubble>((d) => d.node.radius + 4).strength(0.9))
       .force("link", d3.forceLink<Bubble, Link>([]).id((d) => d.id).distance((l) => linkDistance(l)).strength(0.15))
-      .force("x", d3.forceX<Bubble>(W / 2).strength(0.04))
-      .force("y", d3.forceY<Bubble>(H / 2).strength(0.07))
+      // Each bubble is pulled towards its topic's sector (the presenter's seed
+      // position), so topics form groups. Targets are re-read whenever
+      // sim.nodes() is called, i.e. on every update.
+      .force("x", d3.forceX<Bubble>((d) => (d.node.seed_xy?.[0] ?? 0.5) * W).strength(0.06))
+      .force("y", d3.forceY<Bubble>((d) => (d.node.seed_xy?.[1] ?? 0.5) * H).strength(0.09))
       .on("tick", () => this.tick());
   }
 
@@ -73,17 +76,19 @@ export class ConceptMap {
     for (const id of grown) this.pulse(id);
   }
 
-  /** Highlight one bubble and its neighbours; dim the rest. */
-  setActive(id: string | null, neighbours: Set<string>, selected: string | null): void {
+  /** Highlight one bubble and its neighbours, or the bubbles of one topic; dim the rest. */
+  setActive(id: string | null, neighbours: Set<string>, selected: string | null, topic: string | null = null): void {
+    const lit = (d: Bubble) => (id ? d.id === id || neighbours.has(d.id) : !topic || d.node.topic_id === topic);
     this.nodeLayer
       .selectAll<SVGGElement, Bubble>("g.node")
       .classed("sel", (d) => d.id === selected)
       .classed("hover", (d) => d.id === id && id !== selected)
-      .classed("dim", (d) => !!id && d.id !== id && !neighbours.has(d.id));
+      .classed("dim", (d) => !lit(d));
+    const topicOf = (bid: string) => this.bubbles.get(bid)?.node.topic_id;
     this.edgeLayer
       .selectAll<SVGLineElement, Link>("line.edge")
-      .classed("on", (l) => !!id && (l.edge.a === id || l.edge.b === id))
-      .classed("dim", (l) => !!id && l.edge.a !== id && l.edge.b !== id);
+      .classed("on", (l) => (id ? l.edge.a === id || l.edge.b === id : !!topic && topicOf(l.edge.a) === topic && topicOf(l.edge.b) === topic))
+      .classed("dim", (l) => (id ? l.edge.a !== id && l.edge.b !== id : !!topic && (topicOf(l.edge.a) !== topic || topicOf(l.edge.b) !== topic)));
   }
 
   private render(): void {

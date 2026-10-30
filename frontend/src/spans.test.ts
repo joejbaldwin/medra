@@ -27,8 +27,21 @@ describe("splitByMarks", () => {
 
   it("clips marks to the range", () => {
     const pieces = splitByMarks(10, 20, [{ start: 5, end: 12, id: "a" }]);
-    expect(pieces[0]).toEqual({ start: 10, end: 12, ids: ["a"] });
+    expect(pieces[0]).toEqual({ start: 10, end: 12, ids: ["a"], marker: false });
     expect(pieces.at(-1)!.end).toBe(20);
+  });
+
+  it("flags discourse markers without making them bubble ids", () => {
+    // "Wait, let me check the sum": marker [0,18), bubble "sum" [23,26)
+    const pieces = splitByMarks(0, 26, [
+      { start: 0, end: 18, id: "mk:2", marker: true },
+      { start: 23, end: 26, id: "sum" },
+    ]);
+    expect(pieces.map((p) => [p.start, p.end, p.ids, p.marker])).toEqual([
+      [0, 18, [], true],
+      [18, 23, [], false],
+      [23, 26, ["sum"], false],
+    ]);
   });
 });
 

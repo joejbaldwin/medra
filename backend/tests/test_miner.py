@@ -55,8 +55,17 @@ def test_final_state_does_not_depend_on_chunking(name, text):
     batch = final_state([_one_chunk(text)])
     for chunks in [text_chunks(text, "word")] + [text_chunks(text, "random", seed) for seed in range(6)]:
         streamed = final_state(chunks)
-        for field in ("terms", "sentences", "segments", "tfidf", "cooc", "stats", "language", "committed_upto"):
+        for field in (
+            "terms", "sentences", "segments", "tfidf", "cooc", "markers", "stats", "language", "committed_upto",
+        ):
             assert getattr(streamed, field) == getattr(batch, field), field
+        # Topic ids depend on the history of the stream (they are kept stable
+        # as text arrives); the partition of terms into topics does not.
+        assert _partition(streamed) == _partition(batch)
+
+
+def _partition(update: MiningUpdate) -> set[frozenset[str]]:
+    return {frozenset(c.term_ids) for c in update.clusters}
 
 
 def _one_chunk(text: str) -> TextChunk:
@@ -125,12 +134,56 @@ def test_language_is_detected_per_sentence():
 # ---------------------------------------------------------------- segments
 
 
-def test_paragraphs_are_provisional_segments():
-    _, updates = mine(replay_chunks("login-es"))
-    final = updates[-1]
-    assert len(final.segments) == 4 and not any(s.provisional for s in final.segments)
+def test_segments_and_step_types_on_the_samples():
+    # Both traces were written with one paragraph per step; segmentation does
+    # not use paragraphs directly (a blank line is one cue among three).
+    final = final_state(replay_chunks("login-es"))
     assert [s.segment_id for s in final.sentences] == [0] * 4 + [1] * 4 + [2] * 3 + [3] * 5
-    assert updates[0].segments[-1].provisional
+    assert [(s.step_type, s.marker) for s in final.segments] == [
+        (None, None), ("planning", "Primero"), ("backtrack", "Espera"), ("planning", "Después"),
+    ]
+    final = final_state(replay_chunks("odd-sum-en"))
+    assert [(s.step_type, s.marker) for s in final.segments] == [
+        (None, None),
+        ("planning", "One approach"),
+        ("verification", "Wait, let me check"),
+        ("alternative", "Alternatively"),
+        ("conclusion", "So"),
+    ]
+    assert not any(s.provisional for s in final.segments)
+
+
+@pytest.mark.parametrize("name,text", corpus())
+def test_segments_marked_final_never_change(name, text):
+    _, updates = mine(text_chunks(text, "random", 3))
+    final = {(s.start, s.end, s.marker, s.step_type) for s in updates[-1].segments}
+    for update in updates:
+        assert update.final or update.segments[-1].provisional
+        for seg in update.segments:
+            if not seg.provisional:
+                assert (seg.start, seg.end, seg.marker, seg.step_type) in final
+
+
+def test_markers_and_hedges_are_reported_with_offsets():
+    text = load_trace("login-es").reasoning
+    final = final_state(replay_chunks("login-es"))
+    assert [(m.type, m.text) for m in final.markers] == [
+        ("planning", "Necesito"), ("planning", "Primero"), ("backtrack", "Espera"), ("planning", "Después"),
+    ]
+    assert all(text[a:b] == m.text for m in final.markers for a, b in [m.span])
+    # "Quizá" and "Podría": 2 hedges in 157 words.
+    assert final.stats.hedges_per_100w == round(100 * 2 / final.stats.words, 2)
+
+
+def test_topics_group_terms_that_occur_together():
+    final = final_state(replay_chunks("odd-sum-en"))
+    topics = [set(c.term_ids) for c in final.clusters]
+    assert 1 <= len(topics) <= 5
+    assert all(len(t) >= 2 for t in topics)
+    assert sum(map(len, topics)) == len(set().union(*topics))  # each term in at most one topic
+    together = next(t for t in topics if "odd number" in t)
+    assert {"sum", "square"} <= together  # "the sum of the first n odd numbers is n squared"
+    assert all(c.label_terms == c.term_ids[:3] for c in final.clusters)
 
 
 # ---------------------------------------------------------------- TF-IDF

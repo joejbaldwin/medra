@@ -18,3 +18,80 @@ stopwords:
   - vez
   - manera
   - espera
+
+# Discourse markers that open a reasoning step, by step type. Same rules as
+# in en.yaml: sentence-initial, optionally after up to two prefixes.
+markers:
+  backtrack:
+    - espera
+    - un momento
+    - no, espera
+    - me he equivocado
+    - me equivoqué
+    - mejor dicho
+    - eso está mal
+    - eso no es correcto
+  alternative:
+    - alternativamente
+    - otra opción
+    - otra forma
+    - otra manera
+    - otro enfoque
+    - en cambio
+    - o quizá
+    - o tal vez
+    - por otro lado
+    - y si
+  verification:
+    - comprobemos
+    - voy a comprobar
+    - déjame comprobar
+    - hay que comprobar
+    - verifiquemos
+    - voy a verificar
+    - revisemos
+    - a ver
+  conclusion:
+    - entonces
+    - por tanto
+    - por lo tanto
+    - así que
+    - en conclusión
+    - en resumen
+    - en definitiva
+    - finalmente
+    - la respuesta es
+  planning:
+    - primero
+    - para empezar
+    - después
+    - luego
+    - ahora
+    - a continuación
+    - segundo
+    - necesito
+    - el plan es
+    - vamos a
+
+marker_prefixes:
+  - vale
+  - bueno
+  - hmm
+  - ok
+  - okay
+  - pero
+  - y
+  - pues
+  - espera
+  - entonces
+
+hedges:
+  - quizá
+  - quizás
+  - tal vez
+  - probablemente
+  - posiblemente
+  - puede que
+  - creo que
+  - parece
+  - podría

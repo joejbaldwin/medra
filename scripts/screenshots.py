@@ -7,11 +7,13 @@ Edge already installed on Windows, so no browser download is needed; pass
 
     python scripts/screenshots.py --prefix step1
 
-Writes, into screenshots/ (gitignored):
+Writes, into screenshots/ (gitignored), as full-page captures:
     <prefix>-streaming-light.png   mid-stream: pending tail in grey, caret
     <prefix>-final-light.png       after the trace has finished
     <prefix>-final-dark.png        same, dark theme
     <prefix>-selected-light.png    with --select ID: that bubble clicked, its mentions highlighted
+    <prefix>-topic-light.png       with --topic N: the N-th legend entry selected
+    <prefix>-steps-light.png       with --step N: the steps view, the N-th step selected
 """
 
 from __future__ import annotations
@@ -37,6 +39,10 @@ def wait_finished(page: Page) -> None:
     page.wait_for_timeout(2500)  # let the force layout settle
 
 
+def shot(page: Page, args: argparse.Namespace, name: str, scheme: str) -> None:
+    page.screenshot(path=args.out_dir / f"{args.prefix}-{name}-{scheme}.png", full_page=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://localhost:5173/")
@@ -45,6 +51,8 @@ def main() -> None:
     parser.add_argument("--prefix", default="dashboard")
     parser.add_argument("--channel", default="msedge")
     parser.add_argument("--select", help="bubble id to click for a 'selected' capture")
+    parser.add_argument("--topic", type=int, help="legend entry (1-based) to click for a 'topic' capture")
+    parser.add_argument("--step", type=int, help="step (1-based) to click for a 'steps' capture")
     parser.add_argument("--out-dir", type=Path, default=ROOT / "screenshots")
     args = parser.parse_args()
     args.out_dir.mkdir(exist_ok=True)
@@ -65,14 +73,28 @@ def main() -> None:
                     timeout=60_000,
                 )
                 page.wait_for_timeout(300)
-                page.screenshot(path=args.out_dir / f"{args.prefix}-streaming-{scheme}.png")
+                shot(page, args, "streaming", scheme)
             wait_finished(page)
-            page.screenshot(path=args.out_dir / f"{args.prefix}-final-{scheme}.png")
+            shot(page, args, "final", scheme)
             if scheme == "light" and args.select:
                 page.click(f"g.node[data-id='{args.select}']")
                 page.mouse.move(0, 0)  # leave the bubble so the selection, not a hover, is shown
                 page.wait_for_timeout(1200)  # smooth scroll to the first mention
-                page.screenshot(path=args.out_dir / f"{args.prefix}-selected-{scheme}.png")
+                shot(page, args, "selected", scheme)
+                page.click(f"g.node[data-id='{args.select}']")  # deselect
+            if scheme == "light" and args.topic:
+                page.click(f"#legend button:nth-child({args.topic})")
+                page.mouse.move(0, 0)
+                page.wait_for_timeout(1200)
+                shot(page, args, "topic", scheme)
+                page.click(f"#legend button:nth-child({args.topic})")
+            if scheme == "light" and args.step:
+                page.click("#tab-pasos")
+                page.wait_for_timeout(300)
+                page.click(f"g.s-node >> nth={args.step - 1}")
+                page.mouse.move(0, 0)
+                page.wait_for_timeout(1200)
+                shot(page, args, "steps", scheme)
             context.close()
         browser.close()
     for f in sorted(args.out_dir.glob(f"{args.prefix}-*.png")):

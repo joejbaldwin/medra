@@ -29,3 +29,95 @@ stopwords:
   - way
   - let
   - approx
+
+# Discourse markers that open a reasoning step, by step type (build plan
+# §4.2 step 10, after the DeepSeek-R1 "Thoughtology" taxonomy). Matched
+# case-insensitively at the start of a sentence, optionally after up to two
+# prefixes (below), as whole words. A marker after a prefix wins over the
+# prefix itself: "Wait, let me check" is verification, "Wait." is backtrack.
+markers:
+  backtrack:
+    - wait
+    - hold on
+    - no wait
+    - on second thought
+    - that's wrong
+    - that is wrong
+    - that's not right
+    - that can't be right
+    - i made a mistake
+    - oops
+    - scratch that
+  alternative:
+    - alternatively
+    - another approach
+    - another way
+    - another option
+    - instead
+    - or maybe
+    - what if
+    - on the other hand
+  verification:
+    - let me check
+    - let me verify
+    - let me double-check
+    - let me double check
+    - let me confirm
+    - let's check
+    - let's verify
+    - double-check
+    - to verify
+    - to check
+    - sanity check
+    - checking
+  conclusion:
+    - so
+    - therefore
+    - thus
+    - hence
+    - in conclusion
+    - in summary
+    - overall
+    - finally
+    - the answer is
+  planning:
+    - first
+    - firstly
+    - to begin
+    - to start
+    - let's start
+    - let me start
+    - one approach
+    - next
+    - then
+    - now
+    - second
+    - secondly
+    - i need to
+    - the plan is
+
+# Words that may come before a marker without being one themselves.
+marker_prefixes:
+  - hmm
+  - hm
+  - oh
+  - ok
+  - okay
+  - alright
+  - but
+  - and
+  - so
+  - wait
+  - well
+
+# Hedges (uncertainty), counted per 100 words in the stats.
+hedges:
+  - maybe
+  - perhaps
+  - probably
+  - possibly
+  - might
+  - i think
+  - i guess
+  - not sure
+  - seems

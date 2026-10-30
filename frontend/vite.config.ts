@@ -11,6 +11,7 @@ export default defineConfig({
     proxy: {
       "/sessions": { target: backend, ws: true },
       "/datasets": backend,
+      "/sources": backend,
       "/health": backend,
     },
   },

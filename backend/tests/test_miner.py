@@ -115,6 +115,15 @@ def test_hand_counted_terms_english():
     assert final.language == "en"
 
 
+def test_inline_maths_is_not_a_term():
+    # Live CoT (deepseek-flash, step 5) writes equations without $...$; spaCy keeps them as one token.
+    text = "Let t be the crossing time. Then 120+120t=620-100t gives t=500/220=25/11 hours, so x2=620 km. Check the time."
+    final = final_state(text_chunks(text))
+    ids = {t.id for t in final.terms}
+    assert not {i for i in ids if set(i) & set("=+*/^<>")}
+    assert {"time", "crossing time"} & ids
+
+
 def test_ngrams_need_two_occurrences():
     final = final_state(replay_chunks("login-es"))
     assert not [t for t in final.terms if " " in t.id and t.count < 2]

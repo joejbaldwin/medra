@@ -28,12 +28,14 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # 1.1 (step 3): added MiningUpdate.recent_tokens, TickerItem.pos and TickerItem.node_id.
 # 1.2 (step 4): added Sentence.words, Step.marker, Step.marker_span and Step.words.
+# 1.3 (step 5): SessionConfig gains the paste/deepseek/ollama sources (text, prompt; sample
+#     becomes optional) and SourceInfo for GET /sources.
 # Minor versions only add fields with defaults, so 1.0 producers stay valid.
-SCHEMA_VERSION = "1.2"
+SCHEMA_VERSION = "1.3"
 
 Span = tuple[int, int]
 """Half-open character range [start, end) into the reasoning text."""
@@ -359,14 +361,42 @@ ServerMessage = Annotated[
 # ---------------------------------------------------------------------------
 
 
-class SessionConfig(_Model):
-    """Body of POST /sessions. More sources are added in later schema versions."""
+MAX_PASTE_CHARS = 100_000
+MAX_PROMPT_CHARS = 4_000
+SourceId = Literal["replay", "paste", "deepseek", "ollama"]
 
-    source: Literal["replay"] = "replay"
-    sample: str = Field(description="Sample trace id, as listed by GET /datasets.")
+
+class SessionConfig(_Model):
+    """Body of POST /sessions.
+
+    replay needs `sample`, paste needs `text`, deepseek and ollama need
+    `prompt`. words_per_second, chunking and seed only apply to replay and paste
+    (a live model sets its own pace).
+    """
+
+    source: SourceId = "replay"
+    sample: str | None = Field(default=None, description="Sample trace id, as listed by GET /datasets.")
+    text: str | None = Field(default=None, max_length=MAX_PASTE_CHARS, description="Pasted reasoning text.")
+    prompt: str | None = Field(default=None, max_length=MAX_PROMPT_CHARS, description="Question for a live model.")
     words_per_second: float = Field(default=15.0, ge=0, description="0 = as fast as possible.")
     chunking: Literal["word", "random"] = "word"
     seed: int = 0
+
+    @model_validator(mode="after")
+    def _needs_input(self) -> "SessionConfig":
+        needed = {"replay": "sample", "paste": "text", "deepseek": "prompt", "ollama": "prompt"}[self.source]
+        if not (getattr(self, needed) or "").strip():
+            raise ValueError(f"source {self.source!r} needs a non-empty {needed!r}")
+        return self
+
+
+class SourceInfo(_Model):
+    """One entry of GET /sources: what the dashboard can offer."""
+
+    id: SourceId
+    label: str
+    available: bool
+    note: str | None = Field(default=None, description="Why it is unavailable, or a warning to show.")
 
 
 class SessionCreated(_Model):

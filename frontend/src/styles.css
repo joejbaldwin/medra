@@ -67,6 +67,17 @@ button.ghost {
 .status[data-state="live"]::before { content: "● "; }
 .status[data-state="error"] { color: var(--c4); background: color-mix(in srgb, var(--c4) 14%, var(--surface)); }
 
+/* input panel (pasted text or a question for a live model) */
+.input-panel { padding: 14px 18px; }
+.input-label { display: block; font-size: 13.5px; color: var(--muted); margin-bottom: 8px; }
+.input-panel textarea, .input-panel input {
+  width: 100%; font: 14px/1.5 var(--font-ui); color: var(--fg); background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; resize: vertical;
+}
+.input-panel textarea:focus, .input-panel input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.note { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+.note:empty { display: none; }
+
 /* board */
 .board { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 14px; align-items: start; }
 @media (max-width: 900px) { .board { grid-template-columns: minmax(0, 1fr); } }
@@ -235,4 +246,4 @@ button.ghost {
 @keyframes blink { 50% { opacity: 0; } }
 .answer { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); }
 .answer h3 { margin: 0 0 4px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
-.answer p { margin: 0; line-height: 1.55; }
+.answer p { margin: 0; line-height: 1.55; white-space: pre-wrap; max-height: 40vh; overflow-y: auto; }

@@ -20,6 +20,9 @@ from spacy.tokens import Doc, Token
 
 CONTENT_POS = {"NOUN", "PROPN", "ADJ"}
 NOUNISH = {"NOUN", "PROPN"}
+# Live chains of thought write maths inline without $...$ ("t=500/220=25/11"),
+# which spaCy keeps as one token: such tokens are not terms.
+MATH_CHARS = set("=+*/^<>")
 
 
 @dataclass(frozen=True)
@@ -33,10 +36,11 @@ class Occurrence:
 def decide(tok: Token, stopwords: frozenset[str]) -> str:
     """Why a token is kept or dropped (a TokenDecision outcome code)."""
     lemma = tok.lemma_.lower()
-    if tok.like_num:
+    letters = sum(c.isalpha() for c in tok.text)
+    if tok.like_num or sum(c.isdigit() for c in tok.text) > letters:
         return "number"
-    if not any(c.isalpha() for c in tok.text) or "." in tok.text or len(lemma) < 2:
-        return "other"  # punctuation, symbols, abbreviations such as "Dr." or "e.g."
+    if not letters or "." in tok.text or MATH_CHARS & set(tok.text) or len(lemma) < 2:
+        return "other"  # punctuation, symbols, inline maths, abbreviations such as "Dr." or "e.g."
     if tok.is_stop:
         return "stopword"
     if lemma in stopwords:

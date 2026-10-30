@@ -13,6 +13,7 @@ export interface MedraContracts {
   session_config: SessionConfig;
   session_created: SessionCreated;
   sample_info: SampleInfo;
+  source_info: SourceInfo;
 }
 /**
  * A piece of streamed text. Boundaries are arbitrary (may split a word).
@@ -458,17 +459,29 @@ export interface ErrorMessage {
   message: string;
 }
 /**
- * Body of POST /sessions. More sources are added in later schema versions.
+ * Body of POST /sessions.
+ *
+ * replay needs `sample`, paste needs `text`, deepseek and ollama need
+ * `prompt`. words_per_second, chunking and seed only apply to replay and paste
+ * (a live model sets its own pace).
  *
  * This interface was referenced by `MedraContracts`'s JSON-Schema
  * via the `definition` "SessionConfig".
  */
 export interface SessionConfig {
-  source: "replay";
+  source: "replay" | "paste" | "deepseek" | "ollama";
   /**
    * Sample trace id, as listed by GET /datasets.
    */
-  sample: string;
+  sample: string | null;
+  /**
+   * Pasted reasoning text.
+   */
+  text: string | null;
+  /**
+   * Question for a live model.
+   */
+  prompt: string | null;
   /**
    * 0 = as fast as possible.
    */
@@ -493,4 +506,19 @@ export interface SampleInfo {
   language: string;
   words: number;
   origin: string;
+}
+/**
+ * One entry of GET /sources: what the dashboard can offer.
+ *
+ * This interface was referenced by `MedraContracts`'s JSON-Schema
+ * via the `definition` "SourceInfo".
+ */
+export interface SourceInfo {
+  id: "replay" | "paste" | "deepseek" | "ollama";
+  label: string;
+  available: boolean;
+  /**
+   * Why it is unavailable, or a warning to show.
+   */
+  note: string | null;
 }

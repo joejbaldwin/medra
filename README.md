@@ -38,10 +38,27 @@ Pick a trace, press **Reproducir**: the text streams in on the right, split into
 («tramos») coloured by topic; on the left the bubbles grow and the topic timeline fills in.
 The **Pasos** tab shows one node per segment, labelled with the discourse marker that opened it.
 
+The **Fuente** menu picks where the text comes from:
+
+| Source | What it does | Needs |
+|---|---|---|
+| Traza de ejemplo | replays a recorded trace from `data/samples/` | nothing |
+| Pegar texto | replays text you paste (a `<think>…</think>` block is split off from the answer) | nothing |
+| DeepSeek (en directo) | asks `deepseek-flash` and streams its reasoning, then its answer | `DEEPSEEK_API_KEY` |
+| Ollama (modelo local) | the same with a local reasoning model (`deepseek-r1:8b` by default) | Ollama running |
+
+Copy `.env.example` to `.env` and put the DeepSeek key there; it is read only by the backend and
+never sent to the browser or logged. Only one DeepSeek session runs at a time, and
+`MEDRA_LIVE_DISABLED=1` switches off both live sources. Questions sent to DeepSeek leave this
+machine, so don't type personal data.
+
 Each layer is also a command reading and writing JSON Lines:
 
 ```sh
 medra-source replay login-es --chunking random | medra-mine | medra-present > frames.jsonl
+medra-source paste trace.txt | medra-mine | medra-present > frames.jsonl
+medra-source deepseek "¿Cuántos primos hay menores que 50?" | medra-mine > metrics.jsonl
+medra-source ollama "Is 91 prime?" | medra-mine > metrics.jsonl
 ```
 
 ## Tests
@@ -72,10 +89,13 @@ browser and saves streaming and final captures (light and dark) to `screenshots/
 .venv/Scripts/python scripts/screenshots.py --prefix step4 --select contraseña --topic 1 --step 3 --channel chromium-headless-shell
 ```
 
+`--source paste --paste-file FILE` captures pasted text instead, and `--source deepseek --prompt "..."`
+a live run (each colour scheme is one API call, so add `--schemes light`).
+
 ## Contracts
 
 The messages between layers are Pydantic models in [backend/medra/contracts.py](backend/medra/contracts.py),
-frozen as schema v1 in [docs/contracts/v1.schema.json](docs/contracts/v1.schema.json) (currently 1.2;
+frozen as schema v1 in [docs/contracts/v1.schema.json](docs/contracts/v1.schema.json) (currently 1.3;
 minor versions only add fields with defaults). The dashboard's TypeScript types are generated from
 that schema. After changing a contract, bump `SCHEMA_VERSION`, then:
 

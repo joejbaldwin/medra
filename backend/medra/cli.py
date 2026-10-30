@@ -1,6 +1,7 @@
 """Each layer as a command that reads and writes JSON Lines:
 
     medra-source replay login-es | medra-mine | medra-present > frames.jsonl
+    medra-source deepseek "¿Cuántos primos hay menores que 50?" | medra-mine > mining.jsonl
 
 Output is ASCII-escaped JSON (é -> \\u00e9) on purpose: Windows PowerShell
 5.1 re-encodes text piped between programs (with the console code page, and
@@ -46,12 +47,38 @@ def source_main(argv: list[str] | None = None) -> None:
     replay.add_argument("--chunking", choices=["word", "random"], default="word")
     replay.add_argument("--seed", type=int, default=0)
     replay.add_argument("--session-id", default="cli")
+    paste = sub.add_parser("paste", help="replay any text file (split at </think> if present)")
+    paste.add_argument("file")
+    paste.add_argument("--wps", type=float, default=0.0, help="words per second; 0 = no pacing")
+    paste.add_argument("--chunking", choices=["word", "random"], default="word")
+    paste.add_argument("--seed", type=int, default=0)
+    paste.add_argument("--session-id", default="cli")
+    for live in ("deepseek", "ollama"):
+        p = sub.add_parser(live, help=f"ask a live model ({live}); uses the server settings (.env)")
+        p.add_argument("prompt")
+        p.add_argument("--session-id", default="cli")
     args = parser.parse_args(argv)
-    from medra.sources import ReplaySource, load_trace
+    from medra.sources import DeepSeekSource, OllamaSource, PasteSource, ReplaySource, load_trace
 
-    source = ReplaySource(
-        load_trace(args.sample), args.session_id, words_per_second=args.wps, chunking=args.chunking, seed=args.seed
-    )
+    if args.kind == "replay":
+        source = ReplaySource(
+            load_trace(args.sample), args.session_id, words_per_second=args.wps, chunking=args.chunking, seed=args.seed
+        )
+    elif args.kind == "paste":
+        with open(args.file, encoding="utf-8-sig") as f:
+            text = f.read()
+        source = PasteSource(text, args.session_id, words_per_second=args.wps, chunking=args.chunking, seed=args.seed)
+    else:
+        from medra.settings import get_settings
+
+        s = get_settings()
+        if args.kind == "deepseek":
+            if not s.deepseek_api_key:
+                sys.exit("DEEPSEEK_API_KEY is not set (.env or environment)")
+            source = DeepSeekSource(args.prompt, args.session_id, api_key=s.deepseek_api_key, model=s.deepseek_model,
+                                    base_url=s.deepseek_url, max_tokens=s.max_tokens)
+        else:
+            source = OllamaSource(args.prompt, args.session_id, base_url=s.ollama_url, model=s.ollama_model)
 
     async def run() -> None:
         async for chunk in source.stream():

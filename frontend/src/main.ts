@@ -5,7 +5,16 @@
 // clicking a mention in the text selects its concept.
 import "./styles.css";
 import { ConceptMap } from "./conceptMap";
-import type { SampleInfo, ServerMessage, SessionConfig, SessionCreated, Stats, TickerItem, ViewUpdate } from "./contracts";
+import type {
+  SampleInfo,
+  ServerMessage,
+  SessionConfig,
+  SessionCreated,
+  SourceInfo,
+  Stats,
+  TickerItem,
+  ViewUpdate,
+} from "./contracts";
 import type { Mark } from "./spans";
 import { ViewState } from "./state";
 import { StepGraph, stepTypeEs } from "./stepGraph";
@@ -17,6 +26,15 @@ const BACKEND = (import.meta.env.VITE_BACKEND_URL as string | undefined) ?? "";
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const els = {
+  source: $<HTMLSelectElement>("source"),
+  sampleField: $<HTMLLabelElement>("sample-field"),
+  speedField: $<HTMLLabelElement>("speed-field"),
+  inputPanel: $<HTMLElement>("input-panel"),
+  pasteBox: $<HTMLDivElement>("paste-box"),
+  pasteText: $<HTMLTextAreaElement>("paste-text"),
+  promptBox: $<HTMLDivElement>("prompt-box"),
+  promptInput: $<HTMLInputElement>("prompt-input"),
+  sourceNote: $<HTMLParagraphElement>("source-note"),
   sample: $<HTMLSelectElement>("sample"),
   speed: $<HTMLSelectElement>("speed"),
   start: $<HTMLButtonElement>("start"),
@@ -295,7 +313,7 @@ function scheduleText(): void {
   requestAnimationFrame(() => {
     textQueued = false;
     text.setText(reasoning);
-    els.answer.textContent = answer;
+    els.answer.innerHTML = renderAnswer(answer);
     els.answerBlock.hidden = answer === "";
   });
 }
@@ -352,22 +370,42 @@ function resetSession(): void {
   refreshActive();
 }
 
-async function start(): Promise<void> {
-  resetSession();
+function sessionConfig(): SessionConfig | string {
+  const source = els.source.value as SessionConfig["source"];
   const config: SessionConfig = {
-    source: "replay",
-    sample: els.sample.value,
+    source,
+    sample: null,
+    text: null,
+    prompt: null,
     words_per_second: Number(els.speed.value),
     chunking: "word",
     seed: 0,
   };
+  if (source === "replay") config.sample = els.sample.value;
+  if (source === "paste") config.text = els.pasteText.value;
+  if (source === "deepseek" || source === "ollama") config.prompt = els.promptInput.value;
+  const input = config.sample ?? config.text ?? config.prompt ?? "";
+  if (!input.trim()) return source === "paste" ? "Pega primero un texto." : "Escribe primero una pregunta.";
+  return config;
+}
+
+async function start(): Promise<void> {
+  const config = sessionConfig();
+  if (typeof config === "string") {
+    els.title.textContent = config;
+    return;
+  }
+  resetSession();
   try {
     const res = await fetch(`${BACKEND}/sessions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(config),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      const detail = await res.json().then((b: { detail?: unknown }) => b.detail, () => null);
+      throw new Error(typeof detail === "string" ? detail : `HTTP ${res.status}`);
+    }
     const { session_id } = (await res.json()) as SessionCreated;
     const wsBase = BACKEND ? BACKEND.replace(/^http/, "ws") : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}`;
     const socket = new WebSocket(`${wsBase}/sessions/${session_id}`);
@@ -382,9 +420,48 @@ async function start(): Promise<void> {
       if (ws === socket && els.status.dataset.state === "live") setStatus("error", "Conexión cerrada");
     };
   } catch (err) {
-    setStatus("error", "Sin conexión");
-    els.title.textContent = `No se pudo iniciar la sesión (${(err as Error).message}).`;
+    setStatus("error", "No iniciada");
+    els.title.textContent = `No se pudo iniciar la sesión: ${(err as Error).message}`;
   }
+}
+
+// ---------------------------------------------------------------- sources
+
+let sourceInfo: SourceInfo[] = [];
+
+async function loadSources(): Promise<void> {
+  try {
+    const res = await fetch(`${BACKEND}/sources`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    sourceInfo = (await res.json()) as SourceInfo[];
+  } catch {
+    return; // keep the two built-in options; loadSamples reports the backend as unavailable
+  }
+  // Rebuilding the menu resets it to the first option: keep the user's choice if it still exists.
+  const chosen = els.source.value;
+  els.source.replaceChildren(
+    ...sourceInfo.map((s) => {
+      const option = new Option(s.available ? s.label : `${s.label} (no disponible)`, s.id);
+      option.disabled = !s.available;
+      return option;
+    }),
+  );
+  if (sourceInfo.some((s) => s.id === chosen && s.available)) els.source.value = chosen;
+  els.source.dataset.loaded = "true";
+  showSourceInputs();
+}
+
+/** Show the inputs the chosen source needs: a sample, a text box or a question. */
+function showSourceInputs(): void {
+  const source = els.source.value;
+  const live = source === "deepseek" || source === "ollama";
+  els.sampleField.hidden = source !== "replay";
+  els.speedField.hidden = live; // a live model sets its own pace
+  els.inputPanel.hidden = source === "replay";
+  els.pasteBox.hidden = source !== "paste";
+  els.promptBox.hidden = !live;
+  els.sourceNote.textContent = sourceInfo.find((s) => s.id === source)?.note ?? "";
+  els.start.textContent = live ? "Preguntar" : "Reproducir";
 }
 
 async function loadSamples(): Promise<void> {
@@ -441,6 +518,11 @@ function initTheme(): void {
   });
 }
 
+/** The answer as the model wrote it, with Markdown bold rendered (the text is escaped first). */
+function renderAnswer(s: string): string {
+  return esc(s).replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>");
+}
+
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -450,7 +532,13 @@ function esc(s: string): string {
 }
 
 els.start.addEventListener("click", () => void start());
+els.source.addEventListener("change", showSourceInputs);
+els.promptInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") void start();
+});
 initTabs();
 initTheme();
 renderTicker();
+showSourceInputs();
 void loadSamples();
+void loadSources();

@@ -19,10 +19,17 @@
       </div>
       <div class="controls">
         <label class="field">
+          <span>Fuente</span>
+          <select id="source" aria-label="Fuente del texto">
+            <option value="replay">Traza de ejemplo</option>
+            <option value="paste">Pegar texto</option>
+          </select>
+        </label>
+        <label class="field" id="sample-field">
           <span>Traza</span>
           <select id="sample" aria-label="Traza de ejemplo"></select>
         </label>
-        <label class="field">
+        <label class="field" id="speed-field">
           <span>Velocidad</span>
           <select id="speed" aria-label="Velocidad">
             <option value="8">×0,5</option>
@@ -36,6 +43,20 @@
         <button id="theme" class="ghost" type="button" aria-label="Cambiar tema">◐</button>
       </div>
     </header>
+
+    <section id="input-panel" class="card input-panel" hidden>
+      <div id="paste-box" hidden>
+        <label for="paste-text" class="input-label">Pega un razonamiento (por ejemplo, el texto de &lt;think&gt;…&lt;/think&gt; de un modelo). Se reproduce como si se estuviera escribiendo.</label>
+        <textarea id="paste-text" rows="5" maxlength="100000" placeholder="Okay, the user wants…"></textarea>
+      </div>
+      <div id="prompt-box" hidden>
+        <label for="prompt-input" class="input-label">Pregunta para el modelo. Verás su razonamiento mientras lo escribe.</label>
+        <div class="prompt-row">
+          <input id="prompt-input" type="text" maxlength="4000" placeholder="¿Cuántos números primos hay menores que 50?">
+        </div>
+        <p id="source-note" class="note"></p>
+      </div>
+    </section>
 
     <main class="board">
       <section class="viz" aria-label="Visualizaciones">

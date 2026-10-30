@@ -29,6 +29,11 @@ stopwords:
   - way
   - let
   - approx
+  # Telegraphic CoT of deepseek-flash ("Need answer Spanish. Final only."),
+  # seen in live traces on 2026-10-30: here "need" is tagged as a noun.
+  - need
+  - spanish
+  - english
 
 # Discourse markers that open a reasoning step, by step type (build plan
 # §4.2 step 10, after the DeepSeek-R1 "Thoughtology" taxonomy). Matched

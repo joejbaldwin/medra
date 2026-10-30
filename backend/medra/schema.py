@@ -27,6 +27,7 @@ class MedraContracts(BaseModel):
     session_config: c.SessionConfig
     session_created: c.SessionCreated
     sample_info: c.SampleInfo
+    source_info: c.SourceInfo
 
 
 def _drop_field_titles(model_schema: dict) -> None:

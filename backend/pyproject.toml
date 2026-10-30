@@ -16,6 +16,8 @@ dependencies = [
     "spacy>=3.8,<3.9",
     "scikit-learn>=1.5",
     "networkx>=3.3",
+    "httpx>=0.27",  # streaming calls to the DeepSeek and Ollama APIs
+    "python-dotenv>=1.0",  # DEEPSEEK_API_KEY from .env in local runs
     "en_core_web_md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl",
     "es_core_news_md @ https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.8.0/es_core_news_md-3.8.0-py3-none-any.whl",
 ]

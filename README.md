@@ -46,25 +46,35 @@ medra-source replay login-es --chunking random | medra-mine | medra-present > fr
 
 ```sh
 cd backend && ../.venv/Scripts/python -m pytest      # backend
-cd frontend && npm run typecheck                     # dashboard
+cd frontend && npm run typecheck && npm test         # dashboard
+```
+
+End to end, with the backend and dashboard running (needs Playwright, see below): plays a trace,
+checks that every paragraph shows exactly the source text, and that clicking each bubble
+highlights exactly its mentions (and clicking a mention selects the bubble):
+
+```sh
+.venv/Scripts/python scripts/e2e_dashboard.py --sample login-es
 ```
 
 ## Screenshots
 
 With the backend and dashboard running, `scripts/screenshots.py` replays a trace in a headless
-browser and saves streaming and final captures (light and dark) to `screenshots/` (not committed):
+browser and saves streaming and final captures (light and dark) to `screenshots/` (not committed);
+`--select ID` adds one with that bubble selected:
 
 ```sh
 .venv/Scripts/python -m pip install -e "backend[figures]"
 .venv/Scripts/python -m playwright install chromium-headless-shell
-.venv/Scripts/python scripts/screenshots.py --prefix step1 --channel chromium-headless-shell
+.venv/Scripts/python scripts/screenshots.py --prefix step3 --select contraseña --channel chromium-headless-shell
 ```
 
 ## Contracts
 
 The messages between layers are Pydantic models in [backend/medra/contracts.py](backend/medra/contracts.py),
-frozen as schema v1 in [docs/contracts/v1.schema.json](docs/contracts/v1.schema.json). The dashboard's
-TypeScript types are generated from that schema. After changing a contract, bump `SCHEMA_VERSION`, then:
+frozen as schema v1 in [docs/contracts/v1.schema.json](docs/contracts/v1.schema.json) (currently 1.1;
+minor versions only add fields with defaults). The dashboard's TypeScript types are generated from
+that schema. After changing a contract, bump `SCHEMA_VERSION`, then:
 
 ```sh
 cd backend && ../.venv/Scripts/python -m medra.schema ../docs/contracts/v1.schema.json

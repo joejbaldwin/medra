@@ -134,7 +134,7 @@
           "type": "string"
         },
         "schema_version": {
-          "default": "1.0",
+          "default": "1.1",
           "type": "string"
         },
         "session_id": {
@@ -285,7 +285,7 @@
       "description": "Full snapshot of the miner's state after a commit.\n\nEmitted each time at least one sentence is committed. It is a snapshot,\nnot a diff: Layer 2 and 3 run in the same process, so this costs no\nnetwork traffic, and it keeps the \"incremental == batch\" test simple.\nDiffing happens in Layer 3, before the network.",
       "properties": {
         "schema_version": {
-          "default": "1.0",
+          "default": "1.1",
           "type": "string"
         },
         "session_id": {
@@ -365,6 +365,13 @@
         },
         "stats": {
           "$ref": "#/$defs/Stats"
+        },
+        "recent_tokens": {
+          "description": "Decisions for the last tokens committed in this update (not cumulative).",
+          "items": {
+            "$ref": "#/$defs/TokenDecision"
+          },
+          "type": "array"
         }
       },
       "required": [
@@ -383,7 +390,8 @@
         "cooc",
         "clusters",
         "markers",
-        "stats"
+        "stats",
+        "recent_tokens"
       ],
       "title": "MiningUpdate",
       "type": "object"
@@ -484,6 +492,7 @@
           "default": null
         },
         "label": {
+          "description": "Segment keywords (top TF-IDF terms); the dashboard adds 'Tramo n'.",
           "type": "string"
         },
         "provisional": {
@@ -920,7 +929,7 @@
       "description": "A piece of streamed text. Boundaries are arbitrary (may split a word).",
       "properties": {
         "schema_version": {
-          "default": "1.0",
+          "default": "1.1",
           "type": "string"
         },
         "session_id": {
@@ -995,13 +1004,39 @@
           "type": "string"
         },
         "outcome": {
+          "description": "A TokenDecision outcome code; the dashboard words it.",
           "type": "string"
+        },
+        "pos": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "node_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The bubble this token feeds, if any."
         }
       },
       "required": [
         "form",
         "lemma",
-        "outcome"
+        "outcome",
+        "pos",
+        "node_id"
       ],
       "title": "TickerItem",
       "type": "object"
@@ -1062,6 +1097,55 @@
       "title": "TimelineSeries",
       "type": "object"
     },
+    "TokenDecision": {
+      "additionalProperties": false,
+      "description": "What the miner did with one token: the 'pipeline working' trace.",
+      "properties": {
+        "form": {
+          "type": "string"
+        },
+        "lemma": {
+          "type": "string"
+        },
+        "pos": {
+          "type": "string"
+        },
+        "outcome": {
+          "description": "term = kept; stopword/filler = in a stoplist; pos = word type not kept; number = numeral; other = punctuation-like or too short.",
+          "enum": [
+            "term",
+            "stopword",
+            "filler",
+            "pos",
+            "number",
+            "other"
+          ],
+          "type": "string"
+        },
+        "span": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "type": "array"
+        }
+      },
+      "required": [
+        "form",
+        "lemma",
+        "pos",
+        "outcome",
+        "span"
+      ],
+      "title": "TokenDecision",
+      "type": "object"
+    },
     "Topic": {
       "additionalProperties": false,
       "properties": {
@@ -1107,7 +1191,7 @@
       "description": "What the screen should show, as a diff against the previous update.\n\nThe first update of a session has kind=\"snapshot\". After that, each list\nholds only items that were added or changed (upsert by id), and `removed`\nlists ids to delete. `timeline` and `stats`, when present, replace the\nprevious value whole. `ticker` items are appended.",
       "properties": {
         "schema_version": {
-          "default": "1.0",
+          "default": "1.1",
           "type": "string"
         },
         "session_id": {
@@ -1290,5 +1374,5 @@
   ],
   "title": "MedraContracts",
   "type": "object",
-  "$comment": "MeDRA contracts, schema_version 1.0. Generated; do not edit."
+  "$comment": "MeDRA contracts, schema_version 1.1. Generated; do not edit."
 }

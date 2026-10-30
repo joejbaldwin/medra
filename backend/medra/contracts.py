@@ -30,7 +30,9 @@ from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
-SCHEMA_VERSION = "1.0"
+# 1.1 (step 3): added MiningUpdate.recent_tokens, TickerItem.pos and TickerItem.node_id.
+# Minor versions only add fields with defaults, so 1.0 producers stay valid.
+SCHEMA_VERSION = "1.1"
 
 Span = tuple[int, int]
 """Half-open character range [start, end) into the reasoning text."""
@@ -124,6 +126,19 @@ class Marker(_Model):
     span: Span
 
 
+class TokenDecision(_Model):
+    """What the miner did with one token: the 'pipeline working' trace."""
+
+    form: str
+    lemma: str
+    pos: str
+    outcome: Literal["term", "stopword", "filler", "pos", "number", "other"] = Field(
+        description="term = kept; stopword/filler = in a stoplist; pos = word type not kept; "
+        "number = numeral; other = punctuation-like or too short."
+    )
+    span: Span
+
+
 class Stats(_Model):
     words: int = 0
     sentences: int = 0
@@ -158,6 +173,10 @@ class MiningUpdate(_Model):
     clusters: list[Cluster] = Field(default_factory=list)
     markers: list[Marker] = Field(default_factory=list)
     stats: Stats = Field(default_factory=Stats)
+    recent_tokens: list[TokenDecision] = Field(
+        default_factory=list,
+        description="Decisions for the last tokens committed in this update (not cumulative).",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -199,7 +218,7 @@ class Paragraph(_Model):
     start: int
     end: int
     topic_id: str | None = None
-    label: str
+    label: str = Field(description="Segment keywords (top TF-IDF terms); the dashboard adds 'Tramo n'.")
     provisional: bool = False
 
 
@@ -234,7 +253,9 @@ class TickerItem(_Model):
 
     form: str
     lemma: str
-    outcome: str
+    outcome: str = Field(description="A TokenDecision outcome code; the dashboard words it.")
+    pos: str | None = None
+    node_id: str | None = Field(default=None, description="The bubble this token feeds, if any.")
 
 
 class Removed(_Model):

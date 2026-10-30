@@ -30,17 +30,24 @@ class Occurrence:
     kind: str  # "word" or "ngram"
 
 
-def is_content(tok: Token, stopwords: frozenset[str]) -> bool:
+def decide(tok: Token, stopwords: frozenset[str]) -> str:
+    """Why a token is kept or dropped (a TokenDecision outcome code)."""
     lemma = tok.lemma_.lower()
-    return (
-        tok.pos_ in CONTENT_POS
-        and not tok.is_stop
-        and lemma not in stopwords
-        and not tok.like_num
-        and any(c.isalpha() for c in tok.text)
-        and "." not in tok.text  # abbreviations such as "Dr." or "e.g."
-        and len(lemma) >= 2
-    )
+    if tok.like_num:
+        return "number"
+    if not any(c.isalpha() for c in tok.text) or "." in tok.text or len(lemma) < 2:
+        return "other"  # punctuation, symbols, abbreviations such as "Dr." or "e.g."
+    if tok.is_stop:
+        return "stopword"
+    if lemma in stopwords:
+        return "filler"
+    if tok.pos_ not in CONTENT_POS:
+        return "pos"
+    return "term"
+
+
+def is_content(tok: Token, stopwords: frozenset[str]) -> bool:
+    return decide(tok, stopwords) == "term"
 
 
 def lemma_of(tok: Token) -> str:

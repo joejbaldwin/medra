@@ -78,6 +78,10 @@ export interface MiningUpdate {
   clusters: Cluster[];
   markers: Marker[];
   stats: Stats;
+  /**
+   * Decisions for the last tokens committed in this update (not cumulative).
+   */
+  recent_tokens: TokenDecision[];
 }
 /**
  * This interface was referenced by `MedraContracts`'s JSON-Schema
@@ -200,6 +204,26 @@ export interface Stats {
   };
 }
 /**
+ * What the miner did with one token: the 'pipeline working' trace.
+ *
+ * This interface was referenced by `MedraContracts`'s JSON-Schema
+ * via the `definition` "TokenDecision".
+ */
+export interface TokenDecision {
+  form: string;
+  lemma: string;
+  pos: string;
+  /**
+   * term = kept; stopword/filler = in a stoplist; pos = word type not kept; number = numeral; other = punctuation-like or too short.
+   */
+  outcome: "term" | "stopword" | "filler" | "pos" | "number" | "other";
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  span: [number, number];
+}
+/**
  * What the screen should show, as a diff against the previous update.
  *
  * The first update of a session has kind="snapshot". After that, each list
@@ -283,6 +307,9 @@ export interface Paragraph {
   start: number;
   end: number;
   topic_id: string | null;
+  /**
+   * Segment keywords (top TF-IDF terms); the dashboard adds 'Tramo n'.
+   */
   label: string;
   provisional: boolean;
 }
@@ -333,7 +360,15 @@ export interface Step {
 export interface TickerItem {
   form: string;
   lemma: string;
+  /**
+   * A TokenDecision outcome code; the dashboard words it.
+   */
   outcome: string;
+  pos: string | null;
+  /**
+   * The bubble this token feeds, if any.
+   */
+  node_id: string | null;
 }
 /**
  * This interface was referenced by `MedraContracts`'s JSON-Schema

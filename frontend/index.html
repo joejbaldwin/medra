@@ -40,8 +40,9 @@
     <main class="board">
       <section class="card">
         <h2>Conceptos y menciones</h2>
-        <p class="sub">Tamaño = menciones · términos lematizados (sustantivos, adjetivos y n-gramas)</p>
+        <p class="sub">Tamaño = menciones · Enlace = coocurrencia en la misma oración</p>
         <div class="map"><svg id="map" role="img" aria-label="Mapa de conceptos"></svg></div>
+        <p id="map-info" class="hint">Selecciona un término para ver sus menciones.</p>
         <p id="stats" class="stats"></p>
       </section>
 
@@ -49,10 +50,14 @@
         <h2>Texto original</h2>
         <p id="title" class="sub">Elige una traza y pulsa Reproducir.</p>
         <p id="prompt" class="prompt" hidden></p>
-        <div id="stream" class="stream" aria-live="off"><span id="committed"></span><span id="pending" class="pending"></span><span id="caret" class="caret" hidden></span></div>
+        <div id="stream" class="stream" aria-live="off"></div>
         <div id="answer-block" class="answer" hidden>
           <h3>Respuesta</h3>
           <p id="answer"></p>
+        </div>
+        <div class="proc">
+          <h4>Procesando ahora</h4>
+          <div id="ticker" class="ticker"><div>Esperando texto…</div></div>
         </div>
       </section>
     </main>

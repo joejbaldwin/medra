@@ -17,7 +17,7 @@ from medra.contracts import ErrorMessage, SampleInfo, SessionConfig, SessionCrea
 from medra.mining import TextMiner
 from medra.mining.language import LANGUAGES, load_nlp
 from medra.pipeline import run_pipeline
-from medra.present import StubPresenter
+from medra.present import ViewPresenter
 from medra.sources import ReplaySource, list_samples, load_trace
 
 
@@ -76,7 +76,7 @@ async def stream_session(ws: WebSocket, session_id: str) -> None:
         seed=config.seed,
     )
     try:
-        async for message in run_pipeline(session_id, source, TextMiner(session_id), StubPresenter()):
+        async for message in run_pipeline(session_id, source, TextMiner(session_id), ViewPresenter()):
             await ws.send_text(message.model_dump_json())
         await ws.close()
     except WebSocketDisconnect:

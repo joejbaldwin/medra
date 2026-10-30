@@ -75,10 +75,12 @@ def mine_main(argv: list[str] | None = None) -> None:
 
 
 def present_main(argv: list[str] | None = None) -> None:
-    argparse.ArgumentParser(prog="medra-present", description="Layer 3: MiningUpdates in, ViewUpdates out.").parse_args(argv)
-    from medra.present import StubPresenter
+    parser = argparse.ArgumentParser(prog="medra-present", description="Layer 3: MiningUpdates in, ViewUpdates out.")
+    parser.add_argument("--presenter", choices=["view", "stub"], default="view")
+    args = parser.parse_args(argv)
+    from medra.present import StubPresenter, ViewPresenter
 
-    presenter = StubPresenter()
+    presenter = ViewPresenter() if args.presenter == "view" else StubPresenter()
     for update in read_jsonl(sys.stdin, MiningUpdate):
         view = presenter.present(update)
         if view is not None:

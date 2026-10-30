@@ -11,6 +11,7 @@ Writes, into screenshots/ (gitignored):
     <prefix>-streaming-light.png   mid-stream: pending tail in grey, caret
     <prefix>-final-light.png       after the trace has finished
     <prefix>-final-dark.png        same, dark theme
+    <prefix>-selected-light.png    with --select ID: that bubble clicked, its mentions highlighted
 """
 
 from __future__ import annotations
@@ -43,6 +44,7 @@ def main() -> None:
     parser.add_argument("--speed", default="15", help="words per second (value of the speed menu)")
     parser.add_argument("--prefix", default="dashboard")
     parser.add_argument("--channel", default="msedge")
+    parser.add_argument("--select", help="bubble id to click for a 'selected' capture")
     parser.add_argument("--out-dir", type=Path, default=ROOT / "screenshots")
     args = parser.parse_args()
     args.out_dir.mkdir(exist_ok=True)
@@ -58,14 +60,19 @@ def main() -> None:
             if scheme == "light":
                 # Mid-stream: enough committed text for bubbles, and an unfinished sentence showing.
                 page.wait_for_function(
-                    "document.getElementById('committed').textContent.length > 450"
-                    " && document.getElementById('pending').textContent.length > 25",
+                    "document.querySelectorAll('#stream .para[data-seg]').length >= 3"
+                    " && (document.querySelector('#stream .pending')?.textContent.length ?? 0) > 25",
                     timeout=60_000,
                 )
                 page.wait_for_timeout(300)
                 page.screenshot(path=args.out_dir / f"{args.prefix}-streaming-{scheme}.png")
             wait_finished(page)
             page.screenshot(path=args.out_dir / f"{args.prefix}-final-{scheme}.png")
+            if scheme == "light" and args.select:
+                page.click(f"g.node[data-id='{args.select}']")
+                page.mouse.move(0, 0)  # leave the bubble so the selection, not a hover, is shown
+                page.wait_for_timeout(1200)  # smooth scroll to the first mention
+                page.screenshot(path=args.out_dir / f"{args.prefix}-selected-{scheme}.png")
             context.close()
         browser.close()
     for f in sorted(args.out_dir.glob(f"{args.prefix}-*.png")):

@@ -35,16 +35,18 @@ from medra.contracts import (
     Term,
     TermWeight,
     TextChunk,
+    TokenDecision,
 )
 from medra.mining.clean import mask
 from medra.mining.language import LanguageTracker, lexicon, load_nlp
 from medra.mining.sentences import find_sentences
-from medra.mining.terms import extract
+from medra.mining.terms import decide, extract
 from medra.mining.weights import pmi, tfidf_top_k
 
 MIN_NGRAM_COUNT = 2  # an n-gram becomes a term once it has appeared this often
 MIN_COOC_COUNT = 2  # pairs seen in fewer sentences are not reported
 TFIDF_TOP_K = 8
+RECENT_TOKENS = 20  # token decisions kept per update, for the dashboard's ticker
 _BLANK_LINE = re.compile(r"\n[ \t]*\n")
 
 
@@ -76,6 +78,7 @@ class TextMiner:
         self.words = 0
         self.vocabulary: set[str] = set()
         self.words_by_lang: Counter[str] = Counter()
+        self.recent: list[TokenDecision] = []  # decisions in the current update only
 
     # ------------------------------------------------------------------ feed
 
@@ -91,6 +94,7 @@ class TextMiner:
         if not spans and not final:
             return None
         masked_full = self.masked + region.text
+        self.recent = []
         self._commit([(start + a, start + b) for a, b in spans], masked_full)
         self.masked += region.text[:frontier]
         self.committed_upto = start + frontier
@@ -122,15 +126,27 @@ class TextMiner:
         self.sentences.append(Sentence(id=len(self.sentences), start=start, end=end, segment_id=seg_id))
         self.sentence_lang.append(lang)
 
+        stopwords = lexicon(lang)["stopwords"]
         n_words = 0
         for tok in doc:
             if tok.is_alpha or tok.like_num or any(c.isalnum() for c in tok.text):
                 n_words += 1
                 self.vocabulary.add(tok.lemma_.lower())
+                a = start + tok.idx
+                self.recent.append(
+                    TokenDecision(
+                        form=self.text[a : a + len(tok.text)],
+                        lemma=tok.lemma_.lower(),
+                        pos=tok.pos_,
+                        outcome=decide(tok, stopwords),
+                        span=(a, a + len(tok.text)),
+                    )
+                )
+        del self.recent[:-RECENT_TOKENS]
         self.words += n_words
         self.words_by_lang[lang] += n_words
 
-        occurrences = extract(doc, start, lang, lexicon(lang)["stopwords"])
+        occurrences = extract(doc, start, lang, stopwords)
         for occ in occurrences:
             stat = self.terms.get(occ.term_id)
             if stat is None:
@@ -214,6 +230,7 @@ class TextMiner:
                     f"share_{lang}": round(n / self.words, 4) for lang, n in sorted(self.words_by_lang.items())
                 },
             ),
+            recent_tokens=list(self.recent),
         )
         self.seq += 1
         return update

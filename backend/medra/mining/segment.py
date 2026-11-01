@@ -21,7 +21,7 @@ once FROZEN_AFTER more sentences have arrived it can never change. That is
 what lets the dashboard draw a boundary as final while the text is still
 streaming, and makes the streamed result equal the batch one.
 
-The weights and threshold are set by hand on the sample traces; step 7 tunes
+The weights and threshold are set by hand on the sample traces; step 8 tunes
 them against hand-annotated boundaries (Pk, WindowDiff).
 """
 

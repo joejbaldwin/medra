@@ -102,6 +102,7 @@ button.ghost {
 .node.sel .body { fill: var(--c); stroke: color-mix(in srgb, var(--c) 30%, var(--surface)); stroke-width: 8; }
 .node.sel .lbl { fill: var(--on-accent); }
 .node.dim { opacity: .28; }
+.node.leaving { pointer-events: none; }
 .node .pulse { fill: none; stroke: var(--c); stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
 .node .pulse.go { animation: pulse .9s ease-out; }
 @keyframes pulse { from { opacity: .7; transform: scale(1); } to { opacity: 0; transform: scale(1.4); } }

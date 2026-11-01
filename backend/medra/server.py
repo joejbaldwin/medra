@@ -5,7 +5,7 @@
 Sources: replay (sample traces), paste (text from the dashboard), deepseek
 (live, uses the group's API credit) and ollama (local model). Live sessions
 can be switched off with MEDRA_LIVE_DISABLED=1, and only one DeepSeek session
-runs at a time. Access codes and per-code budgets arrive in step 6.
+runs at a time. Access codes and per-code budgets arrive in step 7.
 """
 
 from __future__ import annotations

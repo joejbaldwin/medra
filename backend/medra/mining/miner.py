@@ -13,7 +13,7 @@ For each chunk:
    (segment.py), TF-IDF per segment and PMI (weights.py), topics (topics.py).
 
 Work per sentence is proportional to the sentence; the snapshot is rebuilt
-from the counts each time (measured in step 7).
+from the counts each time (measured in step 8).
 """
 
 from __future__ import annotations

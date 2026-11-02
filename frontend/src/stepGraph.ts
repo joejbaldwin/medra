@@ -5,10 +5,12 @@
 import * as d3 from "d3";
 import type { Paragraph, Step, Topic } from "./contracts";
 
-const H = 300;
+// The drawing fills its window's height (at least MIN_H) and scrolls sideways
+// when the steps need more width. Arcs need ~130 px above the track and the
+// labels ~100 px below it.
+const MIN_H = 260;
 const PAD = 56;
 const MIN_SPACING = 150;
-const SY = 150; // the track
 const R = 26;
 const PALETTE = 6;
 const MARKER_CHARS = 24;
@@ -26,6 +28,10 @@ export function stepTypeEs(type: string | null | undefined): string {
   return (type && STEP_ES[type]) || "desarrollo";
 }
 
+// Each graph needs its own arrowhead ids: url(#id) resolves to the first match
+// in the document, which may be inside a hidden page, where it does not render.
+let instances = 0;
+
 interface StepView {
   step: Step;
   index: number;
@@ -41,6 +47,8 @@ export class StepGraph {
   private svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private selected: number | null = null;
   private dimTopic: string | null = null;
+  private last: Parameters<StepGraph["update"]> | null = null;
+  private arrowId = `step-arrow-${instances++}`;
 
   constructor(
     svgEl: SVGSVGElement,
@@ -51,7 +59,7 @@ export class StepGraph {
     for (let slot = 0; slot < PALETTE; slot++) {
       defs
         .append("marker")
-        .attr("id", `step-arrow-${slot}`)
+        .attr("id", `${this.arrowId}-${slot}`)
         .attr("viewBox", "0 0 10 10")
         .attr("refX", 8)
         .attr("refY", 5)
@@ -66,14 +74,23 @@ export class StepGraph {
     this.svg.append("g").attr("class", "s-body");
   }
 
+  /** Redraw at the window's current size (after it was resized or shown). */
+  resize(): void {
+    if (this.last && this.wrap.clientWidth > 0) this.update(...this.last);
+  }
+
   reset(): void {
     this.selected = null;
     this.dimTopic = null;
+    this.last = null;
     this.svg.select("g.s-body").selectAll("*").remove();
   }
 
   update(steps: Step[], paragraphs: Map<number, Paragraph>, topics: Map<string, Topic>, live: boolean): void {
+    this.last = [steps, paragraphs, topics, live];
     const width = Math.max(this.wrap.clientWidth || 800, 2 * PAD + steps.length * MIN_SPACING);
+    const H = Math.max(MIN_H, this.wrap.clientHeight);
+    const SY = Math.max(140, Math.round(H / 2 + 12)); // the track
     const spacing = steps.length ? (width - 2 * PAD) / steps.length : MIN_SPACING;
     this.svg.attr("viewBox", `0 0 ${width} ${H}`).attr("width", width).attr("height", H);
     const views: StepView[] = steps.map((step, i) => {
@@ -105,7 +122,7 @@ export class StepGraph {
         const g = body.append("g").attr("class", "s-arc").style("--c", `var(--c${v.slot % PALETTE})`);
         g.append("path")
           .attr("d", `M${v.x},${SY - R - 4} C${v.x},${top} ${from.x},${top} ${from.x},${SY - R - 8}`)
-          .attr("marker-end", `url(#step-arrow-${v.slot % PALETTE})`);
+          .attr("marker-end", `url(#${this.arrowId}-${v.slot % PALETTE})`);
         const name = v.step.topic_id ? (topics.get(v.step.topic_id)?.name ?? "") : "";
         const label = `retoma «${name}»`;
         // Highest point of the curve: a cubic Bézier with both control points at
@@ -133,7 +150,7 @@ export class StepGraph {
       g.append("path")
         .attr("class", "s-arrow")
         .attr("d", `M${prevX},${SY} L${v.x - R - 6},${SY}`)
-        .attr("marker-end", `url(#step-arrow-${v.slot % PALETTE})`);
+        .attr("marker-end", `url(#${this.arrowId}-${v.slot % PALETTE})`);
       if (v.step.marker) {
         // Above the node tops, centred on the arrow, so it can use the whole gap
         // between two nodes (monospace: ~MONO_CHAR px per character, plus the «»).

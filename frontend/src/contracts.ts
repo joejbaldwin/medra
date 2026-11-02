@@ -506,6 +506,10 @@ export interface SampleInfo {
   language: string;
   words: number;
   origin: string;
+  /**
+   * The task the trace answers (empty if unknown).
+   */
+  prompt: string;
 }
 /**
  * One entry of GET /sources: what the dashboard can offer.

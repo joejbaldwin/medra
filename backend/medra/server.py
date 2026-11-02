@@ -40,6 +40,12 @@ log = logging.getLogger("medra.server")
 LIVE_NOTE = "Las preguntas se envían a la API de DeepSeek: no escribas datos personales ni sensibles."
 
 
+def model_label(model: str) -> str:
+    """The configured model as the dashboard names it: "deepseek-flash" -> "DeepSeek Flash"."""
+    words = [w for w in model.replace("_", "-").split("-") if w]
+    return " ".join("DeepSeek" if w.lower() == "deepseek" else w[:1].upper() + w[1:] for w in words) or model
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     # Load the spaCy models once at startup (about a second each) instead of
@@ -77,7 +83,7 @@ async def sources() -> list[SourceInfo]:
         SourceInfo(id="paste", label="Pegar texto", available=True),
         SourceInfo(
             id="deepseek",
-            label="DeepSeek (en directo)",
+            label=model_label(s.deepseek_model),
             available=bool(s.deepseek_api_key) and not s.live_disabled,
             note=off or (LIVE_NOTE if s.deepseek_api_key else "No hay clave de API configurada en el servidor."),
         ),

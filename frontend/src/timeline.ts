@@ -6,12 +6,12 @@
 import * as d3 from "d3";
 import type { Timeline, Topic } from "./contracts";
 
-const W = 1000;
-const H = 240;
-const X0 = 58;
-const X1 = 972;
-const Y0 = 14;
-const Y1 = 190;
+// Margins around the plot, in CSS pixels: the drawing is sized to its window
+// by resize(), so text keeps its real size whatever the window's shape.
+const LEFT = 58;
+const RIGHT = 20;
+const TOP = 14;
+const BOTTOM = 50;
 const PALETTE = 6;
 
 export interface Segmenting {
@@ -39,20 +39,26 @@ export class TimelineChart {
   private topics: Topic[] = [];
   private segs: Segmenting = { starts: [], current: 0 };
   private selection: TimelineSelection = null;
-  private x = d3.scaleLinear().range([X0, X1]);
-  private y = d3.scaleLinear().range([Y1, Y0]);
+  private W = 1000;
+  private H = 240;
+  private x = d3.scaleLinear();
+  private y = d3.scaleLinear();
+  private get X0() { return LEFT; }
+  private get X1() { return this.W - RIGHT; }
+  private get Y0() { return TOP; }
+  private get Y1() { return this.H - BOTTOM; }
 
   constructor(
     svgEl: SVGSVGElement,
     private tip: HTMLElement,
     private legend: HTMLElement,
   ) {
-    this.svg = d3.select(svgEl).attr("viewBox", `0 0 ${W} ${H}`);
+    this.svg = d3.select(svgEl).attr("viewBox", `0 0 ${this.W} ${this.H}`);
     this.grid = this.svg.append("g");
-    this.band = this.svg.append("rect").attr("class", "c-band").attr("y", Y0).attr("height", Y1 - Y0).attr("width", 0);
+    this.band = this.svg.append("rect").attr("class", "c-band").attr("width", 0);
     this.areas = this.svg.append("g");
     this.rug = this.svg.append("g").attr("class", "c-rug");
-    this.hoverLine = this.svg.append("line").attr("class", "c-hover").attr("y1", Y0).attr("y2", Y1).attr("visibility", "hidden");
+    this.hoverLine = this.svg.append("line").attr("class", "c-hover").attr("visibility", "hidden");
     this.peak = this.svg.append("g").attr("class", "c-peak").attr("visibility", "hidden");
     this.peak.append("line");
     this.peak.append("circle").attr("r", 6);
@@ -64,6 +70,17 @@ export class TimelineChart {
       this.hoverLine.attr("visibility", "hidden");
     });
     this.svg.on("click", (e: MouseEvent) => this.click(e));
+    this.render();
+  }
+
+  /** Match the drawing to its window (CSS pixels). Ignored while hidden. */
+  resize(width: number, height: number): void {
+    const w = Math.max(320, Math.round(width));
+    const h = Math.max(150, Math.round(height));
+    if (width < 1 || height < 1 || (w === this.W && h === this.H)) return;
+    this.W = w;
+    this.H = h;
+    this.svg.attr("viewBox", `0 0 ${w} ${h}`);
     this.render();
   }
 
@@ -96,6 +113,11 @@ export class TimelineChart {
   }
 
   private render(): void {
+    const { X0, X1, Y0, Y1 } = this;
+    this.x.range([X0, X1]);
+    this.y.range([Y1, Y0]);
+    this.band.attr("y", Y0).attr("height", Y1 - Y0);
+    this.hoverLine.attr("y1", Y0).attr("y2", Y1);
     const series = this.series();
     const xMax = Math.max(1, this.timeline?.x_max ?? 1);
     const yMax = Math.max(1, Math.ceil(d3.max(series, (s) => d3.max(s.points, (p) => p[1])) ?? 0) + 0.15);
@@ -125,7 +147,9 @@ export class TimelineChart {
       if (i % every) return;
       this.grid.append("text").attr("class", "c-axis").attr("x", this.x(w) + 4).attr("y", Y1 + 22).text(i === 0 ? "Inicio" : `T${i + 1}`);
     });
-    this.grid.append("text").attr("class", "c-axis").attr("x", X1).attr("y", Y1 + 44).attr("text-anchor", "end").text(`${Math.round(xMax)} palabras`);
+    if (this.timeline) {
+      this.grid.append("text").attr("class", "c-axis").attr("x", X1).attr("y", Y1 + 44).attr("text-anchor", "end").text(`${Math.round(xMax)} palabras`);
+    }
 
     const area = d3.area<[number, number]>().x((p) => this.x(p[0])).y0(Y1).y1((p) => this.y(p[1])).curve(d3.curveMonotoneX);
     const line = d3.line<[number, number]>().x((p) => this.x(p[0])).y((p) => this.y(p[1])).curve(d3.curveMonotoneX);
@@ -168,6 +192,7 @@ export class TimelineChart {
       b.setAttribute("aria-pressed", String(b.dataset.topic === topicId));
     }
 
+    const { Y1 } = this;
     // Band over a selected step, or over the segment where a selected topic peaks.
     this.band.attr("width", 0);
     this.peak.attr("visibility", "hidden");
@@ -197,6 +222,7 @@ export class TimelineChart {
   }
 
   private showPeak([px, py]: [number, number], label: string, slot: number): void {
+    const { X0, X1, Y1 } = this;
     const x = this.x(px);
     const y = this.y(py);
     this.peak.style("--c", `var(--c${slot % PALETTE})`).attr("visibility", "visible");
@@ -218,9 +244,9 @@ export class TimelineChart {
   /** The sample nearest the pointer, or null outside the plotted range. */
   private sampleAt(e: MouseEvent): { vx: number; index: number } | null {
     const rect = (this.svg.node() as SVGSVGElement).getBoundingClientRect();
-    const vx = ((e.clientX - rect.left) / rect.width) * W;
+    const vx = ((e.clientX - rect.left) / rect.width) * this.W;
     const points = this.timeline?.series[0]?.points;
-    if (!points || points.length < 2 || vx < X0 || vx > X1) return null;
+    if (!points || points.length < 2 || vx < this.X0 || vx > this.X1) return null;
     const word = this.x.invert(vx);
     const index = Math.max(0, Math.min(points.length - 1, d3.bisectCenter(points.map((p) => p[0]), word)));
     return { vx, index };
@@ -243,7 +269,7 @@ export class TimelineChart {
         .map((r) => `<div class="t-row" style="--c:var(--c${r.t.colour_slot % PALETTE})"><span class="dot"></span><span>${esc(r.t.name)}</span><span>${r.v.toFixed(1)}</span></div>`)
         .join("");
     this.tip.hidden = false;
-    this.tip.style.left = `${Math.min(86, Math.max(14, at.vx / 10))}%`;
+    this.tip.style.left = `${Math.min(86, Math.max(14, (at.vx / this.W) * 100))}%`;
   }
 
   private click(e: MouseEvent): void {

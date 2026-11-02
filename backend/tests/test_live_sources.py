@@ -234,6 +234,12 @@ def test_sources_reports_what_is_available(monkeypatch):
     use_settings(monkeypatch, deepseek_api_key=KEY)
     deepseek_info = next(s for s in client.get("/sources").json() if s["id"] == "deepseek")
     assert deepseek_info["available"] and KEY not in json.dumps(deepseek_info)
+    assert deepseek_info["label"] == server.model_label(BASE.deepseek_model)
+
+
+def test_model_label_names_the_model():
+    assert server.model_label("deepseek-flash") == "DeepSeek Flash"
+    assert server.model_label("deepseek-v4-pro") == "DeepSeek V4 Pro"
 
 
 def test_live_sessions_need_a_key_and_respect_the_kill_switch(monkeypatch):

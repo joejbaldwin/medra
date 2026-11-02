@@ -3,23 +3,25 @@
 // ViewUpdate diffs from the presenter. Links go both ways: selecting a
 // concept, topic or step highlights its words and paragraphs in the text;
 // clicking a mention in the text selects its concept.
+//
+// Layout: the chat window (prompt, reasoning, answer, composer) and the
+// visualization windows sit on pages managed by dashboard.ts. Every open
+// visualization is a panel (panels.ts) that follows the same session state.
 import "./styles.css";
-import { ConceptMap } from "./conceptMap";
-import type {
-  SampleInfo,
-  ServerMessage,
-  SessionConfig,
-  SessionCreated,
-  SourceInfo,
-  Stats,
-  TickerItem,
-  ViewUpdate,
-} from "./contracts";
+import { sourceIcon } from "./brand";
+import type { SampleInfo, ServerMessage, SessionConfig, SessionCreated, SourceInfo, ViewUpdate } from "./contracts";
+import { Dashboard } from "./dashboard";
+import type { VizKind } from "./layout";
+import { createPanel, type Active, type Panel, type Selection, type Session } from "./panels";
+import { Picker } from "./picker";
 import type { Mark } from "./spans";
 import { ViewState } from "./state";
-import { StepGraph, stepTypeEs } from "./stepGraph";
+import { SourceMenu } from "./sourceMenu";
+import { statsHtml } from "./statsView";
+import { stepTypeEs } from "./stepGraph";
 import { TextPane, type Block } from "./textPane";
-import { TimelineChart, type Segmenting, type TimelineSelection } from "./timeline";
+import type { Segmenting, TimelineSelection } from "./timeline";
+import { esc } from "./util";
 
 // Same origin in development (Vite proxies to the backend). Set at build time for deployment.
 const BACKEND = (import.meta.env.VITE_BACKEND_URL as string | undefined) ?? "";
@@ -27,52 +29,73 @@ const BACKEND = (import.meta.env.VITE_BACKEND_URL as string | undefined) ?? "";
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const els = {
   source: $<HTMLSelectElement>("source"),
-  sampleField: $<HTMLLabelElement>("sample-field"),
-  speedField: $<HTMLLabelElement>("speed-field"),
-  inputPanel: $<HTMLElement>("input-panel"),
-  pasteBox: $<HTMLDivElement>("paste-box"),
-  pasteText: $<HTMLTextAreaElement>("paste-text"),
-  promptBox: $<HTMLDivElement>("prompt-box"),
-  promptInput: $<HTMLInputElement>("prompt-input"),
-  sourceNote: $<HTMLParagraphElement>("source-note"),
   sample: $<HTMLSelectElement>("sample"),
-  speed: $<HTMLSelectElement>("speed"),
-  start: $<HTMLButtonElement>("start"),
-  status: $<HTMLSpanElement>("status"),
+  sampleField: $<HTMLLabelElement>("sample-field"),
   theme: $<HTMLButtonElement>("theme"),
-  title: $<HTMLParagraphElement>("title"),
+  chatScroll: $<HTMLDivElement>("chat-scroll"),
+  chatEmpty: $<HTMLDivElement>("chat-empty"),
+  userMsg: $<HTMLDivElement>("user-msg"),
   prompt: $<HTMLParagraphElement>("prompt"),
+  reasoningBlock: $<HTMLDivElement>("reasoning-block"),
+  modeBadge: $<HTMLSpanElement>("mode-badge"),
   answerBlock: $<HTMLDivElement>("answer-block"),
-  answer: $<HTMLParagraphElement>("answer"),
-  mapInfo: $<HTMLParagraphElement>("map-info"),
-  stats: $<HTMLParagraphElement>("stats"),
-  ticker: $<HTMLDivElement>("ticker"),
-  stepDetail: $<HTMLElement>("step-detail"),
+  answer: $<HTMLDivElement>("answer"),
+  chatError: $<HTMLParagraphElement>("chat-error"),
+  chatNotice: $<HTMLParagraphElement>("chat-notice"),
+  status: $<HTMLSpanElement>("status"),
+  reasoningIcon: $<HTMLSpanElement>("reasoning-icon"),
+  statsOpen: $<HTMLButtonElement>("stats-open"),
+  statsDialog: $<HTMLDialogElement>("stats-dialog"),
+  statsBody: $<HTMLDivElement>("stats-body"),
+  statsSession: $<HTMLSpanElement>("stats-session"),
+  composer: $<HTMLFormElement>("composer"),
+  input: $<HTMLTextAreaElement>("composer-input"),
+  inputLabel: $<HTMLLabelElement>("composer-label"),
+  send: $<HTMLButtonElement>("send"),
+  composerSource: $<HTMLSpanElement>("composer-source"),
+  speedField: $<HTMLSpanElement>("speed-field"),
+  speed: $<HTMLSelectElement>("speed"),
+  hint: $<HTMLSpanElement>("composer-hint"),
+  announcer: $<HTMLDivElement>("announcer"),
+  toast: $<HTMLDivElement>("toast"),
 };
 
-const map = new ConceptMap(document.getElementById("map") as unknown as SVGSVGElement);
-const chart = new TimelineChart(document.getElementById("chart") as unknown as SVGSVGElement, $("tip"), $("legend"));
-const steps = new StepGraph(document.getElementById("steps") as unknown as SVGSVGElement, $("steps-wrap"));
-const text = new TextPane($<HTMLDivElement>("stream"));
 const state = new ViewState();
+const text = new TextPane($<HTMLDivElement>("stream"), els.chatScroll);
+const panels = new Set<Panel>();
 
 // Session state
 let ws: WebSocket | null = null;
 let reasoning = "";
 let answer = "";
 let language: string | null = null;
+let traceTitle = ""; // what the statistics popup calls the current trace
 let live = false;
 let textQueued = false;
+// A session is running from the moment it is sent until it ends, fails or is
+// stopped; meanwhile the send button is a stop button. The token tells a
+// request that comes back after a stop (or a newer send) that it is stale.
+let running = false;
+let token = 0;
 
-// Selection: a clicked concept, topic or step stays selected; hovering a bubble previews it.
-type Selection = { kind: "node"; id: string } | { kind: "topic"; id: string } | { kind: "step"; id: number } | null;
+// Selection: a clicked concept, topic or step stays selected; hovering (or
+// focusing) a bubble previews it.
 let selected: Selection = null;
 let hovered: string | null = null;
 
-type StatusState = "idle" | "live" | "done" | "error";
+type StatusState = "idle" | "live" | "done" | "stopped" | "error";
 function setStatus(s: StatusState, label: string): void {
   els.status.dataset.state = s;
   els.status.textContent = label;
+}
+
+function setRunning(on: boolean): void {
+  running = on;
+  els.send.classList.toggle("stop", on);
+  const label = on ? "Detener" : "Enviar";
+  els.send.setAttribute("aria-label", label);
+  els.send.title = label;
+  els.modeBadge.classList.toggle("running", on);
 }
 
 // ---------------------------------------------------------------- word positions
@@ -116,6 +139,26 @@ function select(next: Selection, scroll: boolean): void {
   refreshActive();
 }
 
+/** The selection as every view needs it. */
+function active(): Active {
+  const selectedNode = selected?.kind === "node" ? selected.id : null;
+  const topic = selected?.kind === "topic" ? selected.id : null;
+  const step = selected?.kind === "step" ? selected.id : null;
+  const node = hovered ?? selectedNode;
+
+  const segs = segmenting();
+  let chart: TimelineSelection = null;
+  if (topic) chart = { kind: "topic", id: topic };
+  if (step !== null) {
+    const i = state.orderedSteps().findIndex((s) => s.segment_id === step);
+    chart = { kind: "step", start: segs.starts[i], end: segs.starts[i + 1] ?? segs.current, slot: state.slotOf(state.steps.get(step)?.topic_id) };
+  }
+  if (node) {
+    chart = { kind: "node", words: state.nodeSpans(node).map(([a]) => wordAt(a, segs)), slot: state.nodes.get(node)!.colour_slot };
+  }
+  return { node, neighbours: node ? state.neighbours(node) : new Set(), selectedNode, hovered, topic, step, chart };
+}
+
 function refreshActive(): void {
   // Drop a selection whose item disappeared (e.g. a provisional segment merged).
   if (selected?.kind === "node" && !state.nodes.has(selected.id)) selected = null;
@@ -123,166 +166,80 @@ function refreshActive(): void {
   if (selected?.kind === "step" && !state.steps.has(selected.id)) selected = null;
   if (hovered && !state.nodes.has(hovered)) hovered = null;
 
-  const selectedNode = selected?.kind === "node" ? selected.id : null;
-  const topic = selected?.kind === "topic" ? selected.id : null;
-  const step = selected?.kind === "step" ? selected.id : null;
-  const activeNode = hovered ?? selectedNode;
-
-  map.setActive(activeNode, activeNode ? state.neighbours(activeNode) : new Set(), selectedNode, hovered ? null : topic);
+  const a = active();
   const segments = new Set<number>();
-  if (step !== null) segments.add(step);
-  if (topic) for (const p of state.paragraphs.values()) if (p.topic_id === topic) segments.add(p.segment_id);
-  text.setActive(activeNode, segments);
-  steps.setActive(step, topic);
-
-  const segs = segmenting();
-  let chartSel: TimelineSelection = null;
-  if (topic) chartSel = { kind: "topic", id: topic };
-  if (step !== null) {
-    const i = state.orderedSteps().findIndex((s) => s.segment_id === step);
-    chartSel = { kind: "step", start: segs.starts[i], end: segs.starts[i + 1] ?? segs.current, slot: state.slotOf(state.steps.get(step)?.topic_id) };
-  }
-  if (activeNode) {
-    const node = state.nodes.get(activeNode)!;
-    chartSel = { kind: "node", words: state.nodeSpans(activeNode).map(([a]) => wordAt(a, segs)), slot: node.colour_slot };
-  }
-  chart.select(chartSel);
-  renderInfo(activeNode, topic);
-  renderStepDetail(step);
+  if (a.step !== null) segments.add(a.step);
+  if (a.topic) for (const p of state.paragraphs.values()) if (p.topic_id === a.topic) segments.add(p.segment_id);
+  text.setActive(a.node, segments);
+  for (const p of panels) p.setActive(a);
 }
 
-map.onSelect = (id) => select({ kind: "node", id }, true);
-map.onHover = (id) => {
-  hovered = id;
-  refreshActive();
-};
 text.onSelect = (id) => select({ kind: "node", id }, false);
-chart.onSelectTopic = (id) => select(id ? { kind: "topic", id } : null, true);
-steps.onSelect = (id) => select({ kind: "step", id }, true);
 
-// ---------------------------------------------------------------- panels
-
-function tramosOf(spans: [number, number][]): number[] {
-  const paragraphs = state.orderedParagraphs();
-  return [...new Set(spans.map(([a]) => paragraphs.findIndex((p) => p.start <= a && a < p.end) + 1))].filter((n) => n > 0);
-}
-
-function renderInfo(nodeId: string | null, topicId: string | null): void {
-  const node = nodeId ? state.nodes.get(nodeId) : undefined;
-  const topic = topicId ? state.topics.get(topicId) : undefined;
-  if (node) {
-    const spans = state.nodeSpans(node.id);
-    const forms = [...new Set(spans.map(([a, b]) => reasoning.slice(a, b)))];
-    const tramos = tramosOf(spans);
-    const co = [...state.neighbours(node.id)].map((n) => state.nodes.get(n)?.label ?? n);
-    const topicName = node.topic_id ? state.topics.get(node.topic_id)?.name : null;
-    els.mapInfo.innerHTML =
-      `<span class="sw" style="--c: var(--c${node.colour_slot % 6})">${esc(node.label)}</span> · ` +
-      `<b>${node.count}</b> ${node.count === 1 ? "mención" : "menciones"}` +
-      (tramos.length ? ` en ${tramos.length === 1 ? "el tramo" : "los tramos"} ${tramos.join(", ")}` : "") +
-      (topicName ? ` · tema «${esc(topicName)}»` : "") +
-      (forms.length ? ` · formas: ${forms.map((f) => `«${esc(f)}»`).join(", ")}` : "") +
-      (co.length ? ` · coaparece con ${co.map(esc).join(", ")}` : "");
-    return;
-  }
-  if (topic) {
-    const concepts = [...state.nodes.values()].filter((n) => n.topic_id === topic.id).map((n) => n.label);
-    const tramos = state.orderedParagraphs().flatMap((p, i) => (p.topic_id === topic.id ? [i + 1] : []));
-    els.mapInfo.innerHTML =
-      `Tema <span class="sw" style="--c: var(--c${topic.colour_slot % 6})">${esc(topic.name)}</span>` +
-      (concepts.length ? ` · conceptos: ${concepts.map(esc).join(", ")}` : "") +
-      (tramos.length ? ` · domina ${tramos.length === 1 ? "el tramo" : "los tramos"} ${tramos.join(", ")}` : "");
-    return;
-  }
-  els.mapInfo.textContent = "Selecciona un término para ver sus menciones.";
-}
-
-function renderStepDetail(segmentId: number | null): void {
-  const ordered = state.orderedSteps();
-  const i = ordered.findIndex((s) => s.segment_id === segmentId);
-  if (i < 0) {
-    els.stepDetail.innerHTML = `<p class="hint">Haz clic en un paso para ver su tipo, el marcador que lo abrió y sus términos con más peso.</p>`;
-    return;
-  }
-  const step = ordered[i];
-  const p = state.paragraphs.get(step.segment_id);
-  const topic = step.topic_id ? state.topics.get(step.topic_id) : undefined;
-  const slot = state.slotOf(step.topic_id);
-  const keywords = p?.label ? p.label.split(" · ") : [];
-  const back = step.arcs_back_to.map((seg) => ordered.findIndex((s) => s.segment_id === seg) + 1).filter((n) => n > 0);
-  const excerpt = p ? reasoning.slice(p.start, Math.min(p.end, p.start + 240)) + (p.end - p.start > 240 ? "…" : "") : "";
-  els.stepDetail.style.setProperty("--c", `var(--c${slot % 6})`);
-  els.stepDetail.innerHTML =
-    `<div class="sd-head"><div class="sd-num">${i + 1}</div><div><h3>${esc(cap(stepTypeEs(step.step_type)))}</h3>` +
-    `<p>tramo ${i + 1} · ${step.words} palabras${p?.provisional ? " · provisional" : ""}</p></div>` +
-    (topic ? `<span class="sd-tag">${esc(topic.name)}</span>` : "") +
-    `</div><div class="sd-grid"><div>` +
-    `<h4>Marcador</h4><p class="sd-text">${step.marker ? `<span class="mkq">«${esc(step.marker)}»</span>` : "Ninguno: el corte viene del cambio de vocabulario."}</p>` +
-    (back.length ? `<h4>Retoma</h4><p class="sd-text">Vuelve al tema del paso ${back.join(", ")}.</p>` : "") +
-    `<h4>Palabras clave (TF-IDF del tramo)</h4><p class="sd-text">${keywords.map(esc).join(" · ") || "—"}</p>` +
-    `</div><div><h4>Texto</h4><p class="sd-text">${esc(excerpt)}</p></div></div>`;
-}
-
-const POS_ES: Record<string, string> = {
-  VERB: "verbo", AUX: "auxiliar", ADV: "adverbio", ADP: "preposición", DET: "determinante",
-  PRON: "pronombre", CCONJ: "conjunción", SCONJ: "conjunción", INTJ: "interjección", PART: "partícula",
+const session: Session = {
+  state,
+  text: () => reasoning,
+  live: () => live,
+  segmenting,
+  select,
+  hover: (id) => {
+    hovered = id;
+    refreshActive();
+  },
 };
 
-function tickerOutcome(item: TickerItem): string {
-  switch (item.outcome) {
-    case "term": {
-      const node = item.node_id ? state.nodes.get(item.node_id) : undefined;
-      return node ? `<em>concepto «${esc(node.label)}»</em>` : "término";
-    }
-    case "stopword": return "descartada (stopword)";
-    case "filler": return "descartada (relleno)";
-    case "pos": return `descartada (${esc(POS_ES[item.pos ?? ""] ?? item.pos ?? "categoría")})`;
-    case "number": return "descartada (número)";
-    default: return "descartada";
-  }
+/** A window opened: build its panel from the session so far. */
+function openPanel(kind: VizKind): { el: HTMLElement; destroy(): void } {
+  const panel = createPanel(kind, session);
+  panels.add(panel);
+  panel.setActive(active());
+  return {
+    el: panel.el,
+    destroy: () => {
+      panels.delete(panel);
+      panel.destroy();
+    },
+  };
 }
 
-function renderTicker(): void {
-  const rows = state.ticker.slice(-3).reverse();
-  els.ticker.innerHTML = rows.length
-    ? rows
-        .map((t) => {
-          const via = t.lemma !== t.form.toLowerCase() ? ` → ${esc(t.lemma)}` : "";
-          return `<div>«${esc(t.form)}»${via} → ${tickerOutcome(t)}</div>`;
-        })
-        .join("")
-    : "<div>Esperando texto…</div>";
+// ---------------------------------------------------------------- statistics popup
+
+// The popup redraws only while it is open; opening it draws the current state.
+function renderStats(): void {
+  if (!els.statsDialog.open) return;
+  els.statsBody.innerHTML = statsHtml(state, reasoning);
+  const parts = [traceTitle, language ? `idioma ${language}` : ""].filter(Boolean);
+  els.statsSession.textContent = parts.length ? parts.join(" · ") : "Ninguna traza todavía.";
 }
 
-function renderStats(stats: Stats): void {
-  const parts = [
-    `palabras ${stats.words}`,
-    `oraciones ${stats.sentences}`,
-    `tramos ${stats.segments}`,
-    `temas ${state.topics.size}`,
-    stats.lexical_diversity != null ? `diversidad léxica ${stats.lexical_diversity.toFixed(2)}` : null,
-    stats.hedges_per_100w != null ? `dudas ${stats.hedges_per_100w.toFixed(1)}/100 pal.` : null,
-    language ? `idioma ${language}` : null,
-  ];
-  els.stats.textContent = parts.filter(Boolean).join(" · ");
-}
+els.statsOpen.addEventListener("click", () => {
+  els.statsDialog.showModal();
+  renderStats();
+});
+els.statsDialog.querySelector(".stats-close")!.addEventListener("click", () => els.statsDialog.close());
+// A click on the backdrop (the dialog element itself, outside its inner box) closes it.
+els.statsDialog.addEventListener("click", (e) => {
+  if (e.target === els.statsDialog) els.statsDialog.close();
+});
+// The browser returns focus to the opener itself; "close" arrives a task later,
+// so only step in when focus was lost (and never take it from where it went since).
+els.statsDialog.addEventListener("close", () => {
+  if (!document.activeElement || document.activeElement === document.body) els.statsOpen.focus();
+});
 
 // ---------------------------------------------------------------- messages
 
 function applyView(view: ViewUpdate): void {
-  if (view.kind === "snapshot") map.reset();
   state.apply(view);
-  map.update(view.nodes, view.removed.nodes, view.edges, view.removed.edges);
+  for (const p of panels) p.sync(view);
 
-  const ordered = state.orderedSteps();
   const blocks: Block[] = state.orderedParagraphs().map((p, i) => {
     const step = state.steps.get(p.segment_id);
-    const kind = stepTypeEs(step?.step_type);
     return {
       segment_id: p.segment_id,
       start: p.start,
       end: p.end,
-      label: `Tramo ${i + 1} · ${kind}${p.label ? ` · ${p.label}` : ""}`,
+      label: `Tramo ${i + 1} · ${stepTypeEs(step?.step_type)}`,
       slot: state.slotOf(p.topic_id),
       provisional: p.provisional,
     };
@@ -291,19 +248,16 @@ function applyView(view: ViewUpdate): void {
   for (const h of state.highlights.values()) {
     if (h.kind === "node") for (const [start, end] of h.spans) marks.push({ start, end, id: h.id });
   }
-  for (const s of ordered) {
+  for (const s of state.orderedSteps()) {
     if (s.marker_span) marks.push({ start: s.marker_span[0], end: s.marker_span[1], id: `mk:${s.segment_id}`, marker: true });
   }
   text.setView(reasoning, state.committedUpto, blocks, marks);
-  chart.update(state.timeline, state.orderedTopics(), segmenting());
-  steps.update(ordered, state.paragraphs, state.topics, live && !view.final);
 
   if (state.stats) {
     const shares = Object.entries(state.stats.extra).filter(([k]) => k.startsWith("share_"));
     if (shares.length) language = shares.sort((a, b) => b[1] - a[1])[0][0].slice(6);
-    renderStats(state.stats);
   }
-  renderTicker();
+  renderStats();
   refreshActive();
 }
 
@@ -312,18 +266,21 @@ function scheduleText(): void {
   textQueued = true;
   requestAnimationFrame(() => {
     textQueued = false;
+    const follow = text.atBottom();
     text.setText(reasoning);
     els.answer.innerHTML = renderAnswer(answer);
     els.answerBlock.hidden = answer === "";
+    if (follow) els.chatScroll.scrollTop = els.chatScroll.scrollHeight;
   });
 }
 
 function handle(msg: ServerMessage): void {
   switch (msg.type) {
     case "hello":
-      els.title.textContent = msg.title ?? "Sesión";
-      els.prompt.textContent = msg.prompt ?? "";
-      els.prompt.hidden = !msg.prompt;
+      // A recorded trace carries its original prompt: show that one.
+      if (msg.prompt) showUserMessage(msg.prompt);
+      if (msg.title) traceTitle = msg.title;
+      renderStats();
       break;
     case "text":
       if (msg.chunk.channel === "reasoning") reasoning += msg.chunk.text;
@@ -336,20 +293,56 @@ function handle(msg: ServerMessage): void {
     case "mining":
       break; // debug channel, not shown yet
     case "end":
-      live = false;
-      text.setStreaming(false);
-      steps.update(state.orderedSteps(), state.paragraphs, state.topics, false);
-      refreshActive();
+      finish();
       setStatus("done", "Terminado");
       break;
     case "error":
+      finish();
       setStatus("error", "Error");
-      els.title.textContent = msg.message;
+      showError(msg.message);
       break;
   }
 }
 
-// ---------------------------------------------------------------- session
+// ---------------------------------------------------------------- chat
+
+type Mode = "replay" | "paste" | "live";
+const modeOf = (source: string): Mode => (source === "paste" ? "paste" : source === "replay" ? "replay" : "live");
+
+function showUserMessage(s: string): void {
+  els.prompt.textContent = s;
+  els.userMsg.hidden = !s;
+}
+
+function showError(message: string): void {
+  els.chatError.textContent = message;
+  els.chatError.hidden = false;
+  els.chatEmpty.hidden = true;
+}
+
+/** The stream is over (ended, failed or stopped): settle every view on what arrived. */
+function finish(): void {
+  live = false;
+  setRunning(false);
+  text.setStreaming(false);
+  for (const p of panels) p.refresh();
+  refreshActive();
+  renderStats();
+}
+
+/** Abort the running session. Closing the socket stops a replay at the
+ *  server and cancels a live model's request; what arrived so far stays. */
+function stop(): void {
+  if (!running) return;
+  token++;
+  const socket = ws;
+  ws = null;
+  socket?.close(1000, "stopped by the user");
+  finish();
+  setStatus("stopped", "Detenido");
+  els.chatNotice.textContent = reasoning || answer ? "Detenido por el usuario: el análisis cubre el texto recibido hasta aquí." : "Detenido por el usuario antes de recibir texto.";
+  els.chatNotice.hidden = false;
+}
 
 function resetSession(): void {
   ws?.close();
@@ -360,13 +353,15 @@ function resetSession(): void {
   selected = null;
   hovered = null;
   state.reset();
-  map.reset();
-  chart.reset();
-  steps.reset();
+  for (const p of panels) p.reset();
   text.reset();
-  els.stats.textContent = "";
+  els.answer.textContent = "";
   els.answerBlock.hidden = true;
-  renderTicker();
+  els.chatError.hidden = true;
+  els.chatNotice.hidden = true;
+  showUserMessage("");
+  traceTitle = "";
+  renderStats();
   refreshActive();
 }
 
@@ -382,20 +377,41 @@ function sessionConfig(): SessionConfig | string {
     seed: 0,
   };
   if (source === "replay") config.sample = els.sample.value;
-  if (source === "paste") config.text = els.pasteText.value;
-  if (source === "deepseek" || source === "ollama") config.prompt = els.promptInput.value;
+  if (source === "paste") config.text = els.input.value;
+  if (source === "deepseek" || source === "ollama") config.prompt = els.input.value;
   const input = config.sample ?? config.text ?? config.prompt ?? "";
-  if (!input.trim()) return source === "paste" ? "Pega primero un texto." : "Escribe primero una pregunta.";
+  if (!input.trim()) return source === "paste" ? "Pega primero un texto." : source === "replay" ? "Elige primero una traza." : "Escribe primero una pregunta.";
   return config;
 }
 
 async function start(): Promise<void> {
   const config = sessionConfig();
   if (typeof config === "string") {
-    els.title.textContent = config;
+    setHint(config, true);
+    els.input.focus();
     return;
   }
   resetSession();
+  const mine = ++token;
+  setRunning(true);
+  const mode = modeOf(config.source);
+  // One prompt, one session: sending again replaces the conversation.
+  els.chatEmpty.hidden = true;
+  if (mode === "paste") {
+    const words = (config.text!.match(/\S+/g) ?? []).length;
+    showUserMessage(`Texto pegado · ${words.toLocaleString("es")} palabras`);
+  } else showUserMessage(mode === "replay" ? (currentSample()?.prompt ?? "") : config.prompt!);
+  const speed = els.speed.selectedOptions[0]?.text ?? "";
+  els.modeBadge.textContent =
+    mode === "live" ? sourceLabel(config.source) : `${mode === "replay" ? "traza grabada" : "texto pegado"} · ${speed}`;
+  els.modeBadge.dataset.mode = mode;
+  // The reasoning is signed by its author: the model's logo for DeepSeek, a sparkle otherwise.
+  els.reasoningIcon.innerHTML = config.source === "deepseek" ? sourceIcon("deepseek", 22) : SPARKLE;
+  traceTitle = mode === "replay" ? (currentSample()?.title ?? "Traza grabada") : mode === "paste" ? "Texto pegado" : sourceLabel(config.source);
+  els.reasoningBlock.hidden = false;
+  setStatus("idle", "Conectando…");
+  if (mode === "live") els.input.value = ""; // the question now shows as a message
+  autoGrow();
   try {
     const res = await fetch(`${BACKEND}/sessions`, {
       method: "POST",
@@ -407,27 +423,118 @@ async function start(): Promise<void> {
       throw new Error(typeof detail === "string" ? detail : `HTTP ${res.status}`);
     }
     const { session_id } = (await res.json()) as SessionCreated;
+    if (mine !== token) return; // stopped (or replaced) while the session was being created
     const wsBase = BACKEND ? BACKEND.replace(/^http/, "ws") : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}`;
     const socket = new WebSocket(`${wsBase}/sessions/${session_id}`);
     ws = socket;
     socket.onopen = () => {
       live = true;
       text.setStreaming(true);
-      setStatus("live", "En directo");
+      // Recorded and pasted text is a replay; only a model generates live.
+      setStatus("live", mode === "live" ? "En directo" : "Reproduciendo");
     };
-    socket.onmessage = (e) => handle(JSON.parse(e.data as string) as ServerMessage);
+    socket.onmessage = (e) => {
+      if (ws === socket) handle(JSON.parse(e.data as string) as ServerMessage);
+    };
     socket.onclose = () => {
-      if (ws === socket && els.status.dataset.state === "live") setStatus("error", "Conexión cerrada");
+      if (ws !== socket || !running) return;
+      finish();
+      setStatus("error", "Conexión cerrada");
     };
   } catch (err) {
+    if (mine !== token) return;
+    setRunning(false);
     setStatus("error", "No iniciada");
-    els.title.textContent = `No se pudo iniciar la sesión: ${(err as Error).message}`;
+    showError(`No se pudo iniciar la sesión: ${(err as Error).message}`);
   }
 }
 
+// ---------------------------------------------------------------- composer
+
+// What the user typed for each editable mode, kept when switching sources.
+const drafts: Record<"paste" | "live", string> = { paste: "", live: "" };
+let shownMode: Mode | null = null;
+let samples: SampleInfo[] = [];
+let sourceInfo: SourceInfo[] = [];
+
+function currentSample(): SampleInfo | undefined {
+  return samples.find((s) => s.id === els.sample.value);
+}
+
+function sourceLabel(id: string): string {
+  return sourceInfo.find((s) => s.id === id)?.label ?? els.source.selectedOptions[0]?.text ?? id;
+}
+
+const HINTS: Record<Mode, string> = {
+  replay: "Enviar para reproducir la traza",
+  paste: "Ctrl+Intro para reproducir el texto",
+  live: "Intro para enviar · Mayús+Intro, nueva línea",
+};
+
+function setHint(message: string, error = false): void {
+  els.hint.textContent = message;
+  els.hint.classList.toggle("error", error);
+}
+
+/** Set the composer up for the chosen source: a recorded trace's prompt, a box
+ *  to paste reasoning into, or a question for a live model. */
+function updateComposer(): void {
+  const source = els.source.value;
+  const mode = modeOf(source);
+  if (shownMode === "paste" || shownMode === "live") drafts[shownMode] = els.input.value;
+  els.sampleField.hidden = mode !== "replay";
+  els.speedField.hidden = mode === "live"; // a live model sets its own pace
+  els.input.readOnly = mode === "replay";
+  els.input.maxLength = mode === "paste" ? 100_000 : 4_000;
+  els.input.value = mode === "replay" ? (currentSample()?.prompt || "") : drafts[mode];
+  els.input.placeholder = {
+    replay: samples.length ? "Esta traza no incluye su pregunta original." : "Elige una traza.",
+    paste: "Pega un razonamiento (por ejemplo, el texto de <think>…</think> de un modelo). Se reproduce como si se estuviera escribiendo.",
+    live: "Pregunta al modelo; verás su razonamiento mientras lo escribe.",
+  }[mode];
+  els.inputLabel.textContent = { replay: "Pregunta de la traza", paste: "Texto para reproducir", live: "Pregunta para el modelo" }[mode];
+  els.composerSource.innerHTML = `${sourceIcon(source, 16)}<span>${esc(sourceLabel(source))}</span>`;
+  // The source's note (e.g. that live questions go to a third-party API) is a tooltip, not a line of text.
+  els.composerSource.title = sourceInfo.find((s) => s.id === source)?.note ?? "";
+  setHint(HINTS[mode]);
+  shownMode = mode;
+  autoGrow();
+}
+
+function autoGrow(): void {
+  const max = shownMode === "paste" ? 220 : 140;
+  els.input.style.height = "auto";
+  els.input.style.height = `${Math.min(max, els.input.scrollHeight)}px`;
+}
+
+els.composer.addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (running) stop();
+  else void start();
+});
+els.input.addEventListener("input", () => {
+  autoGrow();
+  if (els.hint.classList.contains("error") && shownMode) setHint(HINTS[shownMode]);
+});
+els.input.addEventListener("keydown", (e) => {
+  // While a session runs, Enter does not send (nor stop): only the button stops.
+  if (e.key !== "Enter" || e.isComposing || running) return;
+  // Pasted text has line breaks of its own, so it needs Ctrl+Enter.
+  const send = shownMode === "paste" ? e.ctrlKey || e.metaKey : !e.shiftKey;
+  if (!send) return;
+  e.preventDefault();
+  els.composer.requestSubmit();
+});
+els.source.addEventListener("change", updateComposer);
+els.sample.addEventListener("change", updateComposer);
+
 // ---------------------------------------------------------------- sources
 
-let sourceInfo: SourceInfo[] = [];
+const sourceMenu = new SourceMenu($("source-menu"), els.source, "source-label");
+
+const SPARKLE =
+  `<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M10 3.5l1.6 4.6a3 3 0 0 0 1.8 1.8L18 11.5l-4.6 1.6a3 3 0 0 0-1.8 1.8L10 19.5l-1.6-4.6a3 3 0 0 0-1.8-1.8L2 11.5l4.6-1.6a3 3 0 0 0 1.8-1.8z" fill="currentColor"/>` +
+  `<path d="M18.5 2l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7zM19 15.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor"/></svg>`;
 
 async function loadSources(): Promise<void> {
   try {
@@ -448,67 +555,66 @@ async function loadSources(): Promise<void> {
   );
   if (sourceInfo.some((s) => s.id === chosen && s.available)) els.source.value = chosen;
   els.source.dataset.loaded = "true";
-  showSourceInputs();
+  sourceMenu.refresh();
+  updateComposer();
 }
 
-/** Show the inputs the chosen source needs: a sample, a text box or a question. */
-function showSourceInputs(): void {
-  const source = els.source.value;
-  const live = source === "deepseek" || source === "ollama";
-  els.sampleField.hidden = source !== "replay";
-  els.speedField.hidden = live; // a live model sets its own pace
-  els.inputPanel.hidden = source === "replay";
-  els.pasteBox.hidden = source !== "paste";
-  els.promptBox.hidden = !live;
-  els.sourceNote.textContent = sourceInfo.find((s) => s.id === source)?.note ?? "";
-  els.start.textContent = live ? "Preguntar" : "Reproducir";
-}
+// The trace selected on load (Joe, 2026-11-02): «Sum of the first 100 odd numbers».
+const DEFAULT_SAMPLE = "odd-sum-en";
 
 async function loadSamples(): Promise<void> {
   try {
     const res = await fetch(`${BACKEND}/datasets`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const samples = (await res.json()) as SampleInfo[];
+    samples = (await res.json()) as SampleInfo[];
     els.sample.replaceChildren(...samples.map((s) => new Option(`${s.title} (${s.language}, ${s.words} palabras)`, s.id)));
+    if (samples.some((s) => s.id === DEFAULT_SAMPLE)) els.sample.value = DEFAULT_SAMPLE;
+    updateComposer();
   } catch {
     setStatus("error", "Backend no disponible");
-    els.start.disabled = true;
+    showError("No se puede conectar con el servidor de análisis. Comprueba que el backend está en marcha.");
+    els.send.disabled = true;
   }
 }
 
-// ---------------------------------------------------------------- tabs and theme
+// ---------------------------------------------------------------- dashboard, theme
 
-function initTabs(): void {
-  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
-  for (const tab of tabs) {
-    tab.addEventListener("click", () => {
-      for (const t of tabs) {
-        const on = t === tab;
-        t.setAttribute("aria-selected", String(on));
-        $(t.getAttribute("aria-controls")!).hidden = !on;
-      }
-      // The step graph sizes itself to its container, which has no width while hidden.
-      if (tab.dataset.view === "pasos") {
-        steps.update(state.orderedSteps(), state.paragraphs, state.topics, live);
-        refreshActive();
-      }
-    });
-  }
+let toastTimer = 0;
+function notify(message: string, visible = false): void {
+  // Re-set the text so a repeated message is announced again.
+  els.announcer.textContent = "";
+  requestAnimationFrame(() => (els.announcer.textContent = message));
+  if (!visible) return;
+  els.toast.textContent = message;
+  els.toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => (els.toast.hidden = true), 4500);
 }
+
+const picker = new Picker($<HTMLDialogElement>("picker"));
+const dashboard: Dashboard = new Dashboard({
+  root: $("pages"),
+  pager: $("pager"),
+  pagerAdd: $<HTMLButtonElement>("pager-add"),
+  chat: $("chat-win"),
+  chatToggle: $<HTMLButtonElement>("chat-toggle"),
+  createPanel: openPanel,
+  notify,
+  openPicker: (page, cell, origin) =>
+    picker.open({ present: dashboard.kindsOn(page), origin, onSelect: (kind) => dashboard.add(page, cell, kind) }),
+});
 
 function initTheme(): void {
   let saved: string | null = null;
   try {
     saved = localStorage.getItem("medra-theme");
   } catch {
-    /* storage unavailable: follow the system theme */
+    /* storage unavailable: use the default */
   }
-  if (saved) document.documentElement.dataset.theme = saved;
+  // Light unless the user picked dark before (the system setting is not followed).
+  document.documentElement.dataset.theme = saved === "dark" ? "dark" : "light";
   els.theme.addEventListener("click", () => {
-    const dark =
-      document.documentElement.dataset.theme === "dark" ||
-      (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
-    const next = dark ? "light" : "dark";
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     try {
       localStorage.setItem("medra-theme", next);
@@ -523,22 +629,8 @@ function renderAnswer(s: string): string {
   return esc(s).replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>");
 }
 
-function cap(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function esc(s: string): string {
-  return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-}
-
-els.start.addEventListener("click", () => void start());
-els.source.addEventListener("change", showSourceInputs);
-els.promptInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") void start();
-});
-initTabs();
 initTheme();
-renderTicker();
-showSourceInputs();
+els.reasoningIcon.innerHTML = SPARKLE;
+updateComposer();
 void loadSamples();
 void loadSources();

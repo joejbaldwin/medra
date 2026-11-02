@@ -30,7 +30,9 @@ class Trace:
 
     def info(self) -> SampleInfo:
         words = len(re.findall(r"\S+", self.reasoning))
-        return SampleInfo(id=self.id, title=self.title, language=self.language, words=words, origin=self.origin)
+        return SampleInfo(
+            id=self.id, title=self.title, language=self.language, words=words, origin=self.origin, prompt=self.prompt
+        )
 
 
 def load_trace(sample: str) -> Trace:

@@ -4,8 +4,10 @@
 import * as d3 from "d3";
 import type { Edge, Node } from "./contracts";
 
-const W = 800;
-const H = 480;
+// The drawing's logical size is at least this big: a small window shows the
+// map scaled down rather than cramming the bubbles (their radii are in px).
+const MIN_W = 640;
+const MIN_H = 400;
 const PALETTE = 6;
 // Spacing: empty space kept around each bubble, and extra length of an edge
 // beyond the two radii, so the lines between bubbles stay visible.
@@ -53,9 +55,14 @@ export class ConceptMap {
   private view = { x: 0, y: 0, k: 1 };
   // Runs while any radius or merge is still easing.
   private timer: d3.Timer | null = null;
+  // Logical size (the viewBox), set from the window's size by resize().
+  private w = 800;
+  private h = 480;
+  private svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
   constructor(svgEl: SVGSVGElement) {
-    const svg = d3.select(svgEl).attr("viewBox", `0 0 ${W} ${H}`);
+    const svg = d3.select(svgEl).attr("viewBox", `0 0 ${this.w} ${this.h}`);
+    this.svg = svg;
     this.content = svg.append("g");
     this.edgeLayer = this.content.append("g");
     this.nodeLayer = this.content.append("g");
@@ -71,9 +78,41 @@ export class ConceptMap {
       // position), so topics form groups. Targets are re-read whenever
       // sim.nodes() is called, i.e. on every update.
       // Weak, so the repulsion can spread a topic's bubbles apart.
-      .force("x", d3.forceX<Bubble>((d) => (d.node.seed_xy?.[0] ?? 0.5) * W).strength(0.03))
-      .force("y", d3.forceY<Bubble>((d) => (d.node.seed_xy?.[1] ?? 0.5) * H).strength(0.05))
+      .force("x", d3.forceX<Bubble>((d) => (d.node.seed_xy?.[0] ?? 0.5) * this.w).strength(0.03))
+      .force("y", d3.forceY<Bubble>((d) => (d.node.seed_xy?.[1] ?? 0.5) * this.h).strength(0.05))
       .on("tick", () => this.draw());
+  }
+
+  /** Match the drawing to its window (CSS pixels). Ignored while hidden. */
+  resize(width: number, height: number): void {
+    if (width < 1 || height < 1) return;
+    const f = Math.max(1, MIN_W / width, MIN_H / height);
+    const w = Math.round(width * f);
+    const h = Math.round(height * f);
+    if (w === this.w && h === this.h) return;
+    // Keep the bubbles where they were relative to the centre.
+    const dx = (w - this.w) / 2;
+    const dy = (h - this.h) / 2;
+    for (const b of this.bubbles.values()) {
+      b.x = (b.x ?? 0) + dx;
+      b.y = (b.y ?? 0) + dy;
+    }
+    this.view.x += dx;
+    this.view.y += dy;
+    this.w = w;
+    this.h = h;
+    this.svg.attr("viewBox", `0 0 ${w} ${h}`);
+    // forceX and forceY cache their targets: setting the accessor re-reads them.
+    this.sim.force<d3.ForceX<Bubble>>("x")!.x((d) => (d.node.seed_xy?.[0] ?? 0.5) * this.w);
+    this.sim.force<d3.ForceY<Bubble>>("y")!.y((d) => (d.node.seed_xy?.[1] ?? 0.5) * this.h);
+    this.sim.alpha(Math.max(this.sim.alpha(), 0.2)).restart();
+  }
+
+  /** Stop the physics and timers (the window was closed). */
+  destroy(): void {
+    this.timer?.stop();
+    this.timer = null;
+    this.sim.stop();
   }
 
   reset(): void {
@@ -114,8 +153,8 @@ export class ConceptMap {
         const from = before.find((b) => related(b.id, node.id));
         const [sx, sy] = node.seed_xy ?? [0.5, 0.5];
         // Inside the visible area, or fitView would snap it there in one frame.
-        const x = from ? from.x : this.inView(sx * W + (Math.random() - 0.5) * 80, "x", node.radius);
-        const y = from ? from.y : this.inView(sy * H + (Math.random() - 0.5) * 80, "y", node.radius);
+        const x = from ? from.x : this.inView(sx * this.w + (Math.random() - 0.5) * 80, "x", node.radius);
+        const y = from ? from.y : this.inView(sy * this.h + (Math.random() - 0.5) * 80, "y", node.radius);
         this.bubbles.set(node.id, { id: node.id, node, r: from ? from.r * 0.6 : 0, leaving: null, into: null, x, y });
       }
     }
@@ -190,6 +229,9 @@ export class ConceptMap {
           g.on("click", (_, d) => this.onSelect(d.id))
             .on("mouseenter", (_, d) => this.onHover(d.id))
             .on("mouseleave", () => this.onHover(null))
+            // Keyboard focus previews a bubble the way hovering does.
+            .on("focus", (_, d) => this.onHover(d.id))
+            .on("blur", () => this.onHover(null))
             .on("keydown", (e: KeyboardEvent, d) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
@@ -303,8 +345,9 @@ export class ConceptMap {
       x1 = Math.max(x1, (b.x ?? 0) + b.r);
       y1 = Math.max(y1, (b.y ?? 0) + b.r);
     }
-    const k = Math.max(MIN_SCALE, Math.min(1, (W - 2 * MARGIN) / (x1 - x0), (H - 2 * MARGIN) / (y1 - y0)));
-    const target = { k, x: W / 2 - k * (x0 + x1) / 2, y: H / 2 - k * (y0 + y1) / 2 };
+    const { w, h } = this;
+    const k = Math.max(MIN_SCALE, Math.min(1, (w - 2 * MARGIN) / (x1 - x0), (h - 2 * MARGIN) / (y1 - y0)));
+    const target = { k, x: w / 2 - k * (x0 + x1) / 2, y: h / 2 - k * (y0 + y1) / 2 };
     const ease = 0.08;
     this.view.k += (target.k - this.view.k) * ease;
     this.view.x += (target.x - this.view.x) * ease;
@@ -312,15 +355,15 @@ export class ConceptMap {
     // Keep every bubble inside the visible area under the current transform.
     for (const b of all) {
       if (b.leaving) continue;
-      b.x = this.inView(b.x ?? W / 2, "x", b.r);
-      b.y = this.inView(b.y ?? H / 2, "y", b.r);
+      b.x = this.inView(b.x ?? w / 2, "x", b.r);
+      b.y = this.inView(b.y ?? h / 2, "y", b.r);
     }
     this.content.attr("transform", `translate(${this.view.x},${this.view.y}) scale(${this.view.k})`);
   }
 
   /** Clamp a coordinate so a bubble of radius r at it is inside the visible area. */
   private inView(v: number, axis: "x" | "y", r: number): number {
-    const size = axis === "x" ? W : H;
+    const size = axis === "x" ? this.w : this.h;
     const { k } = this.view;
     const lo = (MARGIN - this.view[axis]) / k + r;
     const hi = (size - MARGIN - this.view[axis]) / k - r;
@@ -328,6 +371,8 @@ export class ConceptMap {
   }
 
   private pulse(id: string): void {
+    // A CSS animation waits while its page is hidden, then plays when shown.
+    if (!this.svg.node()?.getClientRects().length) return;
     const ring = this.nodeLayer
       .selectAll<SVGGElement, Bubble>("g.node")
       .filter((d) => d.id === id)

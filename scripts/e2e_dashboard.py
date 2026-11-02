@@ -1,6 +1,7 @@
 """End-to-end check of traceability in the real dashboard (build step 3).
 
-Plays a sample in a headless browser, then for every bubble:
+Adds a concept map to the first page through the «Añadir visualización»
+picker, plays a sample in a headless browser, then for every bubble:
 1. clicks it and reads which character ranges the text pane highlights;
 2. compares them with the term's spans from the miner, computed here
    independently (the miner is deterministic, so this is ground truth);
@@ -23,6 +24,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
+ACTIVE = ".page:not([hidden])"  # the dashboard page on screen
 sys.path.insert(0, str(ROOT / "backend"))
 
 from medra.contracts import MiningUpdate, TextChunk  # noqa: E402
@@ -64,15 +66,19 @@ def main() -> int:
     with sync_playwright() as p:
         page = p.chromium.launch(channel=args.channel).new_page(viewport={"width": 1440, "height": 900})
         page.goto(args.url)
+        # The first page starts with two empty slots beside the chat: map above, timeline below.
+        for kind in ("map", "timeline"):
+            page.click(f"{ACTIVE} .slot-add >> nth=0")
+            page.click(f".viz-card[data-kind='{kind}'] .add-btn")
         page.wait_for_selector(f"#sample option[value='{args.sample}']", state="attached")
         page.select_option("#sample", args.sample)
         page.select_option("#speed", "30")
-        page.click("#start")
+        page.click("#send")
 
         # Step 4 goal: paragraph blocks and the topic chart update while the text streams.
         page.wait_for_function(
             "document.getElementById('status').dataset.state === 'live'"
-            " && document.querySelectorAll('#chart g.c-topic').length > 0"
+            " && document.querySelectorAll('.page:not([hidden]) .chart g.c-topic').length > 0"
             " && document.querySelectorAll('#stream .para[data-seg]').length >= 2",
             timeout=60_000,
         )
@@ -86,8 +92,8 @@ def main() -> int:
         ok = "".join(markers) == "".join(want_markers)
         failures += not ok
         print(f"{args.sample}: markers in the text {markers} {'ok' if ok else f'!= {want_markers}'}")
-        curves = page.eval_on_selector_all("#chart g.c-topic", "els => els.length")
-        legend = page.eval_on_selector_all("#legend button", "els => els.length")
+        curves = page.eval_on_selector_all(f"{ACTIVE} .chart g.c-topic", "els => els.length")
+        legend = page.eval_on_selector_all(f"{ACTIVE} .legend button", "els => els.length")
         ok = curves == legend == len(final.clusters)
         failures += not ok
         print(f"{args.sample}: {curves} topic curves, {legend} legend entries, {len(final.clusters)} topics mined")
@@ -105,10 +111,11 @@ def main() -> int:
         print(f"{args.sample}: {len(blocks)} paragraphs, "
               f"{'all match the source text' if not bad else f'MISMATCH in {bad}'}")
 
-        ids = page.eval_on_selector_all("g.node", "els => els.map(e => e.dataset.id)")
+        nodes = f"{ACTIVE} [data-win='map'] g.node"
+        ids = page.eval_on_selector_all(nodes, "els => els.map(e => e.dataset.id)")
         print(f"{args.sample}: {len(ids)} bubbles")
         for node_id in ids:
-            bubble = f"g.node[data-id='{node_id}']"
+            bubble = f"{nodes}[data-id='{node_id}']"
             page.click(bubble)  # select
             pieces = page.eval_on_selector_all(
                 ".m.hl", "els => els.map(e => [Number(e.dataset.start), Number(e.dataset.end)])"
@@ -122,10 +129,10 @@ def main() -> int:
             first = page.locator(f".m[data-start='{want[0][0]}']").first
             ids_here = json.loads(first.get_attribute("data-ids") or "[]")
             first.click()
-            selected = page.query_selector("g.node.sel")
+            selected = page.query_selector(f"{nodes}.sel")
             back = selected.get_attribute("data-id") if selected else None
             if back:
-                page.click(f"g.node[data-id='{back}']")  # deselect for the next bubble
+                page.click(f"{nodes}[data-id='{back}']")  # deselect for the next bubble
 
             ok = got == want and node_id in ids_here and back == ids_here[0]
             failures += not ok
@@ -133,14 +140,17 @@ def main() -> int:
                   f"{len(want)} expected; clicking its first mention selects {back!r}")
 
         # Steps view: one node per paragraph block; selecting a step highlights its paragraph.
-        page.click("#tab-pasos")
+        # Collapsing the chat frees the slot above it for the step graph.
+        page.click("#chat-toggle")
+        page.click(f"{ACTIVE} .slot-add")
+        page.click(".viz-card[data-kind='steps'] .add-btn")
         page.wait_for_timeout(300)
-        steps = page.eval_on_selector_all("g.s-node", "els => els.map(e => e.dataset.seg)")
+        steps = page.eval_on_selector_all(f"{ACTIVE} g.s-node", "els => els.map(e => e.dataset.seg)")
         ok = len(steps) == len(blocks)
         failures += not ok
         print(f"{args.sample}: {len(steps)} steps for {len(blocks)} paragraph blocks")
         if steps:
-            page.click(f"g.s-node[data-seg='{steps[-1]}']")
+            page.click(f"{ACTIVE} g.s-node[data-seg='{steps[-1]}']")
             lit = page.eval_on_selector_all("#stream .para.sel", "els => els.map(e => e.dataset.seg)")
             ok = lit == [steps[-1]]
             failures += not ok

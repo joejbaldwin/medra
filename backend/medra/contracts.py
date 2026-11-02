@@ -34,8 +34,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 # 1.2 (step 4): added Sentence.words, Step.marker, Step.marker_span and Step.words.
 # 1.3 (step 5): SessionConfig gains the paste/deepseek/ollama sources (text, prompt; sample
 #     becomes optional) and SourceInfo for GET /sources.
+# 1.4 (step 6): SampleInfo.prompt, so the dashboard can show a trace's prompt before playing it.
 # Minor versions only add fields with defaults, so 1.0 producers stay valid.
-SCHEMA_VERSION = "1.3"
+SCHEMA_VERSION = "1.4"
 
 Span = tuple[int, int]
 """Half-open character range [start, end) into the reasoning text."""
@@ -409,3 +410,4 @@ class SampleInfo(_Model):
     language: str
     words: int
     origin: str
+    prompt: str = Field(default="", description="The task the trace answers (empty if unknown).")

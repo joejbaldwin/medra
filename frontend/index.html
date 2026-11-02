@@ -1,117 +1,176 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MeDRA</title>
+  <meta name="description" content="Mapa de Despliegue del Razonamiento Agente: minería de texto en directo sobre el razonamiento de un modelo.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 </head>
 <body>
   <div class="app">
     <header class="top">
-      <div class="brand">
-        <div>
-          <div class="logo">Me<span>DRA</span></div>
-          <div class="tagline">Mapa de Despliegue del Razonamiento Agente</div>
-        </div>
+      <div class="brand" title="Mapa de Despliegue del Razonamiento Agente">
+        <svg class="brand-mark" viewBox="0 0 44 40" width="44" height="40" aria-hidden="true">
+          <circle cx="15" cy="25" r="11" style="fill: var(--c0)"/>
+          <circle cx="29" cy="9" r="6.5" style="fill: var(--c3)"/>
+          <circle cx="34" cy="31" r="7.5" style="fill: var(--c2)"/>
+        </svg>
+        <h1 class="logo">MeDRA<span class="sr-only">: Mapa de Despliegue del Razonamiento Agente</span></h1>
       </div>
-      <div class="controls">
-        <label class="field">
-          <span>Fuente</span>
-          <select id="source" aria-label="Fuente del texto">
+
+      <nav class="pager" aria-label="Páginas del panel">
+        <div id="pager" role="tablist" aria-label="Páginas"></div>
+        <button id="pager-add" type="button" aria-label="Nueva página" title="Nueva página">+</button>
+      </nav>
+
+      <div class="fields">
+        <div class="field">
+          <span id="source-label">Fuente</span>
+          <!-- sourceMenu.ts draws the menu (with each source's icon) here; the
+               hidden <select> keeps the chosen value for the rest of the page. -->
+          <div id="source-menu"></div>
+          <select id="source" hidden aria-hidden="true" tabindex="-1">
             <option value="replay">Traza de ejemplo</option>
             <option value="paste">Pegar texto</option>
           </select>
-        </label>
+        </div>
         <label class="field" id="sample-field">
           <span>Traza</span>
           <select id="sample" aria-label="Traza de ejemplo"></select>
         </label>
-        <label class="field" id="speed-field">
-          <span>Velocidad</span>
-          <select id="speed" aria-label="Velocidad">
+      </div>
+
+      <button id="stats-open" class="tool-btn" type="button" aria-haspopup="dialog">
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 16V9M8.5 16V4M13 16v-5M17 16V7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+        <span>Estadísticas</span>
+      </button>
+
+      <button id="theme" class="icon-btn theme-btn" type="button" aria-label="Cambiar entre tema claro y oscuro" title="Tema claro u oscuro">
+        <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
+          <circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/>
+        </svg>
+      </button>
+    </header>
+
+    <main id="pages" class="pages"></main>
+  </div>
+
+  <!-- The chat window. The dashboard places it in the grid; it is never duplicated. -->
+  <section class="win win-chat" id="chat-win" data-win="chat" aria-labelledby="chat-title">
+    <header class="win-bar">
+      <button class="grip" type="button" aria-label="Mover Conversación">
+        <svg viewBox="0 0 12 18" width="12" height="18" aria-hidden="true"><g fill="currentColor"><circle cx="3" cy="3" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="3" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="3" cy="15" r="1.6"/><circle cx="9" cy="15" r="1.6"/></g></svg>
+      </button>
+      <h2 class="win-title" id="chat-title">Conversación</h2>
+      <button id="chat-toggle" class="win-btn chat-toggle" type="button" aria-expanded="true" aria-label="Contraer el chat a un cuarto">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.5 6l4.5 4.5L12.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <div class="chat-scroll" id="chat-scroll" data-keep-scroll>
+      <div class="chat-empty" id="chat-empty">
+        <p>Elige una fuente arriba y pulsa <b>enviar</b>: el razonamiento aparecerá aquí mientras se escribe, con sus conceptos, temas y pasos enlazados.</p>
+      </div>
+      <div class="msg-user" id="user-msg" hidden><p id="prompt"></p></div>
+      <div class="msg-reasoning" id="reasoning-block" hidden>
+        <div class="msg-head">
+          <span class="msg-icon sparkle" id="reasoning-icon"></span>
+          <h3>Razonamiento</h3>
+          <span class="badge" id="mode-badge"></span>
+        </div>
+        <div id="stream" class="stream" aria-live="off"></div>
+      </div>
+      <div class="msg-answer" id="answer-block" hidden>
+        <div class="msg-head">
+          <svg class="msg-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4M9 12h6M9 15.5h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <h3>Respuesta</h3>
+        </div>
+        <div class="answer-body" id="answer"></div>
+      </div>
+      <p class="chat-notice" id="chat-notice" hidden></p>
+      <p class="chat-error" id="chat-error" role="alert" hidden></p>
+    </div>
+
+
+    <div class="composer-dock">
+    <form class="composer" id="composer" novalidate>
+      <label for="composer-input" class="sr-only" id="composer-label">Mensaje</label>
+      <textarea id="composer-input" rows="1" maxlength="4000" aria-describedby="composer-hint"></textarea>
+      <!-- Send; while a session runs it becomes a stop button (square) that aborts it. -->
+      <button id="send" class="send" type="submit" aria-label="Enviar" title="Enviar">
+        <svg class="icon-send" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M10 16V4.5M5 9.5l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="icon-stop" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="2" fill="currentColor"/></svg>
+      </button>
+      <div class="composer-meta">
+        <span id="composer-source">Traza de ejemplo</span>
+        <span id="speed-field" class="speed-field">
+          <span aria-hidden="true">·</span>
+          <select id="speed" aria-label="Velocidad de reproducción">
             <option value="8">×0,5</option>
             <option value="15" selected>×1</option>
             <option value="30">×2</option>
             <option value="75">×5</option>
           </select>
-        </label>
-        <button id="start" class="primary" type="button">Reproducir</button>
-        <span id="status" class="status" data-state="idle">Listo</span>
-        <button id="theme" class="ghost" type="button" aria-label="Cambiar tema">◐</button>
+        </span>
+        <span class="composer-hint" id="composer-hint"></span>
       </div>
-    </header>
+    </form>
+    </div>
+  </section>
 
-    <section id="input-panel" class="card input-panel" hidden>
-      <div id="paste-box" hidden>
-        <label for="paste-text" class="input-label">Pega un razonamiento (por ejemplo, el texto de &lt;think&gt;…&lt;/think&gt; de un modelo). Se reproduce como si se estuviera escribiendo.</label>
-        <textarea id="paste-text" rows="5" maxlength="100000" placeholder="Okay, the user wants…"></textarea>
+  <!-- Text-mining statistics of the current trace (opened from the header). -->
+  <dialog id="stats-dialog" class="stats-dialog" aria-labelledby="stats-title" aria-describedby="stats-sub">
+    <div class="stats-inner">
+      <div class="picker-head">
+        <div>
+          <h2 id="stats-title">Estadísticas de la traza</h2>
+          <p id="stats-sub"><span id="status" class="status" data-state="idle">Listo</span> <span id="stats-session">Ninguna traza todavía.</span></p>
+        </div>
+        <button class="icon-btn picker-close stats-close" type="button" aria-label="Cerrar">
+          <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
       </div>
-      <div id="prompt-box" hidden>
-        <label for="prompt-input" class="input-label">Pregunta para el modelo. Verás su razonamiento mientras lo escribe.</label>
-        <div class="prompt-row">
-          <input id="prompt-input" type="text" maxlength="4000" placeholder="¿Cuántos números primos hay menores que 50?">
+      <div id="stats-body" class="stats-body"></div>
+    </div>
+  </dialog>
+
+  <dialog id="picker" class="picker" aria-labelledby="picker-title" aria-describedby="picker-sub">
+    <div class="picker-inner">
+      <div class="picker-head">
+        <div>
+          <h2 id="picker-title">Añadir visualización</h2>
+          <p id="picker-sub">Elige una visualización para este espacio.</p>
         </div>
-        <p id="source-note" class="note"></p>
+        <button class="icon-btn picker-close" type="button" aria-label="Cerrar">
+          <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
       </div>
-    </section>
+      <label class="picker-search">
+        <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12.8 12.8L17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" placeholder="Buscar visualizaciones…" aria-label="Buscar visualizaciones" autocomplete="off">
+      </label>
+      <div class="chips" role="group" aria-label="Filtrar por categoría">
+        <button type="button" data-cat="" aria-pressed="true">Todas</button>
+        <button type="button" data-cat="Conceptos" aria-pressed="false">Conceptos</button>
+        <button type="button" data-cat="Temas" aria-pressed="false">Temas</button>
+        <button type="button" data-cat="Pasos" aria-pressed="false">Pasos</button>
+      </div>
+      <div class="cards" role="list"></div>
+      <p class="picker-empty" hidden>Ninguna visualización coincide con la búsqueda.</p>
+      <footer class="picker-foot">
+        <svg viewBox="0 0 12 18" width="12" height="18" aria-hidden="true"><g fill="currentColor"><circle cx="3" cy="3" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="3" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="3" cy="15" r="1.6"/><circle cx="9" cy="15" r="1.6"/></g></svg>
+        Puedes mover o quitar las visualizaciones cuando quieras.
+      </footer>
+    </div>
+  </dialog>
 
-    <main class="board">
-      <section class="viz" aria-label="Visualizaciones">
-        <div class="tabs" role="tablist" aria-label="Visualización">
-          <button role="tab" id="tab-conceptos" aria-selected="true" aria-controls="view-conceptos" data-view="conceptos" type="button">Conceptos</button>
-          <button role="tab" id="tab-pasos" aria-selected="false" aria-controls="view-pasos" data-view="pasos" type="button">Pasos</button>
-        </div>
-
-        <div class="view" id="view-conceptos" role="tabpanel" aria-labelledby="tab-conceptos">
-          <article class="card">
-            <h2>Conceptos y menciones</h2>
-            <p class="sub">Tamaño = menciones · Color = tema · Enlace = coocurrencia en la misma oración</p>
-            <div class="map"><svg id="map" role="img" aria-label="Mapa de conceptos"></svg></div>
-            <p id="map-info" class="hint">Selecciona un término para ver sus menciones.</p>
-            <p id="stats" class="stats"></p>
-          </article>
-          <article class="card">
-            <h2>Temas a lo largo de la traza</h2>
-            <p class="sub">Densidad de menciones por tema (ventana de ±6 palabras). Haz clic en una curva o en la leyenda para seleccionar un tema.</p>
-            <div class="chart-wrap">
-              <svg id="chart" role="img" aria-label="Temas a lo largo de la traza"></svg>
-              <div class="tip" id="tip" hidden></div>
-            </div>
-            <div id="legend" class="legend"></div>
-          </article>
-        </div>
-
-        <div class="view" id="view-pasos" role="tabpanel" aria-labelledby="tab-pasos" hidden>
-          <article class="card">
-            <h2>Pasos del agente</h2>
-            <p class="sub">Un paso por tramo; el marcador del discurso que lo abre va sobre la flecha. Arco discontinuo = vuelve a un tema anterior.</p>
-            <div id="steps-wrap" class="steps-wrap"><svg id="steps" role="img" aria-label="Grafo de pasos"></svg></div>
-          </article>
-          <article class="card" id="step-detail">
-            <p class="hint">Haz clic en un paso para ver su tipo, el marcador que lo abrió y sus términos con más peso.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="card text-card">
-        <h2>Texto original</h2>
-        <p id="title" class="sub">Elige una traza y pulsa Reproducir.</p>
-        <p id="prompt" class="prompt" hidden></p>
-        <div id="stream" class="stream" aria-live="off"></div>
-        <div id="answer-block" class="answer" hidden>
-          <h3>Respuesta</h3>
-          <p id="answer"></p>
-        </div>
-        <div class="proc">
-          <h4>Procesando ahora</h4>
-          <div id="ticker" class="ticker"><div>Esperando texto…</div></div>
-        </div>
-      </section>
-    </main>
-  </div>
+  <p id="move-help" class="sr-only">Arrastra el asa o usa las flechas del teclado para mover la ventana a otro espacio.</p>
+  <div id="announcer" class="sr-only" aria-live="polite"></div>
+  <div id="toast" class="toast" aria-hidden="true" hidden></div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

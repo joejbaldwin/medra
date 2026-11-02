@@ -28,7 +28,11 @@ export class TextPane {
   private active: string | null = null;
   private activeSegments = new Set<number>();
 
-  constructor(private root: HTMLElement) {
+  /** `scroller` is the element that scrolls (the whole conversation), if not the pane itself. */
+  constructor(
+    private root: HTMLElement,
+    private scroller: HTMLElement = root,
+  ) {
     this.pendingBlock = div("para pending-para");
     this.pending = span("pending");
     this.caret = span("caret");
@@ -141,6 +145,8 @@ export class TextPane {
       m.classList.toggle("hl", !!this.active && idsOf(m).includes(this.active));
     }
     for (const [seg, block] of this.blocks) block.el.classList.toggle("sel", this.activeSegments.has(seg));
+    // With something selected, the other underlines fade further back.
+    this.root.classList.toggle("has-active", !!this.active || this.activeSegments.size > 0);
   }
 
   private renderPending(follow = this.atBottom()): void {
@@ -155,11 +161,13 @@ export class TextPane {
     if (newParagraph && this.pendingBlock.parentElement !== this.root) this.root.append(this.pendingBlock);
     if (!newParagraph) this.pendingBlock.remove();
     host.append(this.pending, this.caret);
-    if (follow) this.root.scrollTop = this.root.scrollHeight;
+    if (follow) this.scroller.scrollTop = this.scroller.scrollHeight;
   }
 
-  private atBottom(): boolean {
-    return this.root.scrollHeight - this.root.scrollTop - this.root.clientHeight < 40;
+  /** Whether the reader is following the end of the text (auto-scroll pauses when they scroll up). */
+  atBottom(): boolean {
+    const s = this.scroller;
+    return s.scrollHeight - s.scrollTop - s.clientHeight < 40;
   }
 }
 

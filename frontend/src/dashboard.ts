@@ -8,20 +8,22 @@ import {
   cellsOf,
   chatExpanded,
   colOf,
+  coverOf,
   emptyPage,
   firstPage,
-  move,
+  moveShown,
   neighbourCell,
   place,
   remove,
   rowOf,
   setChatExpanded,
-  setSpan,
+  shown,
   spanOf,
   windowsOf,
   type Cell,
+  type Expand,
+  type Expanded,
   type Page,
-  type Span,
   type VizKind,
   type WindowId,
 } from "./layout";
@@ -61,11 +63,12 @@ interface Win {
   el: HTMLElement;
   grip: HTMLButtonElement;
   content: WindowContent | null; // null for the chat
-  spanButton?: HTMLButtonElement; // visualizations only: grow to two cells, or shrink back
+  expandButtons?: HTMLButtonElement[]; // visualizations only: row, column, whole page
 }
 
 export class Dashboard {
   private pages: Page[] = [firstPage(), emptyPage()];
+  private expanded: (Expanded | null)[] = [null, null]; // per page: the enlarged visualization
   private active = 0;
   private sections: HTMLElement[] = [];
   private windows: Map<WindowId, Win>[] = []; // per page, by window id
@@ -130,6 +133,7 @@ export class Dashboard {
 
   private addPage(): void {
     this.pages.push(emptyPage());
+    this.expanded.push(null);
     this.showPage(this.pages.length - 1, true);
     this.o.notify(`Página ${this.pages.length} creada, con cuatro espacios vacíos.`);
   }
@@ -157,6 +161,8 @@ export class Dashboard {
     section.hidden = i !== this.active;
     const wins = this.windows[i];
     const slots = this.slots[i];
+    const ex = this.expanded[i];
+    const view = shown(page, ex);
 
     // Close the windows that left the page (their data stays in the session).
     const present = new Set(windowsOf(page).map((w) => w.id));
@@ -174,11 +180,18 @@ export class Dashboard {
         win = id === "chat" ? this.chatWin : this.createWindow(i, id);
         wins.set(id, win);
       }
-      placeAt(win.el, cells);
-      if (win.spanButton) syncSpanButton(win.spanButton, spanOf(page, id));
-      order.push({ el: win.el, cell: cells[0] });
+      // A window under an enlarged one stays in its cell, hidden and inert, so
+      // its view keeps its size and state and it is back as it was on restore.
+      const now = cellsOf(view, id);
+      const covered = now.length === 0;
+      win.el.classList.toggle("covered", covered);
+      win.el.inert = covered;
+      win.el.classList.toggle("expanded", ex?.id === id && !covered);
+      placeAt(win.el, covered ? cells : now);
+      if (win.expandButtons) syncExpandButtons(win.expandButtons, ex?.id === id ? ex.mode : null);
+      order.push({ el: win.el, cell: (covered ? cells : now)[0] });
     }
-    page.cells.forEach((w, cell) => {
+    view.cells.forEach((w, cell) => {
       if (w) {
         slots.get(cell)?.remove();
         slots.delete(cell);
@@ -196,7 +209,7 @@ export class Dashboard {
     reorder(section, order.sort((a, b) => a.cell - b.cell).map((x) => x.el));
 
     if (wins.has("chat")) {
-      const expanded = chatExpanded(page);
+      const expanded = chatExpanded(view);
       this.o.chat.classList.toggle("collapsed", !expanded);
       this.o.chatToggle.setAttribute("aria-expanded", String(expanded));
       const label = expanded ? "Contraer el chat a un cuarto" : "Expandir el chat a toda la columna";
@@ -213,10 +226,8 @@ export class Dashboard {
     el.setAttribute("aria-label", title);
     el.innerHTML =
       `<header class="win-bar">${GRIP_BUTTON}<h2 class="win-title"></h2>` +
-      `<button class="win-btn win-span" type="button" aria-expanded="false"></button>` +
-      `<div class="span-menu" role="menu" hidden>` +
-      `<button type="button" role="menuitem" data-span="column">${COLUMN_ICON}<span>Ocupar la columna<small>dos espacios en vertical</small></span></button>` +
-      `<button type="button" role="menuitem" data-span="row">${ROW_ICON}<span>Ocupar la fila<small>dos espacios en horizontal</small></span></button>` +
+      `<div class="win-expand" role="group" aria-label="Ampliar">` +
+      EXPAND_MODES.map((m) => `<button class="win-btn" type="button" data-expand="${m}" aria-pressed="false"></button>`).join("") +
       `</div>` +
       `<button class="win-btn win-close" type="button">${MINUS_ICON}</button></header><div class="win-body"></div>`;
     const heading = el.querySelector<HTMLElement>(".win-title")!;
@@ -229,66 +240,26 @@ export class Dashboard {
     close.title = "Quitar";
     close.addEventListener("click", () => this.removeViz(page, kind));
     this.bindGrip(grip, kind, title);
-    const spanButton = el.querySelector<HTMLButtonElement>(".win-span")!;
-    this.bindSpanMenu(page, kind, spanButton, el.querySelector<HTMLElement>(".span-menu")!);
-    const content = this.o.createPanel(kind);
-    el.querySelector(".win-body")!.append(content.el);
-    return { el, grip, content, spanButton };
-  }
-
-  /** The span button: on a one-cell window it opens a menu (fill the column or
-   *  the row); on a two-cell window it shrinks it back to one cell. */
-  private bindSpanMenu(page: number, kind: VizKind, button: HTMLButtonElement, menu: HTMLElement): void {
-    const items = [...menu.querySelectorAll<HTMLButtonElement>("[role='menuitem']")];
-    const outside = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (!menu.contains(target) && !button.contains(target)) close(false);
-    };
-    const close = (focusButton: boolean) => {
-      menu.hidden = true;
-      button.setAttribute("aria-expanded", "false");
-      document.removeEventListener("pointerdown", outside, true);
-      if (focusButton) button.focus();
-    };
-    button.addEventListener("click", () => {
-      if (spanOf(this.pages[page], kind) !== "cell") {
-        this.setVizSpan(page, kind, "cell");
-        return;
-      }
-      if (!menu.hidden) {
-        close(true);
-        return;
-      }
-      // Say up front which spans fit on this page, rather than failing after the click.
-      for (const item of items) {
-        const fits = setSpan(this.pages[page], kind, item.dataset.span as Span) !== null;
-        item.setAttribute("aria-disabled", String(!fits));
-        item.title = fits ? "" : "No hay sitio: hay una ventana de dos espacios en medio o la página está llena.";
-      }
-      menu.hidden = false;
-      button.setAttribute("aria-expanded", "true");
-      document.addEventListener("pointerdown", outside, true);
-      items[0].focus();
-    });
-    for (const item of items) {
-      item.addEventListener("click", () => {
-        close(false);
-        this.setVizSpan(page, kind, item.dataset.span as Span);
+    const expandButtons = [...el.querySelectorAll<HTMLButtonElement>("[data-expand]")];
+    for (const b of expandButtons) {
+      // The button of the current mode restores; the others switch to their mode.
+      b.addEventListener("click", () => {
+        const mode = b.dataset.expand as Expand;
+        const ex = this.expanded[page];
+        this.setExpanded(page, ex?.id === kind && ex.mode === mode ? null : { id: kind, mode });
       });
     }
-    menu.addEventListener("keydown", (e) => {
-      const i = items.indexOf(document.activeElement as HTMLButtonElement);
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        close(true);
-      } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        e.preventDefault();
-        items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length].focus();
-      } else if (e.key === "Tab") {
-        close(false);
-      }
+    // Escape restores an enlarged window (from anywhere inside it).
+    el.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || this.expanded[page]?.id !== kind) return;
+      e.preventDefault();
+      const mode = this.expanded[page]!.mode;
+      this.setExpanded(page, null);
+      el.querySelector<HTMLButtonElement>(`[data-expand="${mode}"]`)?.focus();
     });
+    const content = this.o.createPanel(kind);
+    el.querySelector(".win-body")!.append(content.el);
+    return { el, grip, content, expandButtons };
   }
 
   private createSlot(page: number, cell: Cell): HTMLElement {
@@ -306,29 +277,36 @@ export class Dashboard {
 
   private removeViz(page: number, kind: VizKind): void {
     const cell = this.pages[page].cells.indexOf(kind);
+    if (this.expanded[page]?.id === kind) this.expanded[page] = null;
     this.pages[page] = remove(this.pages[page], kind);
     this.render();
     this.slots[page].get(cell)?.querySelector("button")?.focus();
     this.o.notify(`${VIZ_TITLES[kind]} quitado. El análisis se conserva.`);
   }
 
-  private setVizSpan(page: number, kind: VizKind, span: Span): void {
-    const next = setSpan(this.pages[page], kind, span);
-    const title = VIZ_TITLES[kind];
-    if (!next) {
-      const what = span === "column" ? "ocupar la columna" : "ocupar la fila";
-      this.o.notify(`No hay sitio para ${what}: taparía una ventana de dos espacios, o la página está llena.`, true);
-      return;
-    }
-    this.pages[page] = next;
+  /** Enlarge a visualization (row, column or whole page) or, with null, restore the page. */
+  private setExpanded(page: number, next: Expanded | null): void {
+    const before = this.expanded[page];
+    this.expanded[page] = next;
     this.render();
-    this.windows[page].get(kind)?.spanButton?.focus();
-    const done = { cell: "reducido a un espacio", column: "ampliado a toda la columna", row: "ampliado a toda la fila" }[span];
-    this.o.notify(`${title} ${done}.`);
+    if (next) this.o.notify(`${VIZ_TITLES[next.id]} ampliado ${EXPAND_DONE[next.mode]}. Lo que tapa vuelve al restaurarlo.`);
+    else if (before) this.o.notify(`${VIZ_TITLES[before.id]} vuelve a su espacio.`);
   }
 
   private toggleChat(): void {
     const i = this.pages.findIndex((p) => p.cells.includes("chat"));
+    // An enlarged visualization over the chat's column is restored first: the
+    // chat gets its cells back, and if it already filled the column, that is all.
+    const chatCol = colOf(cellsOf(this.pages[i], "chat")[0]);
+    const over = this.expanded[i];
+    if (over && coverOf(this.pages[i], over).some((c) => colOf(c) === chatCol)) {
+      this.expanded[i] = null;
+      if (chatExpanded(this.pages[i])) {
+        this.render();
+        this.o.notify(`${VIZ_TITLES[over.id]} vuelve a su espacio; el chat ocupa de nuevo toda la columna.`);
+        return;
+      }
+    }
     const expand = !chatExpanded(this.pages[i]);
     const next = setChatExpanded(this.pages[i], expand);
     if (!next) {
@@ -344,15 +322,17 @@ export class Dashboard {
   private moveWindow(id: WindowId, to: Cell, title: string): void {
     const i = this.active;
     const page = this.pages[i];
-    const from = cellsOf(page, id)[0];
+    const ex = this.expanded[i];
+    const from = cellsOf(shown(page, ex), id)[0];
     if (from === undefined) return;
-    const next = move(page, from, to);
+    const next = moveShown(page, ex, from, to);
     if (next === page) return;
     this.pages[i] = next;
     this.render();
     this.windows[i].get(id)?.grip.focus();
-    const now = cellsOf(next, id);
-    const span = spanOf(next, id);
+    const view = shown(next, ex);
+    const now = cellsOf(view, id);
+    const span = spanOf(view, id);
     const where =
       span === "column" ? `a la columna ${colOf(now[0]) ? "derecha" : "izquierda"}`
       : span === "row" ? `a la fila de ${rowOf(now[0]) ? "abajo" : "arriba"}`
@@ -366,7 +346,7 @@ export class Dashboard {
   private bindGrip(grip: HTMLButtonElement, id: WindowId, title: string): void {
     grip.setAttribute("aria-describedby", "move-help");
     grip.addEventListener("keydown", (e) => {
-      const page = this.pages[this.active];
+      const page = shown(this.pages[this.active], this.expanded[this.active]);
       const from = cellsOf(page, id);
       if (!from.length) return;
       // A two-cell window moves from its far edge (down and right start from its
@@ -395,7 +375,8 @@ export class Dashboard {
     const mark = (cell: Cell | null) => {
       for (const child of section.children) {
         const cells = (child as HTMLElement).dataset.cells?.split(",").map(Number) ?? [];
-        child.classList.toggle("drop-target", cell !== null && child !== win.el && cells.includes(cell));
+        const hit = cell !== null && child !== win.el && !child.classList.contains("covered") && cells.includes(cell);
+        child.classList.toggle("drop-target", hit);
       }
     };
     const onMove = (ev: PointerEvent) => {
@@ -444,21 +425,33 @@ function placeAt(el: HTMLElement, cells: Cell[]): void {
   const cols = cells.map(colOf);
   const rows = cells.map(rowOf);
   el.dataset.cells = cells.join(",");
-  el.dataset.span = cells.length < 2 ? "cell" : cols[0] === cols[1] ? "column" : "row";
+  el.dataset.span = cells.length === 4 ? "full" : cells.length < 2 ? "cell" : cols[0] === cols[1] ? "column" : "row";
   el.style.setProperty("--col", String(Math.min(...cols) + 1));
   el.style.setProperty("--row", String(Math.min(...rows) + 1));
   el.style.setProperty("--cols", String(new Set(cols).size));
   el.style.setProperty("--rows", String(new Set(rows).size));
 }
 
-function syncSpanButton(button: HTMLButtonElement, span: Span): void {
-  const grown = span !== "cell";
-  button.innerHTML = grown ? SHRINK_ICON : GROW_ICON;
-  const label = grown ? "Reducir a un espacio" : "Ampliar a dos espacios";
-  button.setAttribute("aria-label", label);
-  button.title = label;
-  if (grown) button.removeAttribute("aria-haspopup");
-  else button.setAttribute("aria-haspopup", "menu");
+const EXPAND_MODES: Expand[] = ["row", "column", "full"];
+const EXPAND_LABELS: Record<Expand, string> = {
+  row: "Ocupar la fila (dos espacios en horizontal)",
+  column: "Ocupar la columna (dos espacios en vertical)",
+  full: "Ocupar toda la página (los cuatro espacios)",
+};
+const EXPAND_DONE: Record<Expand, string> = { row: "a toda la fila", column: "a toda la columna", full: "a toda la página" };
+
+/** Each button shows its direction; the one of the current mode turns into "restore". */
+function syncExpandButtons(buttons: HTMLButtonElement[], mode: Expand | null): void {
+  for (const b of buttons) {
+    const m = b.dataset.expand as Expand;
+    const on = m === mode;
+    if (b.dataset.on !== String(on)) b.innerHTML = on ? RESTORE_ICONS[m] : EXPAND_ICONS[m];
+    b.dataset.on = String(on);
+    b.setAttribute("aria-pressed", String(on));
+    const label = on ? "Restaurar: volver a un espacio" : EXPAND_LABELS[m];
+    b.setAttribute("aria-label", label);
+    b.title = label;
+  }
 }
 
 /** The cell under a point, from the windows' and slots' boxes (null in a gap). */
@@ -466,7 +459,7 @@ function cellAtPoint(section: HTMLElement, x: number, y: number): Cell | null {
   for (const child of section.children) {
     const el = child as HTMLElement;
     const r = el.getBoundingClientRect();
-    if (x < r.left || x > r.right || y < r.top || y > r.bottom) continue;
+    if (el.classList.contains("covered") || x < r.left || x > r.right || y < r.top || y > r.bottom) continue;
     const cells = el.dataset.cells?.split(",").map(Number) ?? [];
     if (cells.length < 2) return cells[0] ?? null;
     // Cells are listed in order: the second is below (a column) or to the right (a row).
@@ -494,8 +487,15 @@ function reorder(parent: HTMLElement, wanted: HTMLElement[]): void {
 export const GRIP_ICON = `<svg viewBox="0 0 12 18" width="12" height="18" aria-hidden="true"><g fill="currentColor"><circle cx="3" cy="3" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="3" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="3" cy="15" r="1.6"/><circle cx="9" cy="15" r="1.6"/></g></svg>`;
 const GRIP_BUTTON = `<button class="grip" type="button">${GRIP_ICON}</button>`;
 const MINUS_ICON = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
-const GROW_ICON = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5L9 7M2.5 13.5L7 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const SHRINK_ICON = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5L14 2M6.5 9.5L2 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-const COLUMN_ICON = `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="2.5" y="2.5" width="6.5" height="15" rx="1.5" fill="currentColor"/><rect x="11" y="2.5" width="6.5" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="11" y="11" width="6.5" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>`;
-const ROW_ICON = `<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="6.5" rx="1.5" fill="currentColor"/><rect x="2.5" y="11" width="6.5" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="11" y="11" width="6.5" height="6.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>`;
+// Arrows outward = enlarge in that direction; arrows inward = restore.
+const EXPAND_ICONS: Record<Expand, string> = {
+  row: `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1.5 8h13M4.5 5L1.5 8l3 3M11.5 5l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  column: `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1.5v13M5 4.5l3-3 3 3M5 11.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  full: `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4M2 2l4 4M14 2l-4 4M14 14l-4-4M2 14l4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+};
+const RESTORE_ICONS: Record<Expand, string> = {
+  row: `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1.5 8h4.5M10 8h4.5M3.5 5l3 3-3 3M12.5 5l-3 3 3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  column: `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 1.5V6M8 10v4.5M5 3.5l3 3 3-3M5 12.5l3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  full: `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+};
 const PLUS_ICON = `<svg class="slot-plus" viewBox="0 0 48 48" width="56" height="56" aria-hidden="true"><path d="M24 6v36M6 24h36" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`;

@@ -2,6 +2,8 @@
 // window id or nothing. Kept free of DOM code so the move rules can be unit
 // tested. A window fills one cell, a whole column (listed in both cells of
 // that column) or a whole row. The chat is expanded when it fills its column.
+// Visualizations take one cell; enlarging one is a temporary view on top
+// (`Expanded`, below) that leaves the page itself unchanged.
 // Every rule here keeps all windows: a move swaps, it never overwrites.
 //
 // Cell numbering is column-major, which is also the reading order:
@@ -156,6 +158,60 @@ export function setSpan(page: Page, id: WindowId, span: Span): Page | null {
 /** Collapse the chat to the lower cell of its column, or expand it to the whole column. */
 export function setChatExpanded(page: Page, expand: boolean): Page | null {
   return setSpan(page, "chat", expand ? "column" : "cell");
+}
+
+// ------------------------------------------------------------ enlarging a visualization
+
+/** How a visualization can be enlarged: across its row, down its column, or over the whole page. */
+export type Expand = "row" | "column" | "full";
+export interface Expanded {
+  id: VizKind;
+  mode: Expand;
+}
+
+/** The cells an enlarged visualization covers (none if it is not on the page).
+ *  Enlarging is a view on top of the page, not a change to it: the windows it
+ *  covers keep their cells and reappear when it is restored, so it always fits. */
+export function coverOf(page: Page, ex: Expanded | null): Cell[] {
+  const at = ex ? page.cells.indexOf(ex.id) : -1;
+  if (!ex || at < 0) return [];
+  if (ex.mode === "full") return [0, 1, 2, 3];
+  if (ex.mode === "column") return [cellAt(colOf(at), 0), cellAt(colOf(at), 1)];
+  return [cellAt(0, rowOf(at)), cellAt(1, rowOf(at))];
+}
+
+/** The page as shown: the enlarged visualization fills its cover. A window it
+ *  covers completely is hidden; the chat, if half covered, shows in its other half. */
+export function shown(page: Page, ex: Expanded | null): Page {
+  const cover = coverOf(page, ex);
+  if (!cover.length) return page;
+  const cells = [...page.cells];
+  for (const c of cover) cells[c] = ex!.id;
+  return { cells };
+}
+
+/** `move` for a page with an enlarged visualization. The move follows the
+ *  rules above on the page as shown (the enlarged window moves as a whole row
+ *  or column), and the windows hidden under it travel with it, so restoring
+ *  brings them back next to it. Over the whole page there is nowhere to move. */
+export function moveShown(page: Page, ex: Expanded | null, from: Cell, to: Cell): Page {
+  const cover = coverOf(page, ex);
+  if (!cover.length) return move(page, from, to);
+  if (cover.length === CELLS) return page;
+  const before = shown(page, ex);
+  const after = move(before, from, to);
+  if (after === before) return page;
+  const target = cellsOf(after, ex!.id); // the new cover, in the same order as `cover`
+  const cells = after.cells.map((w) => (w === ex!.id ? null : w));
+  cover.forEach((c, i) => {
+    const under = page.cells[c];
+    if (!under) return;
+    // A half-covered chat keeps its hidden half only if that is still the other
+    // cell of its column; otherwise it is left with one cell.
+    const visible = cells.flatMap((w, cell) => (w === under ? [cell] : []));
+    if (visible.every((v) => sibling(v) === target[i])) cells[target[i]] = under;
+  });
+  return { cells };
 }
 
 /** The cell an arrow key leads to from `cell`, or null at the grid's edge. */

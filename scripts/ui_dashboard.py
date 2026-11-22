@@ -36,7 +36,8 @@ def choose_source(page, value):
 
 def cells(page):
     return page.eval_on_selector_all(
-        f"{ACTIVE} > *", "els => els.map(e => (e.dataset.win || 'slot') + ':' + e.dataset.cells)"
+        f"{ACTIVE} > *",
+        "els => els.map(e => (e.dataset.win || 'slot') + (e.classList.contains('covered') ? '~' : '') + ':' + e.dataset.cells)",
     )
 
 
@@ -252,36 +253,47 @@ with sync_playwright() as p:
     page.click(f"{ACTIVE} .slot-add >> nth=2")
     page.click(".viz-card[data-kind='timeline'] .add-btn")
     check(cells(page) == ["map:0", "slot:1", "slot:2", "timeline:3"], f"page 3 filled {cells(page)}")
-    span_btn = f"{ACTIVE} [data-win='map'] .win-span"
-    menu = f"{ACTIVE} [data-win='map'] .span-menu"
-    page.click(span_btn)
-    check(page.is_visible(menu) and page.evaluate("document.activeElement.dataset.span") == "column", "span menu opens on its first item")
-    page.keyboard.press("Escape")
-    check(not page.is_visible(menu) and page.evaluate("document.activeElement.classList.contains('win-span')"), "Escape closes the span menu, focus back on its button")
-    page.click(span_btn)
-    page.click(f"{menu} [data-span='column']")
+    # Enlarging (row, column, whole page) is drawn over the page; what it covers
+    # is hidden ("~") and comes back on restore.
+    btn = lambda kind, mode: f"{ACTIVE} [data-win='{kind}'] [data-expand='{mode}']"
+    page.click(btn("map", "row"))
+    check(cells(page) == ["map:0,2", "slot:1", "timeline:3"], f"map fills its row {cells(page)}")
+    check(page.get_attribute(btn("map", "row"), "aria-pressed") == "true" and page.get_attribute(btn("map", "row"), "aria-label").startswith("Restaurar"), "row button now restores")
+    page.click(btn("map", "column"))  # switch straight to the column
     check(cells(page) == ["map:0,1", "slot:2", "timeline:3"], f"map fills its column {cells(page)}")
     page.wait_for_timeout(300)
     h_map = page.locator(f"{ACTIVE} [data-win='map']").bounding_box()["height"]
     h_tl = page.locator(f"{ACTIVE} [data-win='timeline']").bounding_box()["height"]
-    vb = page.evaluate(f"document.querySelector(\"{ACTIVE} [data-win='map'] svg\").getAttribute('viewBox')")
-    check(h_map > 1.9 * h_tl, f"two-cell window is twice as tall ({h_map:.0f} vs {h_tl:.0f} px; map viewBox {vb})")
-    check(page.get_attribute(span_btn, "aria-label") == "Reducir a un espacio", "span button now shrinks")
-    page.click(span_btn)
-    check(cells(page) == ["map:0", "slot:1", "slot:2", "timeline:3"], f"map back to one cell {cells(page)}")
-    page.click(span_btn)
-    page.click(f"{menu} [data-span='row']")
-    check(cells(page) == ["map:0,2", "slot:1", "timeline:3"], f"map fills its row {cells(page)}")
+    check(h_map > 1.9 * h_tl, f"column window is twice as tall ({h_map:.0f} vs {h_tl:.0f} px)")
+    page.click(btn("map", "full"))
+    check(cells(page) == ["map:0,1,2,3", "timeline~:3"], f"map fills the page over the timeline {cells(page)}")
+    check(not page.is_visible(f"{ACTIVE} [data-win='timeline'] .win-title"), "covered timeline hidden")
+    page.keyboard.press("Escape")
+    check(cells(page) == ["map:0", "slot:1", "slot:2", "timeline:3"], f"Escape restores the page {cells(page)}")
+    check(page.evaluate("document.activeElement.dataset.expand") == "full", "focus back on the full-page button")
+    page.click(btn("map", "row"))
     page.focus(f"{ACTIVE} [data-win='map'] .grip")
     page.keyboard.press("ArrowDown")
-    check(cells(page) == ["slot:0", "map:1,3", "timeline:2"], f"ArrowDown moves the row-filling map as a row {cells(page)}")
-    page.click(f"{ACTIVE} [data-win='timeline'] .win-span")
-    disabled = page.get_attribute(f"{ACTIVE} [data-win='timeline'] .span-menu [data-span='column']", "aria-disabled")
-    check(disabled == "true", "span menu marks the column as not fitting (it would cover the map)")
-    page.click(f"{ACTIVE} [data-win='timeline'] .span-menu [data-span='column']", force=True)  # clicked anyway
-    check(cells(page) == ["slot:0", "map:1,3", "timeline:2"] and page.is_visible("#toast"), f"refused span leaves the page as it was; toast: {page.inner_text('#toast')}")
+    check(cells(page) == ["slot:0", "map:1,3", "timeline:2"], f"ArrowDown moves the enlarged map as a row {cells(page)}")
+    page.click(btn("timeline", "column"))  # covers the map: allowed now, the map goes back to its cell
+    check(cells(page) == ["slot:0", "map:1", "timeline:2,3"], f"timeline fills its column over the map {cells(page)}")
+    check(not page.is_visible("#toast"), "no refusal message")
+    page.click(btn("timeline", "column"))
+    check(cells(page) == ["slot:0", "map:1", "timeline:2", "slot:3"], f"timeline restored {cells(page)}")
     page.click("#page-tab-0")
+    # Over the chat: the whole page hides it, a row leaves it its lower half.
+    scroll_top = page.evaluate("document.getElementById('chat-scroll').scrollTop")
+    page.click(btn("timeline", "full"))
+    check(cells(page) == ["timeline:0,1,2,3", "steps~:1", "chat~:2,3"] and not page.is_visible("#chat-title"), f"full page covers the chat {cells(page)}")
+    page.click(btn("timeline", "full"))
+    check(cells(page) == ["timeline:0", "steps:1", "chat:2,3"] and page.is_visible("#chat-title"), f"chat back after restoring {cells(page)}")
+    check(abs(page.evaluate("document.getElementById('chat-scroll').scrollTop") - scroll_top) < 2, "chat keeps its scroll position under an enlarged window")
+    page.click(btn("timeline", "row"))
+    check(cells(page) == ["timeline:0,2", "steps:1", "chat:3"] and "collapsed" in page.get_attribute("#chat-win", "class"), f"row leaves the chat its lower half {cells(page)}")
+    page.click("#chat-toggle")
+    check(cells(page) == ["timeline:0", "steps:1", "chat:2,3"], f"chat toggle restores the page {cells(page)}")
     check(page.is_visible("#chat-win") and page.locator("#stream .para").count() >= 4, "session intact after page switching")
+    check(not page.is_visible("#chat-progress"), "no progress line once the text has arrived")
 
     # Paste mode.
     choose_source(page, "paste")

@@ -1,5 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { chatExpanded, emptyPage, firstPage, move, neighbourCell, place, remove, setChatExpanded, setSpan, spanOf, type Page } from "./layout";
+import {
+  chatExpanded,
+  coverOf,
+  emptyPage,
+  firstPage,
+  move,
+  moveShown,
+  neighbourCell,
+  place,
+  remove,
+  setChatExpanded,
+  setSpan,
+  shown,
+  spanOf,
+  type Expanded,
+  type Page,
+} from "./layout";
 
 const p = (...cells: Page["cells"]): Page => ({ cells });
 
@@ -106,5 +122,59 @@ describe("layout", () => {
     const moved = move(start, 3, 0); // chat dropped on the left half of the timeline
     expect(moved.cells).toEqual(["chat", "timeline", "map", "timeline"]);
     expect(inventory(moved)).toEqual(inventory(start));
+  });
+
+  describe("enlarged visualization", () => {
+    const full = p("map", "timeline", "steps", "chat");
+    const ex = (id: Expanded["id"], mode: Expanded["mode"]): Expanded => ({ id, mode });
+
+    it("covers its row, its column or the whole page, whatever is there", () => {
+      expect(coverOf(full, ex("timeline", "row"))).toEqual([1, 3]);
+      expect(coverOf(full, ex("steps", "column"))).toEqual([2, 3]);
+      expect(coverOf(full, ex("map", "full"))).toEqual([0, 1, 2, 3]);
+      expect(coverOf(full, null)).toEqual([]);
+      expect(coverOf(p(null, null, "chat", "chat"), ex("map", "full"))).toEqual([]); // not on the page
+    });
+
+    it("is drawn over the page without changing it", () => {
+      expect(shown(full, ex("timeline", "row")).cells).toEqual(["map", "timeline", "steps", "timeline"]);
+      expect(shown(full, ex("map", "full")).cells).toEqual(["map", "map", "map", "map"]);
+      // Over two-cell windows too (the old spans refused this).
+      const chat = p("map", "timeline", "chat", "chat");
+      expect(shown(chat, ex("map", "row")).cells).toEqual(["map", "timeline", "map", "chat"]); // chat keeps its lower half
+      expect(shown(chat, ex("map", "column")).cells).toEqual(["map", "map", "chat", "chat"]);
+      expect(full.cells).toEqual(["map", "timeline", "steps", "chat"]);
+    });
+
+    it("moves as a whole column, taking the hidden window along", () => {
+      const page = p("map", "timeline", "chat", "chat");
+      const moved = moveShown(page, ex("map", "column"), 0, 2);
+      expect(moved.cells).toEqual(["chat", "chat", "map", "timeline"]);
+      expect(inventory(moved)).toEqual(inventory(page));
+    });
+
+    it("moves as a whole row; a half-covered chat stays a column", () => {
+      const page = p("map", "timeline", "chat", "chat");
+      const moved = moveShown(page, ex("map", "row"), 0, 1);
+      expect(moved.cells).toEqual(["timeline", "map", "chat", "chat"]);
+      expect(shown(moved, ex("map", "row")).cells).toEqual(["timeline", "map", "chat", "map"]);
+    });
+
+    it("trades places with a window dropped on it, which lands where it was dropped", () => {
+      const page = p("map", "timeline", "steps", "chat");
+      const moved = moveShown(page, ex("map", "column"), 2, 1); // steps dropped on the lower half
+      expect(moved.cells).toEqual(["chat", "steps", "map", "timeline"]);
+      expect(inventory(moved)).toEqual(inventory(page));
+    });
+
+    it("moves the other windows as usual", () => {
+      const page = p("map", "timeline", "steps", null);
+      expect(moveShown(page, ex("map", "column"), 2, 3).cells).toEqual(["map", "timeline", null, "steps"]);
+      expect(moveShown(page, null, 0, 3).cells).toEqual(move(page, 0, 3).cells);
+    });
+
+    it("cannot move over the whole page", () => {
+      expect(moveShown(full, ex("map", "full"), 0, 3)).toBe(full);
+    });
   });
 });

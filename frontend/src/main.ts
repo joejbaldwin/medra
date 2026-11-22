@@ -42,6 +42,8 @@ const els = {
   answer: $<HTMLDivElement>("answer"),
   chatError: $<HTMLParagraphElement>("chat-error"),
   chatNotice: $<HTMLParagraphElement>("chat-notice"),
+  progress: $<HTMLParagraphElement>("chat-progress"),
+  progressText: $<HTMLSpanElement>("chat-progress-text"),
   status: $<HTMLSpanElement>("status"),
   reasoningIcon: $<HTMLSpanElement>("reasoning-icon"),
   statsOpen: $<HTMLButtonElement>("stats-open"),
@@ -97,6 +99,31 @@ function setRunning(on: boolean): void {
   els.send.title = label;
   els.modeBadge.classList.toggle("running", on);
 }
+
+// ---------------------------------------------------------------- progress
+
+// Before any text arrives the page can wait a while: the Cloud Run server is
+// scaled to zero and takes a few seconds to start (and load spaCy) after a
+// quiet spell, and a live model can take time to begin. A line in the chat
+// says what it is waiting for, so the page never looks frozen. Each step is
+// [delay in ms, message]: later steps replace earlier ones if the wait drags on.
+let progressTimers: number[] = [];
+function progress(steps: [number, string][]): void {
+  for (const t of progressTimers) clearTimeout(t);
+  progressTimers = [];
+  els.progress.hidden = true;
+  for (const [after, message] of steps) {
+    const show = () => {
+      els.progressText.textContent = message;
+      els.progress.hidden = false;
+    };
+    if (after <= 0) show();
+    else progressTimers.push(window.setTimeout(show, after));
+  }
+}
+
+const WAKING = "Arrancando el servidor de análisis…";
+const WAKING_SLOW = "Arrancando el servidor de análisis… Se apaga tras un rato sin uso y tarda unos segundos en volver.";
 
 // ---------------------------------------------------------------- word positions
 
@@ -283,6 +310,7 @@ function handle(msg: ServerMessage): void {
       renderStats();
       break;
     case "text":
+      if (!els.progress.hidden && msg.chunk.text) progress([]);
       if (msg.chunk.channel === "reasoning") reasoning += msg.chunk.text;
       else if (msg.chunk.channel === "answer") answer += msg.chunk.text;
       scheduleText();
@@ -322,6 +350,7 @@ function showError(message: string): void {
 
 /** The stream is over (ended, failed or stopped): settle every view on what arrived. */
 function finish(): void {
+  progress([]);
   live = false;
   setRunning(false);
   text.setStreaming(false);
@@ -455,6 +484,8 @@ async function start(): Promise<void> {
   traceTitle = mode === "replay" ? (currentSample()?.title ?? "Traza grabada") : mode === "paste" ? "Texto pegado" : sourceLabel(config.source);
   els.reasoningBlock.hidden = false;
   setStatus("idle", "Conectando…");
+  // A warm server answers at once; if it takes longer, it is starting up.
+  progress([[0, "Conectando con el servidor…"], [2000, WAKING], [9000, WAKING_SLOW]]);
   if (mode === "live") els.input.value = ""; // the question now shows as a message
   autoGrow();
   try {
@@ -473,9 +504,17 @@ async function start(): Promise<void> {
     const wsBase = BACKEND ? BACKEND.replace(/^http/, "ws") : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}`;
     const socket = new WebSocket(`${wsBase}/sessions/${session_id}`);
     ws = socket;
+    progress([[0, "Abriendo la sesión…"]]);
     socket.onopen = () => {
       live = true;
       text.setStreaming(true);
+      if (mode === "live") {
+        const model = sourceLabel(config.source);
+        progress([
+          [0, `Pregunta enviada a ${model}. Esperando su respuesta…`],
+          [12000, `${model} todavía no ha empezado a escribir; a veces tarda cuando está saturado.`],
+        ]);
+      } else progress([[0, "Preparando la reproducción…"]]);
       // Recorded and pasted text is a replay; only a model generates live.
       setStatus("live", mode === "live" ? "En directo" : "Reproduciendo");
     };
@@ -489,6 +528,7 @@ async function start(): Promise<void> {
     };
   } catch (err) {
     if (mine !== token) return;
+    progress([]);
     setRunning(false);
     setStatus("error", "No iniciada");
     showError(`No se pudo iniciar la sesión: ${(err as Error).message}`);
@@ -609,14 +649,18 @@ async function loadSources(): Promise<void> {
 const DEFAULT_SAMPLE = "odd-sum-en";
 
 async function loadSamples(): Promise<void> {
+  // The first request after a quiet spell wakes the server: say so if it is slow.
+  progress([[800, WAKING], [8000, WAKING_SLOW]]);
   try {
     const res = await fetch(`${BACKEND}/datasets`);
+    progress([]);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     samples = (await res.json()) as SampleInfo[];
     els.sample.replaceChildren(...samples.map((s) => new Option(`${s.title} (${s.language}, ${s.words} palabras)`, s.id)));
     if (samples.some((s) => s.id === DEFAULT_SAMPLE)) els.sample.value = DEFAULT_SAMPLE;
     updateComposer();
   } catch {
+    progress([]);
     setStatus("error", "Backend no disponible");
     showError("No se puede conectar con el servidor de análisis. Comprueba que el backend está en marcha.");
     els.send.disabled = true;

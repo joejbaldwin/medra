@@ -84,6 +84,8 @@
         </div>
         <div id="stream" class="stream" aria-live="off"></div>
       </div>
+      <!-- What the page is waiting for before the first text arrives (server waking up, the model starting). -->
+      <p class="chat-progress" id="chat-progress" role="status" hidden><span class="spinner" aria-hidden="true"></span><span id="chat-progress-text"></span></p>
       <div class="msg-answer" id="answer-block" hidden>
         <div class="msg-head">
           <svg class="msg-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v4h4M9 12h6M9 15.5h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>

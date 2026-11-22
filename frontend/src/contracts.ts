@@ -525,4 +525,8 @@ export interface SourceInfo {
    * Why it is unavailable, or a warning to show.
    */
   note: string | null;
+  /**
+   * Starting a session needs an access code (deployed backend).
+   */
+  needs_code: boolean;
 }

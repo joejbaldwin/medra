@@ -1,0 +1,12 @@
+# Files uploaded to Cloud Build by scripts/deploy_cloudrun.py: only what the
+# Dockerfile needs (gitignore syntax: exclude everything, then re-include).
+/*
+!/Dockerfile
+!/.dockerignore
+!/backend/
+!/data/
+/data/*
+!/data/samples/
+__pycache__/
+*.egg-info/
+.pytest_cache/

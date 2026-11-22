@@ -429,6 +429,26 @@ select {
 .win-chat.collapsed .composer-dock { padding: 10px 12px 12px; }
 .win-chat.collapsed .composer { padding-top: 8px; padding-bottom: 8px; }
 
+/* ---------------------------------------------------------------- access code (deployed backend) */
+.code-dialog {
+  width: min(420px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--line); border-radius: 18px;
+  background: var(--surface); color: var(--fg); box-shadow: var(--shadow-lg);
+}
+.code-dialog::backdrop { background: var(--backdrop); backdrop-filter: blur(1.5px); }
+.code-dialog[open] { animation: pop .18s ease-out; }
+.code-inner { display: flex; flex-direction: column; gap: 12px; padding: 22px 24px 20px; }
+.code-inner h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+.code-inner p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
+.code-inner input {
+  height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2);
+  color: var(--fg); font-size: 15px; outline: none;
+}
+.code-inner input:focus { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: 0 0 0 3px var(--accent-soft); }
+.code-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.code-actions button { height: 36px; padding: 0 16px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.code-cancel { border: 1px solid var(--line); background: transparent; color: var(--fg); }
+.code-ok { border: 0; background: var(--accent); color: var(--on-accent); }
+
 /* ---------------------------------------------------------------- statistics popup */
 .stats-dialog {
   width: min(980px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line);

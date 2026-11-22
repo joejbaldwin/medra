@@ -35,8 +35,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 # 1.3 (step 5): SessionConfig gains the paste/deepseek/ollama sources (text, prompt; sample
 #     becomes optional) and SourceInfo for GET /sources.
 # 1.4 (step 6): SampleInfo.prompt, so the dashboard can show a trace's prompt before playing it.
+# 1.5 (step 7): SourceInfo.needs_code, so the dashboard asks for an access code.
 # Minor versions only add fields with defaults, so 1.0 producers stay valid.
-SCHEMA_VERSION = "1.4"
+SCHEMA_VERSION = "1.5"
 
 Span = tuple[int, int]
 """Half-open character range [start, end) into the reasoning text."""
@@ -398,6 +399,7 @@ class SourceInfo(_Model):
     label: str
     available: bool
     note: str | None = Field(default=None, description="Why it is unavailable, or a warning to show.")
+    needs_code: bool = Field(default=False, description="Starting a session needs an access code (deployed backend).")
 
 
 class SessionCreated(_Model):

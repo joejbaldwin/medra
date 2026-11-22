@@ -138,6 +138,19 @@
     </div>
   </dialog>
 
+  <!-- Asked once per tab before the first live session on the deployed backend (step 7). -->
+  <dialog id="code-dialog" class="code-dialog" aria-labelledby="code-title" aria-describedby="code-sub">
+    <form method="dialog" class="code-inner">
+      <h2 id="code-title">Código de acceso</h2>
+      <p id="code-sub">Las preguntas en directo usan el crédito de API del grupo. Las trazas de ejemplo y el texto pegado no necesitan código.</p>
+      <input id="code-input" type="password" autocomplete="off" spellcheck="false" aria-labelledby="code-title" required>
+      <div class="code-actions">
+        <button type="button" class="code-cancel" value="cancel">Cancelar</button>
+        <button type="submit" class="code-ok" value="ok">Continuar</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="picker" class="picker" aria-labelledby="picker-title" aria-describedby="picker-sub">
     <div class="picker-inner">
       <div class="picker-head">

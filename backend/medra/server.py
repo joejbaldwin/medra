@@ -5,7 +5,10 @@
 Sources: replay (sample traces), paste (text from the dashboard), deepseek
 (live, uses the group's API credit) and ollama (local model). Live sessions
 can be switched off with MEDRA_LIVE_DISABLED=1, and only one DeepSeek session
-runs at a time. Access codes and per-code budgets arrive in step 7.
+runs at a time. When MEDRA_ACCESS_CODES is set (the deployed Space), a
+DeepSeek session also needs an access code with budget left (access.py),
+sent in the X-Access-Code header of POST /sessions. The WebSocket needs no
+code: its session id is a one-time secret that only an accepted POST returns.
 """
 
 from __future__ import annotations
@@ -17,7 +20,10 @@ from collections import OrderedDict
 from contextlib import asynccontextmanager
 
 import httpx
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+
+from medra.access import AccessCodes, AccessDenied
 
 from medra.contracts import ErrorMessage, SampleInfo, SessionConfig, SessionCreated, SourceInfo
 from medra.mining import TextMiner
@@ -56,12 +62,31 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="MeDRA", lifespan=lifespan)
+# The dashboard on GitHub Pages is another origin. Only the listed origins may
+# call the API from a browser; the access code header must be allowed too.
+# (Settings are read once here: CORS is configured when the app is built.)
+if get_settings().allowed_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_settings().allowed_origins,
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type", "X-Access-Code"],
+    )
 
 # Sessions created but not yet connected. Bounded so abandoned ones don't pile up.
 MAX_PENDING = 100
 pending: OrderedDict[str, SessionConfig] = OrderedDict()
 # One DeepSeek session at a time, so a stuck tab or a script cannot spend the credit in parallel.
 deepseek_busy = asyncio.Lock()
+_access: AccessCodes | None = None
+
+
+def access_codes(s: Settings) -> AccessCodes:
+    """The budget tracker for the configured codes (rebuilt only if the codes change)."""
+    global _access
+    if _access is None or _access.budgets != s.access_codes:
+        _access = AccessCodes(s.access_codes)
+    return _access
 
 
 @app.get("/health")
@@ -86,8 +111,9 @@ async def sources() -> list[SourceInfo]:
             label=model_label(s.deepseek_model),
             available=bool(s.deepseek_api_key) and not s.live_disabled,
             note=off or (LIVE_NOTE if s.deepseek_api_key else "No hay clave de API configurada en el servidor."),
+            needs_code=bool(s.access_codes),
         ),
-        await _ollama_info(s, off),
+        *([await _ollama_info(s, off)] if s.ollama_url else []),
     ]
 
 
@@ -106,7 +132,7 @@ async def _ollama_up(url: str) -> bool:
 
 
 @app.post("/sessions")
-def create_session(config: SessionConfig) -> SessionCreated:
+def create_session(config: SessionConfig, x_access_code: str | None = Header(default=None)) -> SessionCreated:
     s = get_settings()
     if config.source == "replay":
         try:
@@ -117,6 +143,13 @@ def create_session(config: SessionConfig) -> SessionCreated:
         raise HTTPException(status_code=503, detail="Las fuentes en directo están desactivadas.")
     if config.source == "deepseek" and not s.deepseek_api_key:
         raise HTTPException(status_code=503, detail="No hay clave de API de DeepSeek configurada.")
+    if config.source == "ollama" and not s.ollama_url:
+        raise HTTPException(status_code=503, detail="Ollama no está disponible en este servidor.")
+    if config.source == "deepseek":
+        try:
+            access_codes(s).spend(x_access_code)  # last check, so a rejected request costs no budget
+        except AccessDenied as exc:
+            raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
     session_id = secrets.token_urlsafe(9)
     pending[session_id] = config
     while len(pending) > MAX_PENDING:

@@ -384,11 +384,56 @@ function sessionConfig(): SessionConfig | string {
   return config;
 }
 
+// ---------------------------------------------------------------- access code
+
+// The deployed backend asks for an access code before a live DeepSeek session
+// (it spends the group's credit). The code is kept for this tab only and sent
+// in a header; the server checks it and counts the daily budget.
+const CODE_KEY = "medra.accessCode";
+const codeDialog = $<HTMLDialogElement>("code-dialog");
+const codeInput = $<HTMLInputElement>("code-input");
+
+function askAccessCode(): Promise<string | null> {
+  return new Promise((resolve) => {
+    codeInput.value = "";
+    const cancel = codeDialog.querySelector<HTMLButtonElement>(".code-cancel")!;
+    const onCancel = () => codeDialog.close("cancel");
+    cancel.addEventListener("click", onCancel, { once: true });
+    codeDialog.addEventListener(
+      "close",
+      () => {
+        cancel.removeEventListener("click", onCancel);
+        const code = codeInput.value.trim();
+        resolve(codeDialog.returnValue === "ok" && code ? code : null);
+      },
+      { once: true },
+    );
+    codeDialog.returnValue = "";
+    codeDialog.showModal();
+    codeInput.focus();
+  });
+}
+
+/** The access code for a session from `source`: undefined if none is needed, null if the user cancelled. */
+async function accessCodeFor(source: string): Promise<string | null | undefined> {
+  if (!sourceInfo.find((s) => s.id === source)?.needs_code) return undefined;
+  const stored = sessionStorage.getItem(CODE_KEY);
+  if (stored) return stored;
+  const code = await askAccessCode();
+  if (code) sessionStorage.setItem(CODE_KEY, code);
+  return code;
+}
+
 async function start(): Promise<void> {
   const config = sessionConfig();
   if (typeof config === "string") {
     setHint(config, true);
     els.input.focus();
+    return;
+  }
+  const code = await accessCodeFor(config.source);
+  if (code === null) {
+    setHint("Hace falta un código de acceso para preguntar al modelo.", true);
     return;
   }
   resetSession();
@@ -415,10 +460,11 @@ async function start(): Promise<void> {
   try {
     const res = await fetch(`${BACKEND}/sessions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(code ? { "X-Access-Code": code } : {}) },
       body: JSON.stringify(config),
     });
     if (!res.ok) {
+      if (res.status === 401) sessionStorage.removeItem(CODE_KEY); // wrong code: ask again next time
       const detail = await res.json().then((b: { detail?: unknown }) => b.detail, () => null);
       throw new Error(typeof detail === "string" ? detail : `HTTP ${res.status}`);
     }

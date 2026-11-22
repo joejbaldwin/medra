@@ -82,7 +82,8 @@ The **Fuente** menu picks where the text comes from:
 
 Copy `.env.example` to `.env` and put the DeepSeek key there; it is read only by the backend and
 never sent to the browser or logged. Only one DeepSeek session runs at a time, and
-`MEDRA_LIVE_DISABLED=1` switches off both live sources. Questions sent to DeepSeek leave this
+`MEDRA_LIVE_DISABLED=1` switches off both live sources. On the deployed backend a DeepSeek
+question also needs an access code (see [Deploy](#deploy)); locally it does not. Questions sent to DeepSeek leave this
 machine, so don't type personal data.
 
 Each layer is also a command reading and writing JSON Lines:
@@ -135,10 +136,42 @@ selected, and `--step N` one with the step graph added and the N-th step selecte
 `--source paste --paste-file FILE` captures pasted text instead, and `--source deepseek --prompt "..."`
 a live run (each colour scheme is one API call, so add `--schemes light`).
 
+## Deploy
+
+The backend runs on Google Cloud Run and the dashboard on GitHub Pages.
+
+**Backend.** The [Dockerfile](Dockerfile) holds only the backend and the sample traces. Try it
+locally with `docker build -t medra . && docker run -p 7860:7860 --env-file .env medra`. To
+publish it, you need the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) and a project
+with billing on (the free tier covers this use):
+
+```sh
+gcloud auth login
+.venv/Scripts/python scripts/deploy_cloudrun.py --project <project-id> --secrets   # first time
+.venv/Scripts/python scripts/deploy_cloudrun.py --project <project-id>             # redeploys
+```
+
+`--secrets` copies `DEEPSEEK_API_KEY` and `MEDRA_DEPLOY_ACCESS_CODES` (`code:n,code:n`, where n is
+DeepSeek sessions per UTC day for that code) from `.env` into Secret Manager. It never prints them.
+The service sees the codes as `MEDRA_ACCESS_CODES`. The script runs one instance with 1 GiB of
+memory, scales to zero when idle (so the first request after a pause waits a few seconds), and
+allows browser calls only from `https://joejbaldwin.github.io`.
+
+With access codes set, a DeepSeek question asks once per tab for a code (the `X-Access-Code`
+header of `POST /sessions`). The answer is 401 for a wrong code and 429 when the code's daily
+budget is used up. Recorded traces and pasted text never need a code. The counts are kept in
+memory, so they also reset when the instance restarts. `MEDRA_MAX_TOKENS` caps the cost of each
+session, and `MEDRA_LIVE_DISABLED=1` is the kill switch.
+
+**Dashboard.** [.github/workflows/pages.yml](.github/workflows/pages.yml) builds `frontend/` and
+publishes it on each push to `main` that touches the frontend. It reads the backend's URL from the
+repository variable `MEDRA_BACKEND_URL` (*Settings → Secrets and variables → Actions →
+Variables*). Turn on Pages under *Settings → Pages → Source: GitHub Actions*.
+
 ## Contracts
 
 The messages between layers are Pydantic models in [backend/medra/contracts.py](backend/medra/contracts.py),
-frozen as schema v1 in [docs/contracts/v1.schema.json](docs/contracts/v1.schema.json) (currently 1.4;
+frozen as schema v1 in [docs/contracts/v1.schema.json](docs/contracts/v1.schema.json) (currently 1.5;
 minor versions only add fields with defaults). The dashboard's TypeScript types are generated from
 that schema. After changing a contract, bump `SCHEMA_VERSION`, then:
 

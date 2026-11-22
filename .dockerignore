@@ -1,0 +1,8 @@
+# Keep the Docker build context small: only backend/ and data/samples/ are copied.
+**
+!Dockerfile
+!backend/
+!data/samples/
+backend/**/__pycache__
+backend/**/*.egg-info
+backend/.pytest_cache

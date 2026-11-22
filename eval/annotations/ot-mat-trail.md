@@ -1,6 +1,7 @@
 ---
 trace: ot-mat-trail
-annotator: claude-draft
+annotator: Joe
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [trail, length, percentage, fraction, option, Jitka]
 topics:

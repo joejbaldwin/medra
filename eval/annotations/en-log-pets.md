@@ -1,6 +1,7 @@
 ---
 trace: en-log-pets
-annotator: claude-draft
+annotator: Juan
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [dog owner, parrot, house, Alice, Ben, Chloe, cat, dog, solution]
 topics:

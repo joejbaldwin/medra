@@ -1,6 +1,7 @@
 ---
 trace: en-mat-coins
-annotator: claude-draft
+annotator: Joe
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [penny, nickel, dime, quarter, half-dollar, dollar coin, combination, recurrence]
 topics:

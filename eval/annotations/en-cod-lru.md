@@ -1,6 +1,7 @@
 ---
 trace: en-cod-lru
-annotator: claude-draft
+annotator: Kostya
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [LRU cache, doubly linked list, hash map, node, capacity, sentinel, dict, OrderedDict]
 topics:

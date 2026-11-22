@@ -1,6 +1,7 @@
 ---
 trace: en-log-knights
-annotator: claude-draft
+annotator: Kostya
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [knight, knave, statement, truth value, liar, equation, inclusive, exclusive]
 topics:

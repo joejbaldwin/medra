@@ -1,6 +1,7 @@
 ---
 trace: en-mat-semicircle
-annotator: claude-draft
+annotator: Joe
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [rectangle, semicircle, diameter, area, derivative, vertex, arc, radius]
 topics:

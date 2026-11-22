@@ -1,6 +1,7 @@
 ---
 trace: ot-cod-yen
-annotator: claude-draft
+annotator: Kostya
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [1000-yen bill, change, multiple of 1000, ceiling, floor division, modulo, formula]
 topics:

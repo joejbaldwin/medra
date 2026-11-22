@@ -1,6 +1,7 @@
 ---
 trace: en-mat-clock
-annotator: claude-draft
+annotator: Juan
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [right angle, minute hand, hour hand, relative angle, clock, endpoint, degree]
 topics:

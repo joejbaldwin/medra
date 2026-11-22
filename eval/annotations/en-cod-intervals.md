@@ -1,6 +1,7 @@
 ---
 trace: en-cod-intervals
-annotator: claude-draft
+annotator: Laith
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [interval, touching intervals, unsorted input, validation, edge case, start, end, closed interval]
 topics:

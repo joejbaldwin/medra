@@ -1,6 +1,7 @@
 ---
 trace: en-mat-trains
-annotator: claude-draft
+annotator: Juan
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [train, Zaragoza, Madrid, Barcelona, meeting time, distance, speed, stop]
 topics:

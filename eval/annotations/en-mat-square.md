@@ -1,6 +1,7 @@
 ---
 trace: en-mat-square
-annotator: claude-draft
+annotator: Laith
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [perfect square, factor pair, prime, positive integer, parity, expression]
 topics:

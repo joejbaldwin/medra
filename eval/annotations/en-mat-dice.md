@@ -1,6 +1,7 @@
 ---
 trace: en-mat-dice
-annotator: claude-draft
+annotator: Laith
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [probability, dice, outcome, nonnegative solution, generating function, inclusion-exclusion, permutation,
   triple]

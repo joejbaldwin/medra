@@ -1,6 +1,7 @@
 ---
 trace: ot-log-krakozyabrs
-annotator: claude-draft
+annotator: Kostya
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [krakozyabr, horns, wings, total, multiple of 8, integer, census]
 topics:

@@ -1,6 +1,7 @@
 ---
 trace: en-cod-search
-annotator: claude-draft
+annotator: Joe
+drafted_by: Claude (AI assistant), to be corrected
 status: draft
 concepts: [binary search, infinite loop, lower_bound, mid, empty list, duplicates, insertion point, short-circuit]
 topics:

@@ -35,16 +35,19 @@ MIN_JACCARD = 0.2
 SEED = 0
 
 
-def communities(sentence_terms: list[list[str]], counts: dict[str, int]) -> list[list[str]]:
-    """Term communities, largest first (by total mentions), each sorted by count."""
+def communities(
+    sentence_terms: list[list[str]], counts: dict[str, int], window: int = WINDOW, min_count: int = MIN_TERM_COUNT
+) -> list[list[str]]:
+    """Term communities, largest first (by total mentions), each sorted by count.
+    window and min_count default to the module constants (the evaluation varies them)."""
     weights: Counter[tuple[str, str]] = Counter()
-    for i in range(max(1, len(sentence_terms) - WINDOW + 1)):
-        together = sorted({t for terms in sentence_terms[i : i + WINDOW] for t in terms if t in counts})
+    for i in range(max(1, len(sentence_terms) - window + 1)):
+        together = sorted({t for terms in sentence_terms[i : i + window] for t in terms if t in counts})
         for a, b in combinations(together, 2):
             if not _nested(a, b):
                 weights[(a, b)] += 1
 
-    keep = {t for t, n in counts.items() if n >= MIN_TERM_COUNT}
+    keep = {t for t, n in counts.items() if n >= min_count}
     graph = nx.Graph()
     graph.add_nodes_from(sorted(keep))  # insertion order matters to Louvain: keep it fixed
     graph.add_weighted_edges_from((a, b, w) for (a, b), w in sorted(weights.items()) if a in keep and b in keep)

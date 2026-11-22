@@ -136,6 +136,38 @@ selected, and `--step N` one with the step graph added and the N-th step selecte
 `--source paste --paste-file FILE` captures pasted text instead, and `--source deepseek --prompt "..."`
 a live run (each colour scheme is one API call, so add `--schemes light`).
 
+## Evaluation
+
+`eval/` measures the miner against hand annotations (build plan §8). Run from the repo root:
+
+```sh
+.venv/Scripts/python -m pip install -e "backend[eval]"   # matplotlib, pytest
+.venv/Scripts/python -m eval.annotations --check          # every annotation matches its trace
+.venv/Scripts/python -m eval.tune                         # grid search on dev, scored on test + LOOCV
+.venv/Scripts/python -m eval.run                          # all metrics -> eval/results/results.md
+.venv/Scripts/python -m eval.bench                        # ms per update on a 30,000-word stream
+.venv/Scripts/python -m eval.figures                      # PNG figures for the report
+.venv/Scripts/python -m pytest eval                       # the metrics' own tests
+```
+
+- **Data.** `eval/traces/`: 16 English reasoning traces, 12 recorded from DeepSeek in thinking
+  mode (`eval/record_traces.py`) and 4 DeepSeek-R1 traces from OpenThoughts-114k
+  (`eval/fetch_openthoughts.py`). `eval/annotations/<id>.md`: the same text with a `[[type]]` tag
+  where each reasoning step starts, plus the key concepts and topics. `GUIDE.md` (Spanish)
+  explains how to annotate. The drafts were written by an AI assistant and are corrected by the
+  group; only files with `status: corrected` count. `--drafts` runs the scripts on the drafts as
+  well, for testing the code, and writes to `eval/results/drafts/` (not committed).
+- **Segmentation.** Pk and WindowDiff (lower is better) and boundary F1 (within one sentence)
+  against baselines: fixed-size segments, a boundary at every blank line, at every discourse
+  marker, and TextTiling.
+- **Step types, concepts, topics.** Accuracy and macro-F1 of the step type at each reference
+  boundary, P/R/F1 of the bubbles against the annotated concepts, and B-cubed F1 of the topics
+  (Louvain vs agglomerative clustering). Agreement between annotators on traces annotated twice.
+- **"Fine-tuning"** means tuning the segmenter's parameters (`SegParams` in
+  `backend/medra/mining/segment.py`) by grid search on a fixed dev split (seed 0, stratified by
+  source model). Results are reported once on test and with leave-one-out cross-validation. No
+  model is trained.
+
 ## Deploy
 
 The backend runs on Google Cloud Run and the dashboard on GitHub Pages.

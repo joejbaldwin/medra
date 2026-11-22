@@ -20,6 +20,7 @@ dist/
 # Data and outputs too large to commit
 data/raw/
 eval/results/*.jsonl
+eval/results/drafts/
 
 # Report screenshots (regenerate with scripts/screenshots.py)
 screenshots/

@@ -30,6 +30,11 @@ def test_basic_and_pending_tail():
         ('He said "stop." Then left.', ['He said "stop."', "Then left."]),
         ("Is it 9? 9 it is.", ["Is it 9?", "9 it is."]),
         ("Hmm, no. Let me check.", ["Hmm, no.", "Let me check."]),
+        # A list number does not end a sentence, unless the line ends after it.
+        ("Clues:\n1. Ann is here.\n2. Ben does not own the cat.",
+         ["Clues:", "1. Ann is here.", "2. Ben does not own the cat."]),
+        ("The total is\n10.\nDone.", ["The total is", "10.", "Done."]),
+        ("It has 3 sides. 4. Next one.", ["It has 3 sides.", "4. Next one."]),
     ],
 )
 def test_rules(text, expected):

@@ -11,7 +11,9 @@ A boundary is:
 - . ! ? … (plus closing quotes/brackets) followed by whitespace and then a
   character that can start a sentence. For "." the next character must be
   uppercase, a digit or an opening mark, and the word before must not be a
-  known abbreviation ("e.g.", "Dr.", "p. ej.").
+  known abbreviation ("e.g.", "Dr.", "p. ej."), and
+- not the "." of a list number that opens the sentence ("2. Ben does not
+  own the cat" is one sentence), unless the line ends right after it.
 """
 
 from __future__ import annotations
@@ -27,6 +29,7 @@ ABBREVIATIONS = {
     "p.ej", "ej", "sr", "sra", "srta", "dra", "aprox", "núm", "pág", "pp", "ud", "uds",
 }
 _WORD_BEFORE = re.compile(r"([\w.]+)$")
+_LIST_NUMBER = re.compile(r"\d{1,3}")
 
 
 def find_sentences(masked: str, offset: int, limit: int, final: bool) -> tuple[list[tuple[int, int]], int]:
@@ -49,6 +52,8 @@ def find_sentences(masked: str, offset: int, limit: int, final: bool) -> tuple[l
         if m is None:
             break
         decision = _is_boundary(masked, m, limit, final)
+        if decision and _list_number(masked, sent_start, m, limit):
+            decision = False
         if decision is None:  # need more text to decide
             return spans, sent_start
         if decision:
@@ -83,6 +88,16 @@ def _is_boundary(masked: str, m: re.Match, limit: int, final: bool) -> bool | No
     if _spanish_p_ej(masked, m.start()):
         return False
     return nxt.isupper() or nxt.isdigit() or nxt in _OPENING
+
+
+def _list_number(masked: str, sent_start: int, m: re.Match, limit: int) -> bool:
+    """A "." right after a bare list number ("2.") at the start of a sentence,
+    with more text on the same line. _is_boundary has already seen the next
+    non-space character, so this needs no extra lookahead."""
+    if m.group() != "." or not _LIST_NUMBER.fullmatch(masked[sent_start : m.start()].strip()):
+        return False
+    rest = masked[m.end() : limit].lstrip(" \t")
+    return bool(rest) and rest[0] != "\n"
 
 
 def _spanish_p_ej(masked: str, period: int) -> bool:

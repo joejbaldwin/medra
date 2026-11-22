@@ -1,0 +1,25 @@
+{
+  "id": "en-mat-square",
+  "title": "Perfect square",
+  "language": "en",
+  "prompt": "Find all positive integers n such that n^2 + 2n + 12 is a perfect square, and prove that there are no others. Then do the same for n^2 + 6n + 50.",
+  "reasoning": "We need answer. Need solve both. Need find positive integers n such that expression square, prove exhaustive.\n\nLet x^2 = n^2 + 2n + 12 = (n+1)^2 + 11. Let m = n+1 positive >=2. Then m^2 + 11 = x^2. So x^2 - m^2 = 11 => (x-m)(x+m)=11. Positive factors. Since 11 prime. x>m positive. Factor pairs (1,11) or? x-m and x+m positive integers same parity. Product 11 odd -> both odd. Let x-m=1, x+m=11 => x=6,m=5. n=m-1=4. Check 16+8+12=36. If negative factor? x+m positive, x-m could? x^2 > m^2 so x>m for positive? Expression bigger than m^2? m^2+11, x positive; x>m. so positive. only n=4. Nice.\n\nSecond: n^2+6n+50. Complete square (n+3)^2 +41? n^2+6n=(n+3)^2-9, +50 = (n+3)^2+41. Need square. Let m=n+3 >=4. x^2 = m^2+41. Then (x-m)(x+m)=41 prime. Solutions x-m=1, x+m=41 => x=21,m=20 => n=17. Check 289+102+50=441=21^2. But wait also factor pair? 41 prime, positive. Same parity both odd. Only. However need be careful n positive integer, m>=4. Solution m=20 -> n=17. Is there any other factor pair (41,1) yields x-m=41, x+m=1 impossible. Could x-m negative? no.\n\nBut wait the problem asks \"Then do the same for n^2+6n+50.\" Seems simple. But perhaps there are multiple? Let's check if m could be? x^2 - m^2 = 41. Since 41 prime, yes only n=17. But maybe if considering x-m and x+m negative? x positive can choose x nonnegative. Fine.\n\nNeed craft final with proof no others. Need mention perfect square integer square. Positive n. Could present both. Need maybe address x nonnegative. For expression positive, if y^2 equals it, take y positive. Then y>n+1 for first; factor.\n\nBut wait first expression: n^2+2n+12 = (n+1)^2+11. If y^2 = ..., then y^2 - (n+1)^2=11. Factors (y-(n+1))(y+(n+1))=11. Need note y>n+1 since y^2 bigger than (n+1)^2. Both positive factors. Since product 11, smaller positive divisor 1. Then y-(n+1)=1 and y+(n+1)=11. Solve n+1=5 n=4. Done.\n\nSecond similarly y^2=(n+3)^2+41. y>n+3. Difference factors =41. Only y-(n+3)=1, y+(n+3)=41. Solve n+3=20 n=17. Good.\n\nNeed perhaps mention factorization of primes. Since 11 and 41 primes. If product equals p, positive factors 1,p. Same parity automatic? For p odd, x,m parity? If product odd, factors odd. Equations solve.\n\nNeed maybe final answer no others. Desired oververbosity 5, keep concise. The prompt says \"Then do the same\" perhaps wants both fully proven. We can structure.\n\nLet's draft final.",
+  "answer": "For the first expression, suppose\n\\[\nn^2+2n+12=k^2\n\\]\nfor some positive integer \\(k\\). Completing the square gives\n\\[\n(n+1)^2+11=k^2,\n\\]\nso\n\\[\nk^2-(n+1)^2=11.\n\\]\nThus\n\\[\n(k-(n+1))(k+(n+1))=11.\n\\]\nSince \\(k^2=(n+1)^2+11>(n+1)^2\\), we have \\(k>n+1\\), so both factors are positive. Also \\(11\\) is prime, so the only possibility is\n\\[\nk-(n+1)=1,\\qquad k+(n+1)=11.\n\\]\nAdding gives \\(2k=12\\), so \\(k=6\\), and then \\(n+1=5\\), hence\n\\[\nn=4.\n\\]\nIndeed,\n\\[\n4^2+2\\cdot 4+12=16+8+12=36=6^2.\n\\]\nTherefore the only positive integer solution is\n\\[\n\\boxed{n=4}.\n\\]\n\nFor the second expression, suppose\n\\[\nn^2+6n+50=k^2.\n\\]\nCompleting the square,\n\\[\nn^2+6n+50=(n+3)^2+41,\n\\]\nso\n\\[\nk^2-(n+3)^2=41.\n\\]\nHence\n\\[\n(k-(n+3))(k+(n+3))=41.\n\\]\nSince \\(41\\) is prime and \\(k>n+3\\), the only positive factorization is\n\\[\nk-(n+3)=1,\\qquad k+(n+3)=41.\n\\]\nAdding gives \\(2k=42\\), so \\(k=21\\), and then\n\\[\nn+3=20,\n\\]\nso\n\\[\nn=17.\n\\]\nIndeed,\n\\[\n17^2+6\\cdot 17+50=289+102+50=441=21^2.\n\\]\nTherefore the only positive integer solution is\n\\[\n\\boxed{n=17}.\n\\]\n\nThus the complete answers are:\n\\[\n\\boxed{n=4 \\text{ for } n^2+2n+12,}\n\\]\nand\n\\[\n\\boxed{n=17 \\text{ for } n^2+6n+50.}\n\\]",
+  "origin": "Razonamiento real de DeepSeek (deepseek-flash, modo thinking), grabado el 2026-11-22 con eval/record_traces.py; sin editar.",
+  "meta": {
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 76,
+      "completion_tokens": 1320,
+      "total_tokens": 1396,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 811
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 76
+    }
+  }
+}

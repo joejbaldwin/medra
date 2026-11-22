@@ -1,0 +1,25 @@
+{
+  "id": "en-mat-dice",
+  "title": "Sum of three dice",
+  "language": "en",
+  "prompt": "I roll three ordinary six-sided dice. What is the probability that the sum is exactly 10? Check it in two different ways.",
+  "reasoning": "We need answer. Need solve and check two ways. Need be careful. Probability sum exactly 10 for 3d6. Total outcomes 6^3=216. Count ordered triples (a,b,c in 1..6) sum 10.\n\nLet xi=a-1 etc nonnegative 0..5, sum xi=7. Count nonnegative solutions sum7 minus those with xi>=6. Without upper: C(7+3-1,2)=C(9,2)=36. Invalid: one xi>=6, set yi=xi-6 sum=1 -> C(1+3-1,2)=C(3,2)=3 per variable, three variables =9? Need check overlaps none since sum 7 can't have two >=6? two min 12 >7. Count 27. Probability 27/216 =1/8.\n\nNeed check two ways. Way1 generating functions: coefficient of x^10 in (x+x^2+...+x^6)^3. Equivalent coefficient x^7 in (1+x+...+x^5)^3 = ((1-x^6)/(1-x))^3. coefficient x^7 in (1-x^6)^3 (1-x)^-3. Coefficient x^7 of (1-x)^-3 minus 3 coeff x^1 of (1-x)^-3? Let's compute: (1 -3x^6+...)* sum C(n+2,2)x^n. x7 coefficient = C(9,2) -3*C(? for x1 in inverse) wait x^7 term from -3x^6 * coeff x^1 of (1-x)^-3 = -3*C(1+2,2)= -3*3=-9. 36-9=27. Good.\n\nWay2 inclusion-exclusion or perhaps explicit combinations. Need phrase check two different ways. Maybe list dice sum combinations and permutations.\n\nUnordered sums of three positive <=6 equal 10:\n1,3,6 permutations 6\n1,4,5 permutations 6\n2,2,6 permutations 3\n2,3,5 permutations 6\n2,4,4 permutations 3\n3,3,4 permutations 3\nTotal 27. Wait check also 1,? Let's systematically partitions into 3 parts max6 min1 sum10:\n1,3,6 (6)\n1,4,5 (6)\n2,2,6 (3)\n2,3,5 (6)\n2,4,4 (3)\n3,3,4 (3). total 27. Yes.\n\nCould also complement symmetry? For 3d6 distribution symmetric around 10.5, P(sum=10)=P(sum=11)? Actually possible. Exactly 10 count 27. Sum exactly 10.\n\nNeed answer maybe mention ordinary fair dice. \"Check it in two different ways\" means present two methods. We can present first inclusion-exclusion/generating function, second enumeration. Need be concise but explanatory.\n\nNeed perhaps verify probability = 27/216=1/8. Let's craft final with two independent checks.\n\nPotential pitfalls: The question asks \"Check it in two different ways.\" So do both, not just one.\n\nLet's formulate:\n\nMethod 1: Count nonnegative solutions xi=die_i-1, sum xi=7 with 0<=xi<=5. Total nonnegative solutions to x1+x2+x3=7 is C(9,2)=36. Subtract cases xi>=6: for each die set yi=xi-6; equation y1+...+y3=1; count C(3,2)=3 per die? Wait let's recalc carefully! If xi>=6 for a specific i, set xi'=xi-6. Sum xi' = 7-6 =1 over 3 variables. Number nonnegative solutions to sum 1 over 3 variables: C(1+3-1,3-1)=C(3,2)=3. There are 3 choices for variable =9. No double overlap. Count=36-9=27. Probability 27/216=1/8. This is inclusion-exclusion/generating maybe.\n\nMethod 2: Enumerate unordered triples:\n(1,3,6):6 perms\n(1,4,5):6\n(2,2,6):3\n(2,3,5):6\n(2,4,4):3\n(3,3,4):3\nTotal 6+6+3+6+3+3=27. Probability same.\n\nNeed maybe avoid \"check\" with same counting? It's okay.\n\nLet's answer final with both.",
+  "answer": "The probability is \\(\\boxed{\\frac18}\\).\n\n**Method 1: Inclusion–exclusion / variables**\n\nLet the dice be \\(a,b,c\\), each from \\(1\\) to \\(6\\). We want\n\\[\na+b+c=10.\n\\]\nSet \\(x_i=d_i-1\\), so each \\(x_i\\in\\{0,1,2,3,4,5\\}\\) and\n\\[\nx_1+x_2+x_3=7.\n\\]\nWithout the upper bound, the number of nonnegative solutions is\n\\[\n\\binom{7+3-1}{3-1}=\\binom92=36.\n\\]\nSubtract cases where some \\(x_i\\ge 6\\). If \\(x_i\\ge 6\\), set \\(y_i=x_i-6\\). Then\n\\[\ny_i+x_j+x_k=1,\n\\]\nwhich has \\(\\binom{1+3-1}{3-1}=\\binom32=3\\) solutions for each choice of the large variable. There are \\(3\\) choices, giving \\(3\\cdot 3=9\\) invalid outcomes. Thus the count is\n\\[\n36-9=27.\n\\]\nSince there are \\(6^3=216\\) total outcomes,\n\\[\nP=\\frac{27}{216}=\\frac18.\n\\]\n\n**Method 2: Direct enumeration of unordered sums**\n\nThe unordered triples of dice values summing to \\(10\\) are:\n\\[\n(1,3,6),\\ (1,4,5),\\ (2,2,6),\\ (2,3,5),\\ (2,4,4),\\ (3,3,4).\n\\]\nCounting permutations:\n\\[\n6+6+3+6+3+3=27.\n\\]\nTherefore,\n\\[\nP=\\frac{27}{216}=\\boxed{\\frac18}.\n\\]\n\nSo the probability that the sum is exactly \\(10\\) is \\(\\boxed{\\frac18}\\).",
+  "origin": "Razonamiento real de DeepSeek (deepseek-flash, modo thinking), grabado el 2026-11-22 con eval/record_traces.py; sin editar.",
+  "meta": {
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 57,
+      "completion_tokens": 1396,
+      "total_tokens": 1453,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 995
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 57
+    }
+  }
+}

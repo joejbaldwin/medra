@@ -86,6 +86,47 @@ PROMPTS: dict[str, tuple[str, str, str]] = {
         "Three friends, Alice, Ben and Chloe, each own a different pet (cat, dog, parrot) and live in houses "
         "numbered 1 to 3. The dog owner lives next to Alice. Ben does not own the cat. Chloe lives in house 3. "
         "The parrot owner lives in house 1. Who owns which pet and who lives where? Is the solution unique?"),
+    # Second batch (23/11/2026): more logic, to balance the domains. A bridge-and-torch puzzle was
+    # dropped: twice it hit the token limit while proving its lower bound.
+    "en-log-league": ("A four-team league", "en",
+        "Four teams A, B, C and D play each other once. A win is worth 3 points, a draw 1 and a loss 0. At the "
+        "end A has 7 points, B 5, C 3 and D 1. What was the result of every match? Is it the only possibility?"),
+    "en-log-liars": ("Who stole the cake", "en",
+        "Exactly one of five suspects stole a cake, and exactly two of them are lying. Ana: \"It was Bea or "
+        "Carl.\" Bea: \"It wasn't me, and it wasn't Eva.\" Carl: \"Dan did it.\" Dan: \"Carl is lying.\" "
+        "Eva: \"Ana is telling the truth.\" Who stole the cake? Check that the answer is unique."),
+    "en-log-hats": ("Three hats", "en",
+        "Three logicians sit in a line facing forward, so each sees the hats of those in front of them but not "
+        "their own. The hats were taken from three red and two white hats. The one at the back says \"I don't "
+        "know my colour\", then the one in the middle says \"I don't know my colour\". The one in front then "
+        "knows. What colour is the front hat, and why? Would the answer change if the middle one knew?"),
+    "en-log-schedule": ("Scheduling talks", "en",
+        "Five talks A, B, C, D and E must be scheduled in five consecutive slots. B must come before D. A and C "
+        "cannot be next to each other. E is not first or last. C comes after D. A is in an odd-numbered slot. "
+        "List every valid order."),
+    "en-mat-digits": ("Digits that add up", "en",
+        "How many four-digit numbers have digits that add up to 12? Solve it in two different ways and check "
+        "that the answers agree."),
+    "en-mat-ladder": ("Sliding ladder", "en",
+        "A 5 m ladder leans against a vertical wall. Its foot slides away from the wall at 0.5 m/s. How fast is "
+        "the top sliding down when the foot is 3 m from the wall? At what moment are both ends moving at the "
+        "same speed? Check the result."),
+    "en-mat-powers": ("Last digits of a power", "en",
+        "What are the last two digits of 7^2026? Then find the last two digits of 3^2026. Check each answer "
+        "with a second method."),
+    "en-cod-anagrams": ("Grouping anagrams", "en",
+        "Write a Python function that groups a list of words into anagrams, for example ['eat','tea','tan','ate',"
+        "'nat','bat']. Compare a sorting-based key with a letter-count key, and discuss uppercase letters and "
+        "empty strings."),
+    "en-cod-brackets": ("Balanced brackets", "en",
+        "Write a Python function that checks whether a string of brackets ()[]{} is balanced, ignoring any other "
+        "characters. Then extend it to report the position of the first error. Think about the edge cases."),
+    "en-cod-dedupe": ("Removing items while iterating", "en",
+        "This Python function should remove all even numbers from a list, but it gives wrong results for some "
+        "inputs. Trace it by hand on [2, 4, 6, 1] and [1, 2, 2, 3], explain why it fails, then give two "
+        "different fixes and check both on the same inputs:\n\n"
+        "def remove_evens(nums):\n    for i in range(len(nums)):\n        if i < len(nums) and nums[i] % 2 == 0:\n"
+        "            nums.pop(i)\n    return nums\n"),
 }
 
 

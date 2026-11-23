@@ -12,6 +12,7 @@ the data/samples/ format. The rows were picked by hand among those with
 from __future__ import annotations
 
 import json
+import time
 import urllib.request
 from pathlib import Path
 
@@ -24,18 +25,34 @@ ROWS = {
     "ot-mat-trail": (47, "Jitka's hike"),
     "ot-log-krakozyabrs": (84, "Horns and wings"),
     "ot-cod-yen": (100002, "Change from 1000-yen bills"),
+    # Second batch (23/11/2026). The "puzzle" domain is common-sense multiple choice, so the logic
+    # puzzles come from the maths domain; 112008 adds a science (chemistry) calculation.
+    "ot-log-calculator": (151, "A calculator that doubles and reverses"),
+    "ot-log-board": (289, "Erasing numbers from a board"),
+    "ot-cod-tasks": (100107, "Three tasks"),
+    "ot-sci-enthalpy": (112008, "Dissolving sodium hydroxide"),
 }
 
 
-def fetch(row: int) -> dict:
-    with urllib.request.urlopen(f"{API}&offset={row}&length=1", timeout=60) as resp:
-        data = json.load(resp)
-    return data["rows"][0]["row"]
+def fetch(row: int, tries: int = 4) -> dict:
+    """One row; the public API is sometimes busy (5xx or timeouts), so retry."""
+    for attempt in range(tries):
+        try:
+            with urllib.request.urlopen(f"{API}&offset={row}&length=1", timeout=60) as resp:
+                return json.load(resp)["rows"][0]["row"]
+        except (OSError, KeyError, ValueError):
+            if attempt == tries - 1:
+                raise
+            time.sleep(5 * (attempt + 1))
+    raise AssertionError("unreachable")
 
 
 def main() -> None:
     TRACES_DIR.mkdir(exist_ok=True)
     for trace_id, (row, title) in ROWS.items():
+        if (TRACES_DIR / f"{trace_id}.json").exists():
+            print(f"{trace_id}: already saved, skipped")
+            continue
         r = fetch(row)
         trace = {
             "id": trace_id,

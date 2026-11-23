@@ -1,24 +1,24 @@
 ---
 trace: en-mat-coins
-annotator: Joe
-drafted_by: Claude (AI assistant), to be corrected
-status: draft
-concepts: [penny, nickel, dime, quarter, half-dollar, dollar coin, combination, recurrence]
+annotator: "Joe"
+drafted_by: "Claude (AI assistant), to be corrected"
+status: corrected
+concepts: ["penny", "nickel", "dime", "quarter", "half-dollar", "dollar coin", "combination", "recurrence"]
 topics:
-- [penny, nickel, dime, quarter, half-dollar, coin]
-- [way, count, combination]
-- [recurrence, formula, dynamic, table]
-- [dollar coin, order, assumption]
+- ["penny", "nickel", "dime", "quarter", "half-dollar", "coin"]
+- ["way", "count", "combination"]
+- ["recurrence", "formula", "dynamic", "table"]
+- ["dollar coin", "order", "assumption"]
 ---
 [[planning]]We need answer. Need compute coin change counts. Need be careful interpretation ordered? Usually ways make amount using US coins unordered combinations. Need "using pennies, nickels, dimes and quarters" for 50c. Then one dollar if half-dollars also allowed. Need double-check both counts.
 
 We need provide counts and maybe enumeration/verification. Let's compute.
 
-[[development]]We need count nonnegative integer solutions:
+We need count nonnegative integer solutions:
 For 50c with pennies p, nickels n, dimes d, quarters q:
 p+5n+10d+25q=50.
 
-Let's compute. q=0,1,2.
+[[development]]Let's compute. q=0,1,2.
 
 q=2: remaining 0. only p=n=d=0 ->1.
 
@@ -130,10 +130,10 @@ C(100)=W10(100)+W10(75)+W10(50)+W10(25)+W10(0)
 Now allow half dollars h=0,1,2:
 Total = C(100)+C(50)+C(0)=242+49+1=292.
 
-Double-check: For 50c the quarter split gives 36+12+1=49; dynamic coin-change recurrence gives same. For $1, half-dollar splits are 0 halves:242, 1 half:49, 2 halves:1; sum292; recurrence with denominations 1,5,10,25,50 gives same.
+[[verification]]Double-check: For 50c the quarter split gives 36+12+1=49; dynamic coin-change recurrence gives same. For $1, half-dollar splits are 0 halves:242, 1 half:49, 2 halves:1; sum292; recurrence with denominations 1,5,10,25,50 gives same.
 
 Answer: 49 ways; 292 ways.
 
-Need maybe if include dollar coin version? Not necessary but maybe note "not counting a dollar coin." Could mention.
+[[alternative]]Need maybe if include dollar coin version? Not necessary but maybe note "not counting a dollar coin." [[conclusion]]Could mention.
 
 Let's final.

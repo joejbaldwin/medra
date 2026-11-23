@@ -1,14 +1,14 @@
 ---
 trace: en-mat-semicircle
-annotator: Joe
-drafted_by: Claude (AI assistant), to be corrected
-status: draft
-concepts: [rectangle, semicircle, diameter, area, derivative, vertex, arc, radius]
+annotator: "Joe"
+drafted_by: "Claude (AI assistant), to be corrected"
+status: corrected
+concepts: ["rectangle", "semicircle", "diameter", "area", "derivative", "vertex", "arc", "radius"]
 topics:
-- [rectangle, vertex, corner, base, width, height]
-- [semicircle, diameter, arc, radius, circle]
-- [area, derivative, maximum, calculus]
-- [trig, AM-GM, equality]
+- ["rectangle", "vertex", "corner", "base", "width", "height"]
+- ["semicircle", "diameter", "arc", "radius", "circle"]
+- ["area", "derivative", "maximum", "calculus"]
+- ["trig", "AM-GM", "equality"]
 ---
 [[planning]]We need answer. Need solve calculus and check another way. Need be careful geometry. Rectangle inscribed in semicircle radius 5, one side on diameter. Need max area. Let's parse.
 
@@ -16,7 +16,7 @@ topics:
 
 [[verification]]Check another way: AM-GM or trig. Let x=5 cos theta, y=5 sin theta? Area=2*(25) sinθ cosθ? Actually width 2*5 cosθ? Coordinates top vertex (5 cosθ,5 sinθ), width 2x=10 cosθ, height y=5 sinθ. Area=50 sinθ cosθ=25 sin 2θ ≤25 equality θ=π/4. Or AM-GM: x^2+y^2=25. Max 2xy when x=y due x^2 y^2. Or geometric? Need "check it another way." Could use calculus then check via trig/AM-GM.
 
-[[alternative]]Need answer concise. Maybe mention if interpretation less strict? Let's consider possibility rectangle base does not necessarily have both upper vertices on arc? "Inscribed in semicircle" means rectangle contained in semicircle and one side on diameter. For maximum, likely top corners on arc. Could there be rectangle with one side along diameter but not symmetric, with upper vertices within semicircle? To be inscribed, all vertices on boundary? In a semicircle, base side endpoints on diameter (boundary), top side endpoints on arc? Yes.
+[[planning]]Need answer concise. Maybe mention if interpretation less strict? Let's consider possibility rectangle base does not necessarily have both upper vertices on arc? "Inscribed in semicircle" means rectangle contained in semicircle and one side on diameter. For maximum, likely top corners on arc. Could there be rectangle with one side along diameter but not symmetric, with upper vertices within semicircle? To be inscribed, all vertices on boundary? In a semicircle, base side endpoints on diameter (boundary), top side endpoints on arc? Yes.
 
 [[development]]Let's craft with calculus.
 

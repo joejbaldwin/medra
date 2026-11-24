@@ -120,8 +120,9 @@ def git_commit() -> str:
     try:
         sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
                              check=True).stdout.strip()
-        dirty = subprocess.run(["git", "status", "--porcelain", "--", "backend", "eval"], capture_output=True,
-                               text=True).stdout.strip()
+        # Code and data only: eval/results/ holds this script's own outputs.
+        dirty = subprocess.run(["git", "status", "--porcelain", "--", "backend", "eval", ":!eval/results"],
+                               capture_output=True, text=True).stdout.strip()
         return sha + (" (+ cambios sin commit)" if dirty else "")
     except (OSError, subprocess.CalledProcessError):
         return "desconocido"

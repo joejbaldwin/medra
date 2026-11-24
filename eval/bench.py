@@ -32,8 +32,7 @@ from datetime import date
 
 import numpy as np
 
-from eval.common import RESULTS_DIR, get_trace, trace_ids
-from eval.run import git_commit
+from eval.common import RESULTS_DIR, get_trace, git_commit, trace_ids
 from medra.contracts import TextChunk
 from medra.mining.miner import TextMiner
 from medra.present import ViewPresenter

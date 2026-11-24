@@ -62,8 +62,7 @@ class Annotation:
 
 
 def annotation_files(directory: Path = ANNOTATIONS_DIR) -> list[Path]:
-    """Annotation files: <trace id>.md, or <trace id>.<annotator>.md for a
-    second, independent correction (used for inter-annotator agreement)."""
+    """Annotation files: one <trace id>.md per trace."""
     return sorted(p for p in directory.glob("*.md") if p.name != "GUIDE.md")
 
 
@@ -174,8 +173,8 @@ def write(trace_id: str, tags: dict[int, str], *, concepts: list[str], topics: l
 
 
 def load_all(status: str | None = None) -> list[Annotation]:
-    """Primary annotations (<id>.md), optionally only those with this status."""
-    found = [parse(p) for p in annotation_files() if p.name.count(".") == 1]
+    """All annotations, optionally only those with this status."""
+    found = [parse(p) for p in annotation_files()]
     return [a for a in found if status is None or a.status == status]
 
 
@@ -183,18 +182,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Check annotation files or print a trace's sentences.")
     parser.add_argument("--check", action="store_true", help="check every annotation file")
     parser.add_argument("--sentences", metavar="ID", help="print the numbered sentences of a trace")
-    parser.add_argument("--blank", nargs=2, metavar=("ID", "NAME"),
-                        help="create eval/annotations/ID.NAME.md with no tags but the first, for an independent "
-                             "second annotation (inter-annotator agreement)")
     args = parser.parse_args()
-    if args.blank:
-        trace_id, name = args.blank
-        path = ANNOTATIONS_DIR / f"{trace_id}.{name}.md"
-        if path.exists():
-            sys.exit(f"{path} already exists")
-        write(trace_id, {0: "planning"}, concepts=[], topics=[], annotator=name, status="draft", path=path)
-        print(f"created {path}")
-        return
     if args.sentences:
         mined = mine(args.sentences)
         for i, (a, b) in enumerate(mined.spans):

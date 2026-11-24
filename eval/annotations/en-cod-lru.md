@@ -2,7 +2,7 @@
 trace: en-cod-lru
 annotator: Kostya
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [LRU cache, doubly linked list, hash map, node, capacity, sentinel, dict, OrderedDict]
 topics:
 - [node, prev, head, tail, sentinel, front]

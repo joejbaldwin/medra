@@ -2,7 +2,7 @@
 trace: en-mat-trains
 annotator: Juan
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [train, Zaragoza, Madrid, Barcelona, meeting time, distance, speed, stop]
 topics:
 - [Madrid, Barcelona, Zaragoza, route]

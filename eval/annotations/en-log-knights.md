@@ -2,7 +2,7 @@
 trace: en-log-knights
 annotator: Kostya
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [knight, knave, statement, truth value, liar, equation, inclusive, exclusive]
 topics:
 - [knight, knave, liar, truth]

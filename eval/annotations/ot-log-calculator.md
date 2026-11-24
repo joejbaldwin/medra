@@ -2,7 +2,7 @@
 trace: ot-log-calculator
 annotator: Juan
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [two-digit number, calculator, digit, reversed number, three-digit number, leading zero, result]
 topics:
 - [digit, leading zero, three-digit number, two-digit number]

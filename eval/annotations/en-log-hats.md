@@ -2,7 +2,7 @@
 trace: en-log-hats
 annotator: Joe
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [hat, logician, colour, red, white, front hat, middle, back]
 topics:
 - [hat, colour, red, white]

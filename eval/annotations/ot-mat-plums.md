@@ -2,7 +2,7 @@
 trace: ot-mat-plums
 annotator: Laith
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [plum, pear, apple, equation, substitution, weight]
 topics:
 - [plum, pear, apple, fruit]

@@ -2,7 +2,7 @@
 trace: en-mat-square
 annotator: Laith
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [perfect square, factor pair, prime, positive integer, parity, expression]
 topics:
 - [factor, prime, divisor, product, pair]

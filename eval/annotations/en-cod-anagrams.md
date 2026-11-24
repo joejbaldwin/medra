@@ -2,7 +2,7 @@
 trace: en-cod-anagrams
 annotator: Kostya
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [anagram, sorting key, letter count, Counter, empty string, uppercase, casefold, group]
 topics:
 - [anagram, word, group, key]

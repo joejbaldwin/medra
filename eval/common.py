@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import bisect
 import random
+import subprocess
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -113,3 +114,14 @@ def mine(trace_id: str) -> Mined:
         update=update,
         view=view,
     )
+
+
+def git_commit() -> str:
+    try:
+        sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
+                             check=True).stdout.strip()
+        dirty = subprocess.run(["git", "status", "--porcelain", "--", "backend", "eval"], capture_output=True,
+                               text=True).stdout.strip()
+        return sha + (" (+ cambios sin commit)" if dirty else "")
+    except (OSError, subprocess.CalledProcessError):
+        return "desconocido"

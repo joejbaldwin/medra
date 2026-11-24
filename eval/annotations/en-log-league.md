@@ -2,7 +2,7 @@
 trace: en-log-league
 annotator: Kostya
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [team, match, draw, win, point, loss, record, decisive match]
 topics:
 - [win, draw, loss, point]

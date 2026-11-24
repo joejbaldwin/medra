@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 from eval.annotations import load_all  # noqa: E402
 from eval.common import RESULTS_DIR, mine  # noqa: E402
-from eval.run import BASELINES, seg_tuned  # noqa: E402
+from eval.run import BASELINES, seg_paragraphs, seg_paragraphs_min, seg_tuned  # noqa: E402
 from medra.mining.segment import SegParams  # noqa: E402
 
 SURFACE = "#fcfcfb"
@@ -75,7 +75,11 @@ def segmentation_chart(res: dict, out: Path) -> None:
 def boundary_strip(res: dict, trace_id: str, out: Path) -> None:
     annotation = next(a for a in load_all() if a.trace_id == trace_id)
     m = mine(trace_id)
-    rows = [("Referencia", annotation.starts), ("MeDRA (por defecto)", BASELINES["medra"][1](m, {}))]
+    rows = [("Referencia", annotation.starts), ("Solo párrafos", seg_paragraphs(m, {})),
+            ("MeDRA (por defecto)", BASELINES["medra"][1](m, {}))]
+    if res.get("paragraph_min"):
+        rows.append((f"Párrafos + mín. {res['paragraph_min']}",
+                     seg_paragraphs_min(m, {"paragraph_min": res["paragraph_min"]})))
     if res["tuned_params"]:
         rows.append(("MeDRA (ajustado)", seg_tuned(m, {"tuned": SegParams(**res["tuned_params"])})))
     n = annotation.n_sentences

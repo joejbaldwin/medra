@@ -2,7 +2,7 @@
 trace: en-cod-dedupe
 annotator: Juan
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [list, index, even number, pop, loop, range, while loop, list comprehension]
 topics:
 - [index, pop, length, element]

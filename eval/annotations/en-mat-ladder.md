@@ -2,7 +2,7 @@
 trace: en-mat-ladder
 annotator: Juan
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [ladder, wall, foot, top, speed, related rates, position, moment]
 topics:
 - [ladder, wall, foot, top]

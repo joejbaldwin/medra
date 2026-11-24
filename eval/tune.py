@@ -36,9 +36,8 @@ from datetime import date
 import numpy as np
 
 from eval.annotations import load_all
-from eval.common import RESULTS_DIR, mine, split, trace_ids
+from eval.common import RESULTS_DIR, git_commit, mine, split, trace_ids
 from eval.metrics import default_k, mean, pk, windowdiff
-from eval.run import git_commit
 from medra.mining.segment import DEFAULT_PARAMS, SegParams, boundaries, gap_scores
 
 # Gap-score parameters (each combination recomputes gap_scores) and decision
@@ -47,11 +46,13 @@ GAP_GRID = {
     "window": [2, 3, 4],
     "climb": [1, 2, 3],
     "marker_scale": [0.0, 0.5, 1.0, 1.5, 2.0, 3.0],
-    "paragraph_weight": [0.0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0],
+    "paragraph_weight": [0.0, 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0],
 }
+# Upper ends widened after the first run chose values at the edge
+# (threshold 1.8 of max 2.0, min_sentences 8 of max 8, paragraph_weight tie at 3.0).
 DECISION_GRID = {
-    "threshold": [round(0.3 + 0.1 * i, 1) for i in range(18)],  # 0.3 .. 2.0
-    "min_sentences": [2, 3, 4, 5, 6, 8],
+    "threshold": [round(0.3 + 0.1 * i, 1) for i in range(23)],  # 0.3 .. 2.5
+    "min_sentences": [2, 3, 4, 5, 6, 8, 10, 12],
 }
 
 

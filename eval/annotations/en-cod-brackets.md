@@ -2,7 +2,7 @@
 trace: en-cod-brackets
 annotator: Laith
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [bracket, stack, opening bracket, closing bracket, first error, position, mismatch, edge case]
 topics:
 - [stack, opening bracket, closing bracket, bracket]

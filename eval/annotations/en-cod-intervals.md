@@ -2,7 +2,7 @@
 trace: en-cod-intervals
 annotator: Laith
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [interval, touching intervals, unsorted input, validation, edge case, start, end, closed interval]
 topics:
 - [interval, start, end, overlap, touching]

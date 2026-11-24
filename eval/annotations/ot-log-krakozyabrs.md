@@ -2,7 +2,7 @@
 trace: ot-log-krakozyabrs
 annotator: Kostya
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [krakozyabr, horns, wings, total, multiple of 8, integer, census]
 topics:
 - [horns, wings, both]

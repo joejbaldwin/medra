@@ -2,7 +2,7 @@
 trace: en-cod-palindrome
 annotator: Juan
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [palindromic substring, expand around center, dynamic programming, Manacher, complexity, space, center,
   table]
 topics:

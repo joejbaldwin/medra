@@ -2,7 +2,7 @@
 trace: ot-sci-enthalpy
 annotator: Juan
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [enthalpy change, NaOH, mole, molar mass, molar enthalpy, significant figure, dissolution, kJ]
 topics:
 - [enthalpy change, molar enthalpy, dissolution, heat]

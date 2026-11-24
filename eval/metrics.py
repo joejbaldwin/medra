@@ -149,14 +149,3 @@ def bcubed(gold: list[list[str]], pred: list[list[str]]) -> dict:
 def mean(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
-
-def cohen_kappa(a: list[str], b: list[str]) -> float:
-    """Agreement between two labellings of the same items, corrected for the
-    agreement expected by chance from each side's label frequencies."""
-    n = len(a)
-    if n == 0:
-        return 0.0
-    observed = sum(x == y for x, y in zip(a, b)) / n
-    ca, cb = Counter(a), Counter(b)
-    expected = sum(ca[c] * cb[c] for c in ca) / (n * n)
-    return 1.0 if expected == 1 else (observed - expected) / (1 - expected)

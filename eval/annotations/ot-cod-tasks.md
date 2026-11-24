@@ -2,7 +2,7 @@
 trace: ot-cod-tasks
 annotator: Joe
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [task, cost, permutation, absolute difference, order, minimum cost, sample input, itertools]
 topics:
 - [permutation, order, itertools]

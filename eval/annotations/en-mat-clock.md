@@ -2,7 +2,7 @@
 trace: en-mat-clock
 annotator: Juan
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [right angle, minute hand, hour hand, relative angle, clock, endpoint, degree]
 topics:
 - [minute, hour, hand, clock]

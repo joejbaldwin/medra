@@ -14,10 +14,6 @@ Your traces are the files with your name in `annotator:`. Each file is a reasoni
 
 The draft was written by an AI: don't trust it, and don't look at MeDRA's dashboard output for that trace while correcting.
 
-## Annotating from scratch (`<id>.<name>.md`)
-
-Same steps, starting from an empty file. Do it before opening anyone else's version of that trace.
-
 ## Rules
 
 - Never change the text itself, only the tags (the checker compares it byte for byte).

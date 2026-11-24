@@ -2,7 +2,7 @@
 
 import pytest
 
-from eval.metrics import bcubed, boundary_prf, classification, cohen_kappa, default_k, labels, pk, windowdiff
+from eval.metrics import bcubed, boundary_prf, classification, default_k, labels, pk, windowdiff
 
 N = 10
 REF = [0, 5]  # two segments of 5 sentences; k = 5 / 2 rounded half up = 3 (we pass k=2 below)
@@ -69,7 +69,3 @@ def test_bcubed():
     out = bcubed(gold, [["a", "b"], ["d"]])
     assert out["coverage"] == pytest.approx(3 / 5) and out["f1"] == 1.0
 
-
-def test_cohen_kappa():
-    # Observed 3/4; chance: a has x,x,y,y and b has x,y,y,y -> (2*1 + 2*3) / 16 = 0.5.
-    assert cohen_kappa(["x", "x", "y", "y"], ["x", "y", "y", "y"]) == pytest.approx((0.75 - 0.5) / 0.5)

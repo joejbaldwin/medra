@@ -2,7 +2,7 @@
 trace: en-log-schedule
 annotator: Joe
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [talk, slot, order, constraint, position, triple, odd slot, enumeration]
 topics:
 - [slot, position, odd slot, first slot]

@@ -2,7 +2,7 @@
 trace: en-log-pets
 annotator: Juan
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [dog owner, parrot owner, house, Alice, Ben, Chloe, cat, dog, parrot]
 topics:
 - [house, neighbor, adjacent]

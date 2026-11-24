@@ -2,7 +2,7 @@
 trace: en-log-liars
 annotator: Laith
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [culprit, statement, truth value, lie, suspect, Bea, Carl, Dan]
 topics:
 - [statement, truth value, lie, truth]

@@ -2,7 +2,7 @@
 trace: en-mat-dice
 annotator: Laith
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [probability, dice, outcome, nonnegative solution, generating function, inclusion-exclusion, permutation,
   triple]
 topics:

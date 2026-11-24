@@ -2,7 +2,7 @@
 trace: en-mat-powers
 annotator: Laith
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [last two digits, period, exponent, CRT, Euler theorem, mod]
 topics:
 - [period, exponent, power, last two digits]

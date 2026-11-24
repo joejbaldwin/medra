@@ -21,7 +21,6 @@ What is measured:
 - Topics: B-cubed F1 of MeDRA's Louvain topics against the annotated topics,
   and of agglomerative clustering on the same terms (the comparison left open
   in build plan §4.4).
-- Agreement between annotators, on traces annotated twice.
 """
 
 from __future__ import annotations
@@ -29,7 +28,6 @@ from __future__ import annotations
 import argparse
 import json
 import statistics
-import subprocess
 import sys
 from dataclasses import asdict, replace
 from datetime import date
@@ -38,9 +36,10 @@ from pathlib import Path
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 
-from eval.annotations import Annotation, annotation_files, load_all, parse
-from eval.common import RESULTS_DIR, Mined, lemma_key, mine, source_of, split, trace_ids
-from eval.metrics import bcubed, boundary_prf, classification, cohen_kappa, labels, mean, pk, set_prf, windowdiff
+from eval.annotations import Annotation, load_all
+from eval.common import RESULTS_DIR, Mined, git_commit, lemma_key, mine, source_of, split, trace_ids
+from eval.metrics import bcubed, boundary_prf, classification, mean, pk, set_prf, windowdiff
+from eval.tune import DECISION_GRID
 from medra.mining.segment import SegParams, boundaries, gap_scores
 from medra.mining.topics import MIN_TERM_COUNT, WINDOW as TOPIC_WINDOW
 
@@ -62,6 +61,22 @@ def seg_paragraphs(m: Mined, ctx: dict) -> list[int]:
     return [0] + [i for i, f in enumerate(m.features) if i and f.paragraph_break]
 
 
+def min_length(starts: list[int], min_sentences: int) -> list[int]:
+    """Drop every start closer than min_sentences to the last one kept: the
+    same greedy rule as the segmenter's own min_sentences."""
+    kept = [starts[0]]
+    for s in starts[1:]:
+        if s - kept[-1] >= min_sentences:
+            kept.append(s)
+    return kept
+
+
+def seg_paragraphs_min(m: Mined, ctx: dict) -> list[int]:
+    # Ablation for the tuned segmenter, which learned "paragraph breaks + a
+    # long minimum": this is that rule alone, without cohesion or markers.
+    return min_length(seg_paragraphs(m, ctx), ctx["paragraph_min"])
+
+
 def seg_markers(m: Mined, ctx: dict) -> list[int]:
     return [0] + [i for i, f in enumerate(m.features) if i and f.marker_type]
 
@@ -81,6 +96,8 @@ def seg_tuned(m: Mined, ctx: dict) -> list[int]:
     return boundaries(gap_scores(m.features, params), params)
 
 
+DEV_TUNED = {"paragraphs_min", "tuned"}  # a parameter chosen on dev: reported on test only
+
 BASELINES = {
     "fixed": ("Tamaño fijo", seg_fixed),
     "paragraphs": ("Solo párrafos", seg_paragraphs),
@@ -99,6 +116,16 @@ def segmentation_scores(ref: list[int], hyp: list[int], n: int) -> dict:
 def fixed_length(annotations: list[Annotation]) -> int:
     """Mean reference segment length (sentences) on the given traces."""
     return max(1, round(mean([a.n_sentences / len(a.starts) for a in annotations])))
+
+
+def paragraph_min(annotations: list[Annotation]) -> int:
+    """The minimum segment length for seg_paragraphs_min, chosen on the given
+    (dev) traces by mean WindowDiff over the values eval.tune searches, so the
+    ablation gets the same tuning budget for that parameter as MeDRA."""
+    def score(k: int) -> float:
+        return mean([windowdiff(a.starts, min_length(seg_paragraphs(mine(a.trace_id), {}), k), a.n_sentences)
+                     for a in annotations])
+    return min(DECISION_GRID["min_sentences"], key=lambda k: (score(k), k))
 
 
 # ------------------------------------------------------------- other parts
@@ -159,31 +186,9 @@ def topic_scores(a: Annotation, m: Mined) -> dict:
     return {"louvain": bcubed(gold, louvain), "agglomerative": bcubed(gold, agglo), "n_topics": len(louvain)}
 
 
-def agreement(first: Annotation, second: Annotation) -> dict:
-    """How far two annotators agree on the same trace: segmentation metrics
-    with the first as reference, and Cohen's kappa on the step type of each
-    sentence (the type of the segment it is in)."""
-    n = first.n_sentences
-    p, r, f = boundary_prf(first.starts, second.starts, tolerance=1)
-    ta = [first.types[i] for i in labels(first.starts, n)]
-    tb = [second.types[i] for i in labels(second.starts, n)]
-    return {"trace": first.trace_id, "annotators": [first.annotator, second.annotator],
-            "pk": pk(first.starts, second.starts, n), "windowdiff": windowdiff(first.starts, second.starts, n),
-            "f1": f, "type_kappa": cohen_kappa(ta, tb)}
-
-
 # ------------------------------------------------------------- driver
 
 
-def git_commit() -> str:
-    try:
-        sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
-                             check=True).stdout.strip()
-        dirty = subprocess.run(["git", "status", "--porcelain", "--", "backend", "eval"], capture_output=True,
-                               text=True).stdout.strip()
-        return sha + (" (+ cambios sin commit)" if dirty else "")
-    except (OSError, subprocess.CalledProcessError):
-        return "desconocido"
 
 
 def load_tuned(out_dir: Path) -> SegParams | None:
@@ -200,9 +205,10 @@ def evaluate(drafts: bool) -> dict:
     out_dir = RESULTS_DIR / "drafts" if drafts else RESULTS_DIR
     dev_ids, test_ids = split(trace_ids())
     by_id = {a.trace_id: a for a in annotations}
-    ctx = {"fixed_length": fixed_length([by_id[i] for i in dev_ids if i in by_id] or annotations),
-           "tuned": load_tuned(out_dir)}
+    dev = [by_id[i] for i in dev_ids if i in by_id] or annotations
+    ctx = {"fixed_length": fixed_length(dev), "paragraph_min": paragraph_min(dev), "tuned": load_tuned(out_dir)}
     methods = dict(BASELINES)
+    methods["paragraphs_min"] = (f"Párrafos + mín. {ctx['paragraph_min']} frases", seg_paragraphs_min)
     if ctx["tuned"]:
         methods["tuned"] = ("MeDRA (ajustado)", seg_tuned)
 
@@ -221,13 +227,6 @@ def evaluate(drafts: bool) -> dict:
         }
         per_trace.append(row)
 
-    second = []
-    for path in annotation_files():
-        if path.name.count(".") == 2:
-            b = parse(path)
-            if b.trace_id in by_id and (drafts or b.status == "corrected"):
-                second.append(agreement(by_id[b.trace_id], b))
-
     return {
         "date": date.today().isoformat(),
         "commit": git_commit(),
@@ -235,10 +234,10 @@ def evaluate(drafts: bool) -> dict:
         "annotations": {"n": len(annotations), "corrected": sum(a.status == "corrected" for a in annotations)},
         "split": {"dev": dev_ids, "test": test_ids},
         "fixed_length": ctx["fixed_length"],
+        "paragraph_min": ctx["paragraph_min"],
         "tuned_params": asdict(ctx["tuned"]) if ctx["tuned"] else None,
         "methods": {key: label for key, (label, _) in methods.items()},
         "per_trace": per_trace,
-        "agreement": second,
         "out_dir": str(out_dir),
     }
 
@@ -272,7 +271,8 @@ def _seg_table(rows: list[dict], methods: dict[str, str]) -> list[str]:
 def report(res: dict) -> str:
     rows = res["per_trace"]
     test = [r for r in rows if r["split"] == "test"]
-    untuned = {k: v for k, v in res["methods"].items() if k != "tuned"}
+    # Methods with a parameter chosen on dev are only reported on test.
+    untuned = {k: v for k, v in res["methods"].items() if k not in DEV_TUNED}
     lines = ["# Resultados de la evaluación de MeDRA", ""]
     if res["preliminary"]:
         lines += ["> **PRELIMINAR.** Calculado sobre anotaciones que incluyen borradores sin corregir "
@@ -296,7 +296,14 @@ def report(res: dict) -> str:
         lines += [f"## Segmentación en test ({len(test)} trazas)", ""]
         if res["tuned_params"]:
             lines += [f"Parámetros ajustados en dev con `python -m eval.tune`: `{res['tuned_params']}`.", ""]
+        lines += [f"«Párrafos + mín.»: un corte en cada línea en blanco, descartando los que quedan a menos de "
+                  f"{res['paragraph_min']} frases del anterior (mínimo elegido en dev). Es la ablación del "
+                  "segmentador ajustado: la misma regla sin cohesión ni marcadores.", ""]
         lines += _seg_table(test, res["methods"]) + [""]
+        for source, label in (("deepseek", "DeepSeek"), ("openthoughts", "OpenThoughts")):
+            sub = [r for r in test if r["source"] == source]
+            if sub:
+                lines += [f"### Test, solo {label} ({len(sub)} trazas)", ""] + _seg_table(sub, res["methods"]) + [""]
 
     pairs = [tuple(p) for r in rows for p in r["step_types"]]
     medra_types = classification(pairs)
@@ -330,14 +337,6 @@ def report(res: dict) -> str:
             t = lambda m: _avg(with_topics, ["topics", key, m])  # noqa: E731
             lines.append(f"| {label} | {t('precision'):.2f} | {t('recall'):.2f} | {t('f1'):.2f} "
                          f"| {t('coverage'):.0%} |")
-        lines.append("")
-
-    if res["agreement"]:
-        lines += ["## Acuerdo entre anotadores", "", "| Traza | Anotadores | Pk | WindowDiff | F1 (±1) | κ tipos |",
-                  "|---|---|---|---|---|---|"]
-        for g in res["agreement"]:
-            lines.append(f"| {g['trace']} | {' / '.join(g['annotators'])} | {g['pk']:.3f} | {g['windowdiff']:.3f} "
-                         f"| {g['f1']:.2f} | {g['type_kappa']:.2f} |")
         lines.append("")
 
     lines += ["## Por traza (MeDRA por defecto)", "", "| Traza | Fuente | Split | Frases | Tramos ref. | Tramos MeDRA "

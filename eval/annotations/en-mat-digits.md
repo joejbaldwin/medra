@@ -2,7 +2,7 @@
 trace: en-mat-digits
 annotator: Kostya
 drafted_by: Claude (AI assistant), to be corrected
-status: draft
+status: corrected
 concepts: [four-digit number, digit, digit sum, first digit, inclusion-exclusion, nonnegative solution, upper bound,
   generating function]
 topics:

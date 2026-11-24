@@ -92,7 +92,7 @@ Could C=1? no after. C=3 occupied. So two for A=3. We have B D A E C and B E A D
 [[verification]]A=5:
 Remaining slots {1,2,3,4} for B,D,E,C, E in {2,3,4}; A/C not adjacent: C cannot4 (adjacent to A5). C after D. Enumerate possible C <5 and not4, after B,D. C can be3? Need B,D before C from slots1,2. Then C=3, E remaining4? Wait remaining slots include1,2,4. B,D=(1,2), C=3, E4 valid. A5 C3 diff2 not adjacent. Slots B D C E A = B D C E A (above). C can be? C=2 impossible need two before. C=1 no. C=4 disallow adjacent A5. Could C? Let's also C=3 only. What about C=5 occupied. So one for A=5. Total 3+2+1=6. Good.
 
-[[planning]]Need present list every valid order. Need clarify order slots 1 through 5. Sort perhaps lexicographically or by our list. Need maybe state all six. Could include "from first slot to fifth". Need no overexplain maybe.
+[[conclusion]]Need present list every valid order. Need clarify order slots 1 through 5. Sort perhaps lexicographically or by our list. Need maybe state all six. Could include "from first slot to fifth". Need no overexplain maybe.
 
 [[verification]]Let's ensure letter order for each:
 A=1:
@@ -116,7 +116,7 @@ A B E D C
 A E B D C
 Matches.
 
-[[planning]]Need answer maybe bullet. Need ensure "List every valid order." We can simply list.
+[[conclusion]]Need answer maybe bullet. Need ensure "List every valid order." We can simply list.
 
 Let's consider if "A and C cannot be next to each other" perhaps not adjacent slots. We used.
 

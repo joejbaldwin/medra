@@ -158,7 +158,7 @@ Need discuss edge cases:
 - Non-brackets inside don't matter, but index includes them.
 - O(n) time O(n) space.
 
-[[planning]]Need maybe mention if "first error" means position of opening vs closing. We can state convention.
+[[conclusion]]Need maybe mention if "first error" means position of opening vs closing. We can state convention.
 
 But the user asks "Write a Python function that checks whether a string of brackets ()[]{} is balanced, ignoring any other characters. Then extend it to report the position of the first error. Think about the edge cases." They might expect just code and perhaps explanation. We can answer with code.
 
@@ -229,7 +229,7 @@ first_error("(]") mismatch at i1. Good.
 first_error(")") unexpected at 0. Good.
 first_error("([") stack at end [('(',0),('[',1)], returns pos1 unclosed '['. If expected earliest, mention.
 
-[[planning]]Should we include tests? Could include examples. Final answer oververbosity 5: include code and brief explanation. Good.
+[[conclusion]]Should we include tests? Could include examples. Final answer oververbosity 5: include code and brief explanation. Good.
 
 Need consider "position of first error" maybe they want the first error character position, not tuple. Could include a simpler wrapper `first_error_position` returning int or -1. Let's add:
 
@@ -239,6 +239,6 @@ Need consider "position of first error" maybe they want the first error characte
 
 Maybe not necessary. But helpful. Could mention if balanced returns None.
 
-[[planning]]Let's craft final with code and comments. Need not be too long. We'll include edge cases list.
+[[conclusion]]Let's craft final with code and comments. Need not be too long. We'll include edge cases list.
 
-[[conclusion]]Let's final.
+Let's final.

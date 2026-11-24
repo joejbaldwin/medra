@@ -35,7 +35,7 @@ Top downward speed v_y_down = (x/√(25-x^2))*0.5. For 0<x<5, this increases fro
 
 [[verification]]"Check result": We can check by differentiating velocity? Or check distances: at x=y=5/√2, y≈3.535, top height. dy/dt = -dx/dt. Then length derivative: x dx/dt + y dy/dt = x*0.5 + y*(-0.5) when x=y =0, preserving length. Also speeds equal.
 
-[[planning]]Let's craft final answer with equations and mention time ambiguity. Desired oververbosity 5. Need not too verbose.
+[[conclusion]]Let's craft final answer with equations and mention time ambiguity. Desired oververbosity 5. Need not too verbose.
 
 [[verification]]Let's think if any subtle issue: For a ladder leaning against wall, top is constrained to wall, bottom to floor. The foot slides away at 0.5 m/s constant. Top velocity changes. At x=3, y=4. Speed down 0.375 m/s.
 

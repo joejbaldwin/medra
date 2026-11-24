@@ -29,7 +29,7 @@ What about n negative gives negative maybe no. So in interval [0,60): t=0 and 32
 
 [[conclusion]]Need craft final answer maybe state if counting 3:00, include it, otherwise just one. Could mention. The desired final maybe "At 3:00 and at 3:32 8/11 minutes (3:32:43 7/11), if including 3:00; strictly between, only 3:32:43 7/11." Need answer.
 
-[[development]]Need derive succinctly. Use formula.
+[[conclusion]]Need derive succinctly. Use formula.
 
 Let's formulate.
 

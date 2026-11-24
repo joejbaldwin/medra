@@ -20,7 +20,7 @@ Need maybe use type hints. Need maybe "average O(1)" due to hash collisions wors
 
 Need explain "without OrderedDict". Good.
 
-[[planning]]Need answer with code and explanation. Desired oververbosity 5, not too lengthy. [[verification]]Ensure no hidden issue: get returns -1 as common LeetCode. If value None allowed? Use sentinel? get existing with value None should return None not -1? Common use integer. Could mention adjust sentinel. Maybe better implement get returns None if missing? Prompt says LRU cache get/put, no return spec. Use -1 standard. We can say return -1 for missing. Or use Optional. Need design. Let's craft.
+[[conclusion]]Need answer with code and explanation. Desired oververbosity 5, not too lengthy. [[verification]]Ensure no hidden issue: get returns -1 as common LeetCode. If value None allowed? Use sentinel? get existing with value None should return None not -1? Common use integer. Could mention adjust sentinel. Maybe better implement get returns None if missing? Prompt says LRU cache get/put, no return spec. Use -1 standard. We can say return -1 for missing. Or use Optional. Need design. Let's craft.
 
 [[development]]Code:
 

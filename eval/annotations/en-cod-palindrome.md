@@ -55,7 +55,7 @@ def longest_palindrome_dp(s):
 
 [[alternative]]Could include Manacher? The question says compare two approaches. Maybe expand center vs dynamic programming. Complexity: expand O(n^2), O(1) aux; DP O(n^2), O(n^2). Need mention Manacher O(n) optional. The function maybe single function? We can provide both. Maybe ask "Write a Python function that returns..." Could just give expand function and compare with DP. The final can include both functions and comparison. Need explain complexity. Mention expand-around-center practical and low memory; DP simple but memory heavy.
 
-[[development]]Need perhaps discuss worst-case and best-case. Expand around center: O(n^2) worst, O(n) best if string all same? Actually for each center expands O(n), total O(n^2) worst; if all same each center expands O(n), overall O(n^2). If random, average O(n). Space O(1). DP O(n^2) time always (with inner loops), O(n^2) space. Could optimize DP to O(n) space? But two approaches maybe compare expand vs Manacher. Hmm. [[planning]]The question: "Write a Python function that returns the longest palindromic substring of a string. Compare two approaches and explain the complexity of each." It might expect code for one function plus compare two approaches. We can say I implement expand-around-center below; compare with DP. Or provide both. Better provide both code functions.
+[[development]]Need perhaps discuss worst-case and best-case. Expand around center: O(n^2) worst, O(n) best if string all same? Actually for each center expands O(n), total O(n^2) worst; if all same each center expands O(n), overall O(n^2). If random, average O(n). Space O(1). DP O(n^2) time always (with inner loops), O(n^2) space. Could optimize DP to O(n) space? But two approaches maybe compare expand vs Manacher. Hmm. [[conclusion]]The question: "Write a Python function that returns the longest palindromic substring of a string. Compare two approaches and explain the complexity of each." It might expect code for one function plus compare two approaches. We can say I implement expand-around-center below; compare with DP. Or provide both. Better provide both code functions.
 
 Need maybe include example. Not necessary but can.
 
@@ -90,10 +90,10 @@ def longest_palindrome_dp(s):
 
 [[verification]]But if n=1, dp[0][0]=True, max_len=1, loops skip. Return s[0:1] good. If no length2, start remains 0 max_len=1 returns first char. Good.
 
-[[planning]]Expand function as above. Need note that expand from center handles both odd/even.
+[[conclusion]]Expand function as above. Need note that expand from center handles both odd/even.
 
 Could include "Tie behavior may differ but any longest is valid." Good.
 
 Need answer likely no need to mention Manacher unless optional. But maybe "For production, Manacher's O(n) exists." But user asked two approaches; maybe mention optional in final note.
 
-[[conclusion]]Let's produce final.
+Let's produce final.

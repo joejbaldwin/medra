@@ -80,7 +80,7 @@ Empty -> [].
 
 Could mention if you want touching *not* to merge, change `<=` to `<`. But "touching intervals" edge cases. Need answer perhaps "If by touching you mean [1,3] and [3,5], this treats them as overlapping and merges; if not, adjust".
 
-[[planning]]Need maybe include test assertions? Could.
+[[conclusion]]Need maybe include test assertions? Could.
 
 Need final answer with code only maybe. We can include explanation. The final answer should satisfy. Use final.
 

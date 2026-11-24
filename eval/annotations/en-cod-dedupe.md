@@ -58,19 +58,19 @@ def remove_evens(nums):
 [[verification]]Check:
 [2,4,6,1]: i0 pop2 [4,6,1], i0; pop4 [6,1], i0; pop6 [1], i0 odd i1; end [1].
 [1,2,2,3]: i0 odd i1; i1=2 pop [1,2,3] i1; i1=2 pop [1,3] i1; i1=3 odd i2; end [1,3].
-This is different from reverse or comprehension. [[planning]]Which two best? The prompt probably expects two different fixes and check both. Could present reverse iteration and list comprehension; clear.
+This is different from reverse or comprehension. [[conclusion]]Which two best? The prompt probably expects two different fixes and check both. Could present reverse iteration and list comprehension; clear.
 
 Need maybe mention first function's failure in detail. Need trace by hand. Also perhaps note range(len(nums)) uses length at call time. [[verification]]In trace for [2,4,6,1] we need ensure actual steps with i condition. At i=0 pop2, list [4,6,1]; i=1 checks 6, pop; list [4,1]; i=2 condition 2<2 false; i=3 condition 3<2 false. returns [4,1]. At i=1, why not check 4? Because index 0 now contains 4 and loop has passed i=0.
 
 For [1,2,2,3]: i0 no pop; i1 pop first 2 => [1,2,3]; i2 checks 3 not 2 at index1; i3 condition false. returns [1,2,3]. Actually at i=2, nums[2]=3, odd. i=3 i<len nums 3<3 false. Yes.
 
-[[planning]]Need answer in moderate detail. Include code. Maybe mention if correct target should remove all even numbers: results expected [1] and [1,3]. If original asks "This Python function should remove all even numbers... trace by hand..., explain why it fails, then give two different fixes and check both..." We can format.
+[[conclusion]]Need answer in moderate detail. Include code. Maybe mention if correct target should remove all even numbers: results expected [1] and [1,3]. If original asks "This Python function should remove all even numbers... trace by hand..., explain why it fails, then give two different fixes and check both..." We can format.
 
 Need include exact outputs and steps. [[verification]]Could note condition `i < len(nums)` guards some, but after pops len shrinks; when i reaches len/above it skips rest.
 
 Potential issue: For [2,4,6,1], at i=2, `i < len(nums)` = 2<2 false; loop still i=3 but false. It doesn't access. Good.
 
-[[planning]]Let's craft final with sections:
+[[conclusion]]Let's craft final with sections:
 Original function trace.
 Why fails.
 Fix A reverse loop with code and trace/check both inputs.
@@ -116,7 +116,7 @@ i1 val3 odd -> i2
 i2<2 false; return [1,3].
 This is clear. In second trace at i1 after first pop list [1,2,3], nums[1]=2 yes pop index1 => [1,3]. Then i1 val3 odd -> i2. correct.
 
-[[development]]Need maybe mention why reverse works: removing later elements doesn't affect indices of earlier unprocessed elements. While fix works because when remove at i, do not increment i, so the shifted next element is checked.
+[[conclusion]]Need maybe mention why reverse works: removing later elements doesn't affect indices of earlier unprocessed elements. While fix works because when remove at i, do not increment i, so the shifted next element is checked.
 
 [[alternative]]Potential alternative: `nums[:] = [x for x in nums if x % 2 != 0]`. But two fixes? Maybe "two different fixes" can include reverse and list comprehension. I think while is fine.
 

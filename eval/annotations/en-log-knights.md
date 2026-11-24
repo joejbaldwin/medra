@@ -23,7 +23,7 @@ B says: "A and C are the same type." S = (A == C). B = S.
 
 [[development]]A=¬B.
 
-Case B=0 => A=1. B statement truth: A==C. B=0 means statement false => (A==C)=false. A=1 so C≠1 => C=0. C=0 and B=0 satisfies C statement yes (liar says false "C knight or B knight" = false∨false false). So A knight, B knave, C knave. Check A says B knave true yes. B says A,C same type false (A knight C knave) yes. C says I'm knight or B is [knight], false or false=false, liar yes.
+Case B=0 => A=1. B statement truth: A==C. B=0 means statement false => (A==C)=false. A=1 so C≠1 => C=0. C=0 and B=0 satisfies C statement yes (liar says false "C knight or B knight" = false∨false false). So A knight, B knave, C knave. [[verification]]Check A says B knave true yes. B says A,C same type false (A knight C knave) yes. C says I'm knight or B is [knight], false or false=false, liar yes.
 
 [[alternative]]Case B=1 => A=0. B statement true: A==C. A=0 so C=0. But excluded by C equation: B=1,C=0 impossible because C liar saying "C knight or B knight" = false∨true=true, but liar cannot true. So no.
 

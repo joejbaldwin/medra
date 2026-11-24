@@ -56,7 +56,7 @@ Read N as integer.
 
 Compute change = ( (N // 1000) + 1 ) * 1000 - N if N is not divisible by 1000. Otherwise, 0.
 
-[[backtrack]]Wait, but that's more complicated. The previous formula of (N +999) // 1000 *1000 -N seems easier.
+Wait, but that's more complicated. The previous formula of (N +999) // 1000 *1000 -N seems easier.
 
 [[development]]So, code:
 
@@ -76,7 +76,7 @@ N=999: (999+999)=1998 →1 →1000 →1 change. Wait, 1000-999=1. Correct.
 
 So the formula works.
 
-[[development]]So the code is straightforward.
+[[alternative]]So the code is straightforward.
 
 So the function would read N from input, compute this value, and print it.
 
@@ -85,7 +85,7 @@ So the Python code would be:
 n = int(input())
 print( (1000 - (n % 1000)) % 1000 )
 
-[[alternative]]Wait, wait, another approach. Because the required total is the next multiple of 1000. So if the remainder is r when divided by 1000, then the required total is (n + (1000 - r)) % 1000? Wait, no. Let's think.
+Wait, wait, another approach. Because the required total is the next multiple of 1000. So if the remainder is r when divided by 1000, then the required total is (n + (1000 - r)) % 1000? Wait, no. Let's think.
 
 If n mod 1000 is r, then if r is zero, the next multiple is n, so change is 0. Otherwise, the next multiple is n + (1000 - r). So change is 1000 - r.
 
@@ -120,7 +120,7 @@ n=999: 999 mod 1000=999. 1000-999=1. mod 1000 is 1. Correct.
 
 So yes, this formula works as well.
 
-[[planning]]So which approach is better? Both are correct. Both give the same result.
+[[conclusion]]So which approach is better? Both are correct. Both give the same result.
 
 So in code, either approach can be used. But the second approach might be more efficient, as it's a simple modulo operation.
 
@@ -128,7 +128,7 @@ So the code could be either way.
 
 But the first approach uses integer division, but adding 999. Either way, the code is simple.
 
-[[conclusion]]So the code can be written as:
+So the code can be written as:
 
 n = int(input())
 print( (1000 - (n % 1000)) % 1000 )

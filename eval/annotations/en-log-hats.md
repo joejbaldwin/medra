@@ -27,7 +27,7 @@ They ask: "What colour is the front hat, and why? Would the answer change if the
 
 [[alternative]]But question wording: "Would the answer change if the middle one knew?" It might be a trick: The middle one in original does not know (he says don't know). If middle one "knew" (could know), then? The front's answer would change to white? Need articulate.
 
-Need maybe consider if middle one knew from start before back? But information order: back says no, then middle. "Would the answer change if the middle one knew?" likely asks if middle announced "I know" instead of "I don't know." Answer yes: then front is white. [[planning]]Let's craft final with labels and reasoning.
+Need maybe consider if middle one knew from start before back? But information order: back says no, then middle. "Would the answer change if the middle one knew?" likely asks if middle announced "I know" instead of "I don't know." Answer yes: then front is white. [[conclusion]]Let's craft final with labels and reasoning.
 
 Need also mention assumptions: All are perfect logicians, truthful, all know hat inventory, hear prior statement. Need maybe mention if "middle one knew" from beginning? We can disambiguate.
 
@@ -41,7 +41,7 @@ Need also mention assumptions: All are perfect logicians, truthful, all know hat
 
 Maybe include "If the middle one somehow knew without saying so, the front might not get that information; the front's conclusion depends on the public statement. If the public statement is 'I know,' then front is white." The question wording "if the middle one knew" perhaps asks "Would the answer change if the middle one knew [his colour]?" We can state.
 
-[[planning]]Let's prepare final concise. Need answer with "red" and why. Mention logical chain.
+[[conclusion]]Let's prepare final concise. Need answer with "red" and why. Mention logical chain.
 
 Potential issue: Classic puzzle with 3 red, 2 white; back says don't know, middle says don't know, front knows red. Yes.
 

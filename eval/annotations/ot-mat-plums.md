@@ -11,12 +11,12 @@ topics:
 ---
 [[planning]]Okay, let's see. I need to figure out how many plums balance one pear. The problem gives me two equations involving apples, pears, and plums. All fruits of the same type weigh the same. Hmm, let's break it down step by step.
 
-[[planning]]First, let me restate the information given. The problem says:
+First, let me restate the information given. The problem says:
 
 1. 3 apples and one pear weigh the same as 10 plums.
 2. 1 apple and 6 plums balance one pear.
 
-I need to find out how many plums equal one pear. Let me assign variables to each fruit to make it easier. Let's let A represent the weight of an apple, P represent the weight of a pear, and M represent the weight of a plum. Since all fruits of the same kind are identical in weight, these variables should work.
+I need to find out how many plums equal one pear. [[development]]Let me assign variables to each fruit to make it easier. Let's let A represent the weight of an apple, P represent the weight of a pear, and M represent the weight of a plum. Since all fruits of the same kind are identical in weight, these variables should work.
 
 So translating the problem into equations:
 

@@ -33,19 +33,19 @@ Total 27. Wait check also 1,? Let's systematically partitions into 3 parts max6 
 2,4,4 (3)
 3,3,4 (3). total 27. Yes.
 
-[[alternative]]Could also complement symmetry? For 3d6 distribution symmetric around 10.5, P(sum=10)=P(sum=11)? Actually possible. Exactly 10 count 27. Sum exactly 10.
+[[verification]]Could also complement symmetry? For 3d6 distribution symmetric around 10.5, P(sum=10)=P(sum=11)? Actually possible. Exactly 10 count 27. Sum exactly 10.
 
-[[planning]]Need answer maybe mention ordinary fair dice. "Check it in two different ways" means present two methods. We can present first inclusion-exclusion/generating function, second enumeration. Need be concise but explanatory.
+[[conclusion]]Need answer maybe mention ordinary fair dice. "Check it in two different ways" means present two methods. We can present first inclusion-exclusion/generating function, second enumeration. Need be concise but explanatory.
 
 Need perhaps verify probability = 27/216=1/8. Let's craft final with two independent checks.
 
 Potential pitfalls: The question asks "Check it in two different ways." So do both, not just one.
 
-[[development]]Let's formulate:
+[[conclusion]]Let's formulate:
 
 Method 1: Count nonnegative solutions xi=die_i-1, sum xi=7 with 0<=xi<=5. Total nonnegative solutions to x1+x2+x3=7 is C(9,2)=36. Subtract cases xi>=6: for each die set yi=xi-6; equation y1+...+y3=1; count C(3,2)=3 per die? [[verification]]Wait let's recalc carefully! If xi>=6 for a specific i, set xi'=xi-6. Sum xi' = 7-6 =1 over 3 variables. Number nonnegative solutions to sum 1 over 3 variables: C(1+3-1,3-1)=C(3,2)=3. There are 3 choices for variable =9. No double overlap. Count=36-9=27. Probability 27/216=1/8. This is inclusion-exclusion/generating maybe.
 
-[[development]]Method 2: Enumerate unordered triples:
+[[conclusion]]Method 2: Enumerate unordered triples:
 (1,3,6):6 perms
 (1,4,5):6
 (2,2,6):3

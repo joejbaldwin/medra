@@ -37,7 +37,7 @@ def group_anagrams_count(words, case_sensitive=True):
 
 [[development]]Need provide comparison. Sorting-based key simple, correct, handles Unicode by code point, empty string gives empty tuple. Complexity O(total characters log k) maybe per word. Letter-count key O(total chars + distinct chars log distinct) to canonicalize; if fixed alphabet (26 letters), O(total chars). It avoids sorting all letters, can be faster for long words, but more code and must handle arbitrary alphabet/Unicode and case. Need mention sorting key returns same key for permutations; counts key returns same counts. Empty string: sorted('') = '', tuple? If key=tuple(sorted(word)) => (). Counter('') empty; tuple(sorted(Counter('').items())) => (). All empty strings group. But if using ''.join(sorted(...)) returns '' too. Need mention if you filter empty strings, then no group. If case-insensitive, lower before key; this merges 'Eat' and 'eat'. If case-sensitive, treats uppercase and lowercase as distinct letters. Need mention preserving original words in output or normalized? We append original word, so output preserves input. If case-insensitive grouping, keys normalized but original words preserved. If you want output normalized, append key_word.
 
-[[planning]]Need perhaps answer with code both implementations and compare. Need maybe mention if using sorting-based key with Counter? Let's craft.
+[[conclusion]]Need perhaps answer with code both implementations and compare. Need maybe mention if using sorting-based key with Counter? Let's craft.
 
 Potential final:
 
@@ -94,7 +94,7 @@ For Counter key using tuple(sorted(Counter(norm).items())). For empty string: Co
 
 Need output list of groups: `list(groups.values())` order of groups first occurrence, order within group input order (due to append). If need deterministic sorted groups, sort each group and/or groups. But example output maybe not sorted. Could include optional sorted return? Not necessary. But maybe user expects groups. We can say change to `return [sorted(g) for g in groups.values()]` if desired.
 
-[[planning]]Need maybe provide function "group_anagrams" with sorting-based key. Then compare. The prompt: "Write a Python function that groups a list of words into anagrams, for example... Compare a sorting-based key with a letter-count key, and discuss uppercase letters and empty strings." So final should include code for both and discussion. Need answer concise but sufficient. Desired oververbosity 5. Need not extremely long.
+[[conclusion]]Need maybe provide function "group_anagrams" with sorting-based key. Then compare. The prompt: "Write a Python function that groups a list of words into anagrams, for example... Compare a sorting-based key with a letter-count key, and discuss uppercase letters and empty strings." So final should include code for both and discussion. Need answer concise but sufficient. Desired oververbosity 5. Need not extremely long.
 
 Need maybe include type hints. Ensure code works in Python. Let's craft final with sections.
 
@@ -161,7 +161,7 @@ Need maybe mention letter-count key with empty string: `Counter('')` empty. Sort
 
 Need maybe mention if using `casefold` and original word: the key for 'Straße' and 'STRASSE' could be same? Actually casefold('Straße') = 'strasse'; casefold('STRASSE') = 'strasse'. Good. Sorting key then same. Counter same. Good.
 
-[[planning]]Need ensure final answer not too verbose. Could include table.
+[[conclusion]]Need ensure final answer not too verbose. Could include table.
 
 Need answer likely final only. Need not mention "I". Use markdown.
 

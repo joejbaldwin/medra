@@ -17,13 +17,13 @@ topics:
 
 [[verification]]But wait the problem asks "Then do the same for n^2+6n+50." Seems simple. But perhaps there are multiple? Let's check if m could be? x^2 - m^2 = 41. Since 41 prime, yes only n=17. But maybe if considering x-m and x+m negative? x positive can choose x nonnegative. Fine.
 
-[[planning]]Need craft final with proof no others. Need mention perfect square integer square. Positive n. Could present both. Need maybe address x nonnegative. For expression positive, if y^2 equals it, take y positive. Then y>n+1 for first; factor.
+[[conclusion]]Need craft final with proof no others. Need mention perfect square integer square. Positive n. Could present both. Need maybe address x nonnegative. For expression positive, if y^2 equals it, take y positive. Then y>n+1 for first; factor.
 
 [[verification]]But wait first expression: n^2+2n+12 = (n+1)^2+11. If y^2 = ..., then y^2 - (n+1)^2=11. Factors (y-(n+1))(y+(n+1))=11. Need note y>n+1 since y^2 bigger than (n+1)^2. Both positive factors. Since product 11, smaller positive divisor 1. Then y-(n+1)=1 and y+(n+1)=11. Solve n+1=5 n=4. Done.
 
-Second similarly y^2=(n+3)^2+41. y>n+3. Difference factors =41. Only y-(n+3)=1, y+(n+3)=41. Solve n+3=20 n=17. Good.
+[[verification]]Second similarly y^2=(n+3)^2+41. y>n+3. Difference factors =41. Only y-(n+3)=1, y+(n+3)=41. Solve n+3=20 n=17. Good.
 
-[[development]]Need perhaps mention factorization of primes. Since 11 and 41 primes. If product equals p, positive factors 1,p. Same parity automatic? For p odd, x,m parity? If product odd, factors odd. Equations solve.
+[[verification]]Need perhaps mention factorization of primes. Since 11 and 41 primes. If product equals p, positive factors 1,p. Same parity automatic? For p odd, x,m parity? If product odd, factors odd. Equations solve.
 
 [[conclusion]]Need maybe final answer no others. Desired oververbosity 5, keep concise. The prompt says "Then do the same" perhaps wants both fully proven. We can structure.
 

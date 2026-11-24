@@ -14,7 +14,7 @@ Let's compute. [[development]]For 7 mod100. Since gcd, Carmichael? phi100=40, la
 
 [[development]]3^2026 mod100. Period? 3^1=3,3^2=9,3^3=27,3^4=81,3^5=43,3^6=29,3^7=87,3^8=61,3^9=83,3^10=49,3^11=47,3^12=41,3^13=23,3^14=69,3^15=7,3^16=21,3^17=63,3^18=89,3^19=67,3^20=1. Period 20. 2026 mod20=6. 3^6=729 =>29 mod100. So answer 29. [[verification]]Second method CRT. Mod4: 3≡-1, even exponent =>1. Mod25: phi20, 2026 mod20=6. 3^6 mod25 =729; 25*29=725 remainder4. Need x≡1 mod4, x≡4 mod25. x=4+25k; mod4: 0 +1*k need1 => k≡1 mod4. k=1 ->29. Or direct repeated squares.
 
-[[planning]]Need answer maybe mention exponent 2026 even. Need explain check each with second method. User asks "What are last two digits ... Then find ... Check each answer with a second method." Could be wanting both. Need maybe include two methods for each.
+[[conclusion]]Need answer maybe mention exponent 2026 even. Need explain check each with second method. User asks "What are last two digits ... Then find ... Check each answer with a second method." Could be wanting both. Need maybe include two methods for each.
 
 Need be aware "last two digits" include leading zero if any, but not relevant.
 
@@ -41,8 +41,8 @@ x≡1 mod4, x≡4 mod25. x=4+25k. mod4: 4+25k≡k mod4, need k≡1 mod4. k=1 giv
 
 [[alternative]]Could use Euler theorem: since gcd(3,100)=1, φ(100)=40, so 3^40≡1; not period 20. Need reduce exponent mod40: 2026 mod40 = 26, then 3^26? We can compute perhaps. But period 20. Need support 3^20≡1. Or use CRT method as check.
 
-[[planning]]For first method 3: direct modular exponent via 3^10 ≡49; 3^20≡1; then exponent 6. Include.
+[[conclusion]]For first method 3: direct modular exponent via 3^10 ≡49; 3^20≡1; then exponent 6. Include.
 
 Potential alternative: use Chinese remainder as second. Good.
 
-[[conclusion]]Need final with boxed results.
+Need final with boxed results.

@@ -3,11 +3,11 @@ trace: en-log-pets
 annotator: Joe
 drafted_by: Claude (AI assistant), to be corrected
 status: draft
-concepts: [dog owner, parrot, house, Alice, Ben, Chloe, cat, dog, solution]
+concepts: [dog owner, parrot owner, house, Alice, Ben, Chloe, cat, dog, parrot]
 topics:
 - [house, neighbor, adjacent]
 - [pet, cat, dog, parrot, owner]
-- [Alice, Ben, Chloe, people]
+- [Alice, Ben, Chloe]
 - [solution, possibility, arrangement]
 ---
 [[planning]]We need answer puzzle. Need reason carefully. Need maybe identify ambiguity. Let's formalize.
@@ -39,13 +39,13 @@ Parrot owner H1 = B. Thus B parrot. But clue Ben not cat okay. Pet remaining A,C
 
 [[conclusion]]Both valid if dog owner cannot be Alice and "next to" means adjacent another person. Thus not unique. [[verification]]But check first: A H1, dog owner B H2 next to yes. Parrot A H1. Chloe H3 cat. valid.
 
-Could there be more if dog owner can be Alice? But "lives next to Alice" excludes Alice naturally. If not excluding? dog owner lives next to Alice, no same house, so no.
+[[verification]]Could there be more if dog owner can be Alice? But "lives next to Alice" excludes Alice naturally. If not excluding? dog owner lives next to Alice, no same house, so no.
 
 [[conclusion]]Need answer: two possible arrangements. Need present. [[verification]]Let's ensure no hidden assumption "house numbered 1 to 3" and "each live in houses numbered 1 to 3" usually one per house. Yes.
 
 Let's maybe derive systematically and question asks "Who owns which pet and who lives where? Is solution unique?" likely maybe trick: no unique, two solutions. Could there be interpretation "dog owner lives next to Alice" meaning the dog owner is neighbor of Alice, so if Alice owns dog impossible. We did.
 
-[[development]]Let's list table.
+[[conclusion]]Let's list table.
 
 Possibility 1:
 House1 Alice parrot
@@ -61,7 +61,7 @@ House3 Chloe dog
 P1: Dog owner Ben lives next to Alice H1-H2. Ben doesn't own cat, owns dog. Chloe H3. Parrot H1. yes.
 P2: Dog owner Chloe H3 lives next to Alice H2. Ben H1 parrot not cat. Chloe H3. Parrot H1. yes.
 
-Are there potential if Chloe also parrot? Since Chloe H3 and parrot H1 impossible if distinct houses. Good.
+[[verification]]Are there potential if Chloe also parrot? Since Chloe H3 and parrot H1 impossible if distinct houses. Good.
 
 Could there be solution where Chloe owns parrot? No if houses are distinct, cannot live both H1/H3. Unless houses can share? No.
 

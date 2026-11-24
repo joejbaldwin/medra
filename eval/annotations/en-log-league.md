@@ -39,7 +39,7 @@ C beats D; loses to A,B.
 D draws B; loses to A,C.
 [[planning]]Need answer question "What was result of every match? Is it only possibility?" Explain uniqueness. Need maybe mention if points totals determine records; no alternative. [[verification]]But let's verify no hidden issue: Could there be different with C 3 draws? We excluded via draw count due total sum. Let x draws computed from total points 16. If C had 3 draws, then A D1+B D2+C D3+D? sum draw incidences would at least6 -> #draws3; total points? Wait total 16 dictates exactly 2 draws because each draw reduces total by 1 from decisive maximum 18. But sum per team: A 7 possible (2W1D). B 5 (1W2D). If C 0W3D, D 0W1D, total team draw incidences=1+2+3+1=7 odd impossible because each draw counts 2; also #draws=3.5 not. So no.
 
-[[planning]]Let's craft concise but with method. Maybe table.
+[[conclusion]]Let's craft concise but with method. Maybe table.
 
 Need be careful match notation "A v B: draw" etc. Provide points check.
 

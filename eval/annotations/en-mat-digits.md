@@ -43,19 +43,19 @@ a=2: sum10 for last 3 digits each <=9. Unrestricted C(12,2)=66 minus any variabl
 a=1: sum11 for last3 <=9. Unrestricted C(13,2)=78. Subtract variable>=10: let b'=b-10, sum=1 among 3 variables: C(1+3-1,2)=C3,2=3 per variable *3=9. No double. Count 78-9=69.
 [[verification]]Sum: for a=9 down3: 10+15+21+28+36+45+55 =? 10+15=25+21=46+28=74? Wait 25+21=46 yes +28=74? No 46+28=74? Oops 46+28=74 yes? Actually 46+28=74? Wait 46+28=74 indeed? 46+30=76-2=74. That's wrong? 46+28 = 74? 40+20=60; 6+8=14 total 74. yes. +36=110. +45=155? Wait 110+45=155 yes. +55=210. Then plus a=2 63 plus a=1 69 => 342. Check sum sequence: a=9 to3 terms: 10,15,21,28,36,45,55. Sum: 10+15=25; +21=46; +28=74; +36=110; +45=155; +55=210. +63=273; +69=342. Good.
 
-[[planning]]Need present two methods. Could choose generating functions as second. Need answer. Need perhaps mention digits sum exactly 12. Need "four-digit numbers" no leading zero. Let's formulate.
+[[conclusion]]Need present two methods. Could choose generating functions as second. Need answer. Need perhaps mention digits sum exactly 12. Need "four-digit numbers" no leading zero. Let's formulate.
 
 Need ensure not too verbose. Provide two methods and check.
 
 Potential issue: "four-digit numbers have digits that add up to 12" could include number 100? No four-digit. Leading digit nonzero. Good.
 
-[[development]]Method 1 inclusion-exclusion detail. Define digits a,b,c,d with a in 1..9, b,c,d in 0..9. Let x=a-1. Then x+b+c+d=11 with x,b,c,d>=0, x<=8, b,c,d<=9. Without upper bounds C(14,3)=364. Subtract x>=9: set x'=x-9, x'+b+c+d=2 -> C(5,3)=10. Subtract b>=10 (or c/d): set b'=b-10, x+b'+c+d=1 -> C(4,3)=4 for each of b,c,d, total 12. No overlap. Count 364-10-12=342. Need ensure upper bounds: x<=8 because a<=9, and b,c,d<=9. Good.
+[[conclusion]]Method 1 inclusion-exclusion detail. Define digits a,b,c,d with a in 1..9, b,c,d in 0..9. Let x=a-1. Then x+b+c+d=11 with x,b,c,d>=0, x<=8, b,c,d<=9. Without upper bounds C(14,3)=364. Subtract x>=9: set x'=x-9, x'+b+c+d=2 -> C(5,3)=10. Subtract b>=10 (or c/d): set b'=b-10, x+b'+c+d=1 -> C(4,3)=4 for each of b,c,d, total 12. No overlap. Count 364-10-12=342. Need ensure upper bounds: x<=8 because a<=9, and b,c,d<=9. Good.
 
-[[planning]]Method 2 case first digit. Could show table perhaps concise. For a=1..9, count triples sum 12-a. Need include values. Use table with a and count. We must present in final. Maybe table.
+[[conclusion]]Method 2 case first digit. Could show table perhaps concise. For a=1..9, count triples sum 12-a. Need include values. Use table with a and count. We must present in final. Maybe table.
 
 Let's consider if there is more elegant second method with generating functions. But case table is okay. Need "Solve in two different ways and check answers agree." We can show sum =342.
 
-[[development]]Let's craft final with formula for a=1,2 using inclusion-exclusion. For a≥3, sum ≤9, count C(12-a+2,2)=C(14-a,2). Wait check a=3 sum=9, number nonnegative triples = C(9+2,2)=C11,2=55. Formula C(14-a,2): C11,2 yes. a=9 C5,2=10. For a=1,2 need subtract. Table. The sum for a=3..9: use formula. a=1: last digits sum 11: C(13,2)-3*C? Let's detail. If one of b,c,d≥10, set subtract 10, remaining sum 1 among 3 variables, number C(1+2,2)=3 each, total9. Count78-9=69. For a=2: sum10: C(12,2)=66 minus 3*1=63. For a≥3 no upper bound violations because sum≤9. Sum a=3 to9 C(14-a,2) = for a=3..9 gives C11,2 + C10,2 + ... C5,2. Wait C(14-a,2) a=3 => C11,2; a=9=>C5,2. Sum = C? 55+45+36+28+21+15+10 =210. Include a=1 69, a=2 63 total 342. Need be careful display not confuse.
+Let's craft final with formula for a=1,2 using inclusion-exclusion. For a≥3, sum ≤9, count C(12-a+2,2)=C(14-a,2). Wait check a=3 sum=9, number nonnegative triples = C(9+2,2)=C11,2=55. Formula C(14-a,2): C11,2 yes. a=9 C5,2=10. For a=1,2 need subtract. Table. The sum for a=3..9: use formula. a=1: last digits sum 11: C(13,2)-3*C? Let's detail. If one of b,c,d≥10, set subtract 10, remaining sum 1 among 3 variables, number C(1+2,2)=3 each, total9. Count78-9=69. For a=2: sum10: C(12,2)=66 minus 3*1=63. For a≥3 no upper bound violations because sum≤9. Sum a=3 to9 C(14-a,2) = for a=3..9 gives C11,2 + C10,2 + ... C5,2. Wait C(14-a,2) a=3 => C11,2; a=9=>C5,2. Sum = C? 55+45+36+28+21+15+10 =210. Include a=1 69, a=2 63 total 342. Need be careful display not confuse.
 
 [[alternative]]Alternative second method use generating function coefficient maybe shorter:
 Coefficient of x^12 in (x+x^2+...+x^9)(1+x+...+x^9)^3. Evaluate. Coefficient = [x^11](1-x^9)/(1-x) * ((1-x^10)/(1-x))^3? Actually (x(1-x^9)/(1-x))*((1-x^10)/(1-x))^3. Need coefficient. Could compute via inclusion-exclusion same as method 1, not different enough. Case table distinct.

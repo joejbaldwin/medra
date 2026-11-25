@@ -27,18 +27,35 @@ EVAL_DIR = Path(__file__).parent
 TRACES_DIR = EVAL_DIR / "traces"
 ANNOTATIONS_DIR = EVAL_DIR / "annotations"
 RESULTS_DIR = EVAL_DIR / "results"
+# Extra annotated traces used only to train the step-type classifier
+# (eval/steptypes.py). Kept apart so the evaluation set, and so its dev/test
+# split, never changes: ids are ot-<row> (OpenThoughts) and ds-<kind>-<n> (DeepSeek).
+TRAIN_DIR = EVAL_DIR / "train"
+TRAIN_TRACES_DIR = TRAIN_DIR / "traces"
+TRAIN_ANNOTATIONS_DIR = TRAIN_DIR / "annotations"
 
 
 def trace_ids() -> list[str]:
+    """The evaluation traces (the dev/test split is made over these only)."""
     return sorted(p.stem for p in TRACES_DIR.glob("*.json"))
 
 
+def train_trace_ids() -> list[str]:
+    return sorted(p.stem for p in TRAIN_TRACES_DIR.glob("*.json"))
+
+
+def trace_path(trace_id: str) -> Path:
+    """Where a trace lives: the evaluation set first, then the training set."""
+    path = TRACES_DIR / f"{trace_id}.json"
+    return path if path.exists() else TRAIN_TRACES_DIR / f"{trace_id}.json"
+
+
 def get_trace(trace_id: str) -> Trace:
-    return load_trace(str(TRACES_DIR / f"{trace_id}.json"))
+    return load_trace(str(trace_path(trace_id)))
 
 
 def source_of(trace_id: str) -> str:
-    """Which model wrote the trace: recorded DeepSeek (en-*) or OpenThoughts R1 (ot-*)."""
+    """Which model wrote the trace: recorded DeepSeek (en-*, ds-*) or OpenThoughts R1 (ot-*)."""
     return "openthoughts" if trace_id.startswith("ot-") else "deepseek"
 
 

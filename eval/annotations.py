@@ -22,7 +22,13 @@ the trace byte for byte, then maps each tag to a sentence index using MeDRA's
 own sentence splitter, so boundaries are compared sentence by sentence.
 
     python -m eval.annotations --check          # check every file
+    python -m eval.annotations --check --train  # the same for the training set (eval/train/)
     python -m eval.annotations --sentences ID   # print a trace's numbered sentences
+    python -m eval.annotations --write ID --tags "0:planning,4:development,9:verification"
+
+--write makes the file from sentence numbers (as --sentences prints them), so
+the text is copied exactly; it goes to eval/train/annotations/ for a training
+trace. Training files need only the step tags (concepts and topics optional).
 """
 
 from __future__ import annotations
@@ -35,7 +41,7 @@ from pathlib import Path
 
 import yaml
 
-from eval.common import ANNOTATIONS_DIR, mine, trace_ids
+from eval.common import ANNOTATIONS_DIR, TRAIN_ANNOTATIONS_DIR, mine, trace_ids, train_trace_ids
 
 STEP_TYPES = ("planning", "development", "verification", "backtrack", "alternative", "conclusion")
 STATUSES = ("draft", "corrected")
@@ -77,8 +83,8 @@ def parse(path: Path) -> Annotation:
         body = body[:-1]  # editors add a final newline; traces are stripped
 
     trace_id = meta.get("trace") or path.name.split(".")[0]
-    if trace_id not in trace_ids():
-        raise AnnotationError(f"no trace {trace_id!r} in eval/traces/")
+    if trace_id not in trace_ids() and trace_id not in train_trace_ids():
+        raise AnnotationError(f"no trace {trace_id!r} in eval/traces/ or eval/train/traces/")
     status = meta.get("status")
     if status not in STATUSES:
         raise AnnotationError(f"status must be one of {STATUSES}, not {status!r}")
@@ -166,41 +172,82 @@ def write(trace_id: str, tags: dict[int, str], *, concepts: list[str], topics: l
     out.append(text[last:])
     meta = {"trace": trace_id, "annotator": annotator, "status": status, "concepts": concepts, "topics": topics}
     front = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False, default_flow_style=None, width=110)
-    path = path or ANNOTATIONS_DIR / f"{trace_id}.md"
+    if path is None:
+        directory = TRAIN_ANNOTATIONS_DIR if trace_id in train_trace_ids() else ANNOTATIONS_DIR
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / f"{trace_id}.md"
     path.write_text(f"---\n{front}---\n" + "".join(out) + "\n", encoding="utf-8", newline="\n")
     parse(path)  # what was written must check
     return path
 
 
-def load_all(status: str | None = None) -> list[Annotation]:
-    """All annotations, optionally only those with this status."""
-    found = [parse(p) for p in annotation_files()]
+def load_all(status: str | None = None, directory: Path = ANNOTATIONS_DIR) -> list[Annotation]:
+    """All annotations in `directory`, optionally only those with this status."""
+    found = [parse(p) for p in annotation_files(directory)]
     return [a for a in found if status is None or a.status == status]
 
 
+def parse_tags(spec: str) -> dict[int, str]:
+    """ "0:planning, 4:development" -> {0: "planning", 4: "development"}."""
+    tags = {}
+    for item in filter(None, (x.strip() for x in spec.split(","))):
+        index, _, kind = item.partition(":")
+        kind = kind.strip()
+        if kind not in STEP_TYPES:
+            raise AnnotationError(f"unknown step type {kind!r} in {item!r} (use one of {', '.join(STEP_TYPES)})")
+        if int(index) in tags:
+            raise AnnotationError(f"sentence {index} is tagged twice")
+        tags[int(index)] = kind
+    if 0 not in tags:
+        raise AnnotationError("sentence 0 needs a tag (the type of the first step)")
+    return tags
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Check annotation files or print a trace's sentences.")
+    parser = argparse.ArgumentParser(description="Check annotation files, print a trace's sentences or write a file.")
     parser.add_argument("--check", action="store_true", help="check every annotation file")
+    parser.add_argument("--train", action="store_true", help="with --check: the training set (eval/train/)")
     parser.add_argument("--sentences", metavar="ID", help="print the numbered sentences of a trace")
+    parser.add_argument("--write", metavar="ID", help="write the annotation file of a trace from --tags")
+    parser.add_argument("--tags", help='with --write: "sentence:type,..." e.g. "0:planning,4:development"')
+    parser.add_argument("--annotator", default="grupo", help="with --write: annotator field")
     args = parser.parse_args()
     if args.sentences:
         mined = mine(args.sentences)
         for i, (a, b) in enumerate(mined.spans):
             print(f"{i:3d} {mined.text[a:b]}")
         return
+    if args.write:
+        if not args.tags:
+            sys.exit("--write needs --tags")
+        try:
+            tags = parse_tags(args.tags)
+            n = len(mine(args.write).spans)
+            if max(tags) >= n:
+                raise AnnotationError(f"the trace has {n} sentences (0-{n - 1}); got sentence {max(tags)}")
+            path = write(args.write, tags, concepts=[], topics=[], annotator=args.annotator, status="corrected")
+        except (AnnotationError, ValueError) as exc:
+            sys.exit(f"FAIL {args.write}: {exc}")
+        print(f"ok   {path}: {len(tags)} steps")
+        return
+    directory, ids = (TRAIN_ANNOTATIONS_DIR, train_trace_ids()) if args.train else (ANNOTATIONS_DIR, trace_ids())
     failed = 0
-    for path in annotation_files():
+    types: dict[str, int] = {}
+    for path in annotation_files(directory):
         try:
             a = parse(path)
         except AnnotationError as exc:
             failed += 1
             print(f"FAIL {path.name}: {exc}")
             continue
+        for t in a.types:
+            types[t] = types.get(t, 0) + 1
         print(f"ok   {path.name}: {a.status}, {len(a.starts)} segments in {a.n_sentences} sentences, "
               f"{len(a.concepts)} concepts, {len(a.topics)} topics ({a.annotator})")
-    missing = sorted(set(trace_ids()) - {p.name.split(".")[0] for p in annotation_files()})
+    print("steps by type: " + ", ".join(f"{t} {types.get(t, 0)}" for t in STEP_TYPES))
+    missing = sorted(set(ids) - {p.name.split(".")[0] for p in annotation_files(directory)})
     if missing:
-        print(f"not annotated yet: {', '.join(missing)}")
+        print(f"not annotated yet ({len(missing)}): {', '.join(missing)}")
     sys.exit(1 if failed else 0)
 
 

@@ -2,6 +2,11 @@
 
     python -m eval.record_traces            # record every prompt not yet saved
     python -m eval.record_traces en-log-seats en-cod-intervals   # only these
+    python -m eval.record_traces --prompts eval/train/prompts.yaml   # training traces
+
+--prompts reads problems from a YAML list of {id, title, prompt} (ids
+ds-<kind>-<n>) and saves them in eval/train/traces/, the training set of the
+step-type classifier, which is kept apart from the evaluation traces.
 
 Each trace is saved as eval/traces/<id>.json in the same format as
 data/samples/, so the dashboard can replay it too. A trace is kept only if
@@ -22,6 +27,9 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import yaml
+
+from eval.common import TRAIN_TRACES_DIR
 from medra.mining.language import stopword_hits
 from medra.settings import get_settings
 from medra.sources import DeepSeekSource, SourceError
@@ -155,6 +163,22 @@ async def record(trace_id: str, title: str, language: str, prompt: str, model: s
     }
 
 
+def load_prompts(path: Path) -> dict[str, tuple[str, str, str]]:
+    """Training problems from YAML: a list of {id, title, prompt}, English only."""
+    items = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+    prompts: dict[str, tuple[str, str, str]] = {}
+    for item in items:
+        trace_id = str(item.get("id", ""))
+        if not re.fullmatch(r"ds-(mat|log|cod|sci)-\d+", trace_id):
+            sys.exit(f"bad id {trace_id!r}: use ds-<mat|log|cod|sci>-<number>")
+        if trace_id in prompts or trace_id in PROMPTS:
+            sys.exit(f"duplicate id {trace_id!r}")
+        if not str(item.get("prompt", "")).strip():
+            sys.exit(f"{trace_id}: empty prompt")
+        prompts[trace_id] = (str(item.get("title", trace_id)), "en", str(item["prompt"]).strip())
+    return prompts
+
+
 def check(trace: dict) -> str | None:
     """Why the trace should be discarded, or None to keep it."""
     n = words(trace["reasoning"])
@@ -177,20 +201,25 @@ def main() -> None:
     parser.add_argument("--force", action="store_true", help="re-record even if the file exists")
     parser.add_argument("--model", default=None, help="DeepSeek model (default: MEDRA_DEEPSEEK_MODEL)")
     parser.add_argument("--discarded", type=Path, default=None, help="also save discarded traces in this folder")
+    parser.add_argument("--prompts", type=Path, default=None,
+                        help="YAML list of {id, title, prompt}: record these into eval/train/traces/")
     args = parser.parse_args()
     if not get_settings().deepseek_api_key:
         sys.exit("DEEPSEEK_API_KEY is not set (.env or environment)")
-    unknown = set(args.ids) - set(PROMPTS)
+    prompts, out = PROMPTS, TRACES_DIR
+    if args.prompts:
+        prompts, out = load_prompts(args.prompts), TRAIN_TRACES_DIR
+    unknown = set(args.ids) - set(prompts)
     if unknown:
         sys.exit(f"unknown ids: {sorted(unknown)}")
-    TRACES_DIR.mkdir(exist_ok=True)
-    for trace_id in args.ids or list(PROMPTS):
-        path = TRACES_DIR / f"{trace_id}.json"
+    out.mkdir(parents=True, exist_ok=True)
+    for trace_id in args.ids or list(prompts):
+        path = out / f"{trace_id}.json"
         if path.exists() and not args.force:
             print(f"{trace_id}: already saved, skipped")
             continue
         try:
-            trace = asyncio.run(record(trace_id, *PROMPTS[trace_id], model=args.model or get_settings().deepseek_model))
+            trace = asyncio.run(record(trace_id, *prompts[trace_id], model=args.model or get_settings().deepseek_model))
         except SourceError as exc:
             print(f"{trace_id}: FAILED: {exc}")
             continue

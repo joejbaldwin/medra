@@ -1,6 +1,6 @@
 # Resultados de la evaluación de MeDRA
 
-Generado con `python -m eval.run` el 2026-11-25, commit 3894b35. Anotaciones: 30 (30 corregidas). Trazas en inglés: 22 de DeepSeek y 8 de OpenThoughts (DeepSeek-R1).
+Generado con `python -m eval.run` el 2026-11-25, commit 1fd3a99. Anotaciones: 30 (30 corregidas). Trazas en inglés: 22 de DeepSeek y 8 de OpenThoughts (DeepSeek-R1).
 
 Referencia: 13.9 tramos por traza, 9.4 frases por tramo de media. Tamaño fijo = 10 frases (media de la referencia en dev).
 
@@ -76,18 +76,27 @@ Parámetros ajustados en dev con `python -m eval.tune`: `{'window': 2, 'climb': 
 
 ## Tipo de paso (en las fronteras de la referencia)
 
-418 pasos. MeDRA: exactitud 0.28, F1 macro 0.20. Línea base (siempre «development»): exactitud 0.23, F1 macro 0.06.
+Clasificador: TF-IDF (palabras iniciales, palabras del tramo, marcador del léxico, primer tramo) y regresión logística, C = 1, pesos de clase balanced (elegidos por validación cruzada agrupada por traza en dev, 257 pasos). Regla: el marcador que abre el tramo, «development» si no hay.
 
-| Tipo | Precisión | Cobertura | F1 | Casos |
+| Método | Test: exactitud | Test: F1 macro | Dejar-una-traza-fuera: exactitud | F1 macro |
 |---|---|---|---|---|
-| alternative | 0.50 | 0.10 | 0.17 | 40 |
-| backtrack | 0.05 | 0.50 | 0.08 | 2 |
-| conclusion | 0.56 | 0.18 | 0.27 | 85 |
-| development | 0.24 | 0.83 | 0.38 | 96 |
-| planning | 0.24 | 0.08 | 0.12 | 64 |
-| verification | 1.00 | 0.10 | 0.18 | 131 |
+| Clasificador | 0.61 | 0.57 | 0.61 | 0.48 |
+| Regla de marcadores | 0.28 | 0.25 | 0.28 | 0.20 |
+| Siempre «development» | 0.22 | 0.07 | 0.23 | 0.06 |
 
-Confusión (referencia → MeDRA): alternative->alternative: 4, alternative->backtrack: 2, alternative->conclusion: 1, alternative->development: 33, backtrack->backtrack: 1, backtrack->development: 1, conclusion->alternative: 1, conclusion->conclusion: 15, conclusion->development: 68, conclusion->planning: 1, development->backtrack: 1, development->conclusion: 4, development->development: 80, development->planning: 11, planning->conclusion: 5, planning->development: 54, planning->planning: 5, verification->alternative: 3, verification->backtrack: 18, verification->conclusion: 2, verification->development: 91, verification->planning: 4, verification->verification: 13
+Test: 161 pasos. Dejar-una-traza-fuera: 418 pasos (la regla y la línea base no se entrenan: son las mismas trazas).
+
+Por tipo, en test:
+
+| Tipo | Clasificador P | R | F1 | Regla P | R | F1 | Casos |
+|---|---|---|---|---|---|---|---|
+| alternative | 0.27 | 0.27 | 0.27 | 0.60 | 0.20 | 0.30 | 15 |
+| conclusion | 0.71 | 0.77 | 0.74 | 0.55 | 0.19 | 0.29 | 31 |
+| development | 0.53 | 0.53 | 0.53 | 0.24 | 0.78 | 0.37 | 36 |
+| planning | 0.62 | 0.70 | 0.65 | 0.17 | 0.09 | 0.11 | 23 |
+| verification | 0.70 | 0.62 | 0.66 | 1.00 | 0.11 | 0.19 | 56 |
+
+Confusión del clasificador en test (referencia → predicción): alternative->alternative: 4, alternative->conclusion: 2, alternative->development: 3, alternative->verification: 6, conclusion->conclusion: 24, conclusion->development: 2, conclusion->planning: 4, conclusion->verification: 1, development->alternative: 4, development->conclusion: 3, development->development: 19, development->planning: 5, development->verification: 5, planning->conclusion: 3, planning->development: 1, planning->planning: 16, planning->verification: 3, verification->alternative: 7, verification->conclusion: 2, verification->development: 11, verification->planning: 1, verification->verification: 35
 
 ## Conceptos clave (burbujas)
 

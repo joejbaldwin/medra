@@ -1,0 +1,732 @@
+{
+ "settings": {
+  "C": 1,
+  "class_weight": "balanced"
+ },
+ "grid": [
+  {
+   "C": 0.3,
+   "class_weight": null,
+   "accuracy": 0.4785992217898833,
+   "macro_f1": 0.30607012035583464
+  },
+  {
+   "C": 0.3,
+   "class_weight": "balanced",
+   "accuracy": 0.5642023346303502,
+   "macro_f1": 0.42466640336976474
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "accuracy": 0.5642023346303502,
+   "macro_f1": 0.38908434878560594
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "accuracy": 0.5992217898832685,
+   "macro_f1": 0.4361403235758241
+  },
+  {
+   "C": 3,
+   "class_weight": null,
+   "accuracy": 0.5758754863813229,
+   "macro_f1": 0.399071522899572
+  },
+  {
+   "C": 3,
+   "class_weight": "balanced",
+   "accuracy": 0.5992217898832685,
+   "macro_f1": 0.42033952860112594
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "accuracy": 0.5719844357976653,
+   "macro_f1": 0.3953294110314185
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "accuracy": 0.5992217898832685,
+   "macro_f1": 0.4186444159989886
+  },
+  {
+   "C": 30,
+   "class_weight": null,
+   "accuracy": 0.5836575875486382,
+   "macro_f1": 0.40320119584825465
+  },
+  {
+   "C": 30,
+   "class_weight": "balanced",
+   "accuracy": 0.5914396887159533,
+   "macro_f1": 0.4124266800737389
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "accuracy": 0.5836575875486382,
+   "macro_f1": 0.4046603401670676
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "accuracy": 0.5836575875486382,
+   "macro_f1": 0.40696315525044807
+  }
+ ],
+ "dev_steps": 257,
+ "test": {
+  "classifier": {
+   "n": 161,
+   "accuracy": 0.6086956521739131,
+   "macro_f1": 0.569268913177269,
+   "per_class": {
+    "alternative": {
+     "precision": 0.26666666666666666,
+     "recall": 0.26666666666666666,
+     "f1": 0.26666666666666666,
+     "support": 15
+    },
+    "conclusion": {
+     "precision": 0.7058823529411765,
+     "recall": 0.7741935483870968,
+     "f1": 0.7384615384615385,
+     "support": 31
+    },
+    "development": {
+     "precision": 0.5277777777777778,
+     "recall": 0.5277777777777778,
+     "f1": 0.5277777777777778,
+     "support": 36
+    },
+    "planning": {
+     "precision": 0.6153846153846154,
+     "recall": 0.6956521739130435,
+     "f1": 0.6530612244897959,
+     "support": 23
+    },
+    "verification": {
+     "precision": 0.7,
+     "recall": 0.625,
+     "f1": 0.6603773584905661,
+     "support": 56
+    }
+   },
+   "confusion": {
+    "alternative->alternative": 4,
+    "alternative->conclusion": 2,
+    "alternative->development": 3,
+    "alternative->verification": 6,
+    "conclusion->conclusion": 24,
+    "conclusion->development": 2,
+    "conclusion->planning": 4,
+    "conclusion->verification": 1,
+    "development->alternative": 4,
+    "development->conclusion": 3,
+    "development->development": 19,
+    "development->planning": 5,
+    "development->verification": 5,
+    "planning->conclusion": 3,
+    "planning->development": 1,
+    "planning->planning": 16,
+    "planning->verification": 3,
+    "verification->alternative": 7,
+    "verification->conclusion": 2,
+    "verification->development": 11,
+    "verification->planning": 1,
+    "verification->verification": 35
+   }
+  },
+  "rule": {
+   "n": 161,
+   "accuracy": 0.2795031055900621,
+   "macro_f1": 0.25239388794567064,
+   "per_class": {
+    "alternative": {
+     "precision": 0.6,
+     "recall": 0.2,
+     "f1": 0.3,
+     "support": 15
+    },
+    "conclusion": {
+     "precision": 0.5454545454545454,
+     "recall": 0.1935483870967742,
+     "f1": 0.2857142857142857,
+     "support": 31
+    },
+    "development": {
+     "precision": 0.2413793103448276,
+     "recall": 0.7777777777777778,
+     "f1": 0.368421052631579,
+     "support": 36
+    },
+    "planning": {
+     "precision": 0.16666666666666666,
+     "recall": 0.08695652173913043,
+     "f1": 0.11428571428571427,
+     "support": 23
+    },
+    "verification": {
+     "precision": 1.0,
+     "recall": 0.10714285714285714,
+     "f1": 0.19354838709677416,
+     "support": 56
+    }
+   },
+   "confusion": {
+    "alternative->alternative": 3,
+    "alternative->backtrack": 2,
+    "alternative->conclusion": 1,
+    "alternative->development": 9,
+    "conclusion->conclusion": 6,
+    "conclusion->development": 24,
+    "conclusion->planning": 1,
+    "development->backtrack": 1,
+    "development->conclusion": 2,
+    "development->development": 28,
+    "development->planning": 5,
+    "planning->conclusion": 2,
+    "planning->development": 19,
+    "planning->planning": 2,
+    "verification->alternative": 2,
+    "verification->backtrack": 8,
+    "verification->development": 36,
+    "verification->planning": 4,
+    "verification->verification": 6
+   }
+  },
+  "majority": {
+   "n": 161,
+   "accuracy": 0.2236024844720497,
+   "macro_f1": 0.07309644670050762,
+   "per_class": {
+    "alternative": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 15
+    },
+    "conclusion": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 31
+    },
+    "development": {
+     "precision": 0.2236024844720497,
+     "recall": 1.0,
+     "f1": 0.3654822335025381,
+     "support": 36
+    },
+    "planning": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 23
+    },
+    "verification": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 56
+    }
+   },
+   "confusion": {
+    "alternative->development": 15,
+    "conclusion->development": 31,
+    "development->development": 36,
+    "planning->development": 23,
+    "verification->development": 56
+   }
+  }
+ },
+ "loto": {
+  "classifier": {
+   "n": 418,
+   "accuracy": 0.6148325358851675,
+   "macro_f1": 0.48461722808442365,
+   "per_class": {
+    "alternative": {
+     "precision": 0.34375,
+     "recall": 0.275,
+     "f1": 0.3055555555555556,
+     "support": 40
+    },
+    "backtrack": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 2
+    },
+    "conclusion": {
+     "precision": 0.7078651685393258,
+     "recall": 0.7411764705882353,
+     "f1": 0.7241379310344828,
+     "support": 85
+    },
+    "development": {
+     "precision": 0.5463917525773195,
+     "recall": 0.5520833333333334,
+     "f1": 0.5492227979274611,
+     "support": 96
+    },
+    "planning": {
+     "precision": 0.676923076923077,
+     "recall": 0.6875,
+     "f1": 0.6821705426356589,
+     "support": 64
+    },
+    "verification": {
+     "precision": 0.6370370370370371,
+     "recall": 0.6564885496183206,
+     "f1": 0.6466165413533835,
+     "support": 131
+    }
+   },
+   "confusion": {
+    "alternative->alternative": 11,
+    "alternative->conclusion": 2,
+    "alternative->development": 7,
+    "alternative->planning": 3,
+    "alternative->verification": 17,
+    "backtrack->development": 1,
+    "backtrack->verification": 1,
+    "conclusion->alternative": 1,
+    "conclusion->conclusion": 63,
+    "conclusion->development": 9,
+    "conclusion->planning": 7,
+    "conclusion->verification": 5,
+    "development->alternative": 6,
+    "development->conclusion": 4,
+    "development->development": 53,
+    "development->planning": 10,
+    "development->verification": 23,
+    "planning->conclusion": 13,
+    "planning->development": 4,
+    "planning->planning": 44,
+    "planning->verification": 3,
+    "verification->alternative": 14,
+    "verification->conclusion": 7,
+    "verification->development": 23,
+    "verification->planning": 1,
+    "verification->verification": 86
+   }
+  },
+  "rule": {
+   "n": 418,
+   "accuracy": 0.2822966507177033,
+   "macro_f1": 0.19905172470879606,
+   "per_class": {
+    "alternative": {
+     "precision": 0.5,
+     "recall": 0.1,
+     "f1": 0.16666666666666669,
+     "support": 40
+    },
+    "backtrack": {
+     "precision": 0.045454545454545456,
+     "recall": 0.5,
+     "f1": 0.08333333333333334,
+     "support": 2
+    },
+    "conclusion": {
+     "precision": 0.5555555555555556,
+     "recall": 0.17647058823529413,
+     "f1": 0.26785714285714285,
+     "support": 85
+    },
+    "development": {
+     "precision": 0.24464831804281345,
+     "recall": 0.8333333333333334,
+     "f1": 0.37825059101654845,
+     "support": 96
+    },
+    "planning": {
+     "precision": 0.23809523809523808,
+     "recall": 0.078125,
+     "f1": 0.11764705882352941,
+     "support": 64
+    },
+    "verification": {
+     "precision": 1.0,
+     "recall": 0.09923664122137404,
+     "f1": 0.18055555555555555,
+     "support": 131
+    }
+   },
+   "confusion": {
+    "alternative->alternative": 4,
+    "alternative->backtrack": 2,
+    "alternative->conclusion": 1,
+    "alternative->development": 33,
+    "backtrack->backtrack": 1,
+    "backtrack->development": 1,
+    "conclusion->alternative": 1,
+    "conclusion->conclusion": 15,
+    "conclusion->development": 68,
+    "conclusion->planning": 1,
+    "development->backtrack": 1,
+    "development->conclusion": 4,
+    "development->development": 80,
+    "development->planning": 11,
+    "planning->conclusion": 5,
+    "planning->development": 54,
+    "planning->planning": 5,
+    "verification->alternative": 3,
+    "verification->backtrack": 18,
+    "verification->conclusion": 2,
+    "verification->development": 91,
+    "verification->planning": 4,
+    "verification->verification": 13
+   }
+  },
+  "majority": {
+   "n": 418,
+   "accuracy": 0.22966507177033493,
+   "macro_f1": 0.0622568093385214,
+   "per_class": {
+    "alternative": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 40
+    },
+    "backtrack": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 2
+    },
+    "conclusion": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 85
+    },
+    "development": {
+     "precision": 0.22966507177033493,
+     "recall": 1.0,
+     "f1": 0.3735408560311284,
+     "support": 96
+    },
+    "planning": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 64
+    },
+    "verification": {
+     "precision": 0.0,
+     "recall": 0.0,
+     "f1": 0.0,
+     "support": 131
+    }
+   },
+   "confusion": {
+    "alternative->development": 40,
+    "backtrack->development": 2,
+    "conclusion->development": 85,
+    "development->development": 96,
+    "planning->development": 64,
+    "verification->development": 131
+   }
+  }
+ },
+ "top_features": {
+  "alternative": [
+   "o:#_#",
+   "o:#",
+   "o:b_#",
+   "b:e",
+   "b:dollar",
+   "o:#_d",
+   "b:not",
+   "o:#_b"
+  ],
+  "backtrack": [
+   "b:k",
+   "b:variables",
+   "b:interval",
+   "b:x",
+   "b:tuple",
+   "b:intervals",
+   "b:sorted",
+   "b:d"
+  ],
+  "conclusion": [
+   "b:final",
+   "b:answer",
+   "o:final",
+   "m:conclusion",
+   "o1:let's",
+   "o1:so",
+   "b:include",
+   "o:answer"
+  ],
+  "development": [
+   "b:w",
+   "b:s",
+   "b:h",
+   "b:return",
+   "b:def",
+   "b:since",
+   "b:l",
+   "b:stack"
+  ],
+  "planning": [
+   "b:need",
+   "pos:first",
+   "o:we_need",
+   "o1:we",
+   "o:need_answer",
+   "o:need",
+   "o:we",
+   "b:solve"
+  ],
+  "verification": [
+   "b:#",
+   "o:check",
+   "b:wait",
+   "b:yes",
+   "b:which",
+   "b:check",
+   "o:but",
+   "o1:but"
+  ]
+ },
+ "test_predictions": {
+  "en-cod-anagrams": [
+   "planning",
+   "planning",
+   "planning",
+   "development",
+   "development",
+   "planning",
+   "development",
+   "alternative",
+   "planning",
+   "planning",
+   "planning",
+   "conclusion",
+   "verification",
+   "development",
+   "conclusion",
+   "conclusion"
+  ],
+  "en-cod-dedupe": [
+   "planning",
+   "development",
+   "development",
+   "development",
+   "development",
+   "planning",
+   "planning",
+   "development",
+   "alternative",
+   "development",
+   "development",
+   "verification",
+   "planning",
+   "development",
+   "planning",
+   "verification",
+   "conclusion",
+   "development",
+   "development",
+   "development",
+   "development",
+   "conclusion",
+   "alternative",
+   "conclusion"
+  ],
+  "en-cod-search": [
+   "planning",
+   "development",
+   "verification",
+   "conclusion",
+   "verification",
+   "conclusion",
+   "conclusion",
+   "verification",
+   "alternative",
+   "conclusion",
+   "development",
+   "conclusion",
+   "conclusion"
+  ],
+  "en-log-liars": [
+   "planning",
+   "alternative",
+   "planning",
+   "development",
+   "development",
+   "verification",
+   "conclusion",
+   "planning",
+   "conclusion",
+   "alternative",
+   "alternative",
+   "development",
+   "alternative",
+   "verification",
+   "alternative",
+   "conclusion"
+  ],
+  "en-log-pets": [
+   "planning",
+   "planning",
+   "development",
+   "verification",
+   "alternative",
+   "alternative",
+   "conclusion",
+   "verification",
+   "verification",
+   "planning",
+   "verification",
+   "conclusion",
+   "development",
+   "verification",
+   "conclusion"
+  ],
+  "en-mat-powers": [
+   "planning",
+   "development",
+   "development",
+   "alternative",
+   "development",
+   "conclusion",
+   "conclusion",
+   "development",
+   "alternative",
+   "alternative",
+   "conclusion"
+  ],
+  "en-mat-semicircle": [
+   "planning",
+   "development",
+   "development",
+   "development",
+   "verification",
+   "planning",
+   "development",
+   "conclusion",
+   "verification",
+   "conclusion"
+  ],
+  "en-mat-square": [
+   "planning",
+   "development",
+   "alternative",
+   "verification",
+   "conclusion",
+   "verification",
+   "development",
+   "development",
+   "conclusion"
+  ],
+  "ot-cod-yen": [
+   "planning",
+   "verification",
+   "conclusion",
+   "verification",
+   "verification",
+   "verification",
+   "verification",
+   "conclusion",
+   "verification",
+   "verification",
+   "conclusion",
+   "verification",
+   "conclusion",
+   "verification",
+   "conclusion"
+  ],
+  "ot-log-calculator": [
+   "planning",
+   "verification",
+   "verification",
+   "verification",
+   "verification",
+   "verification",
+   "conclusion",
+   "verification",
+   "verification",
+   "verification",
+   "verification",
+   "conclusion"
+  ],
+  "ot-sci-enthalpy": [
+   "planning",
+   "verification",
+   "development",
+   "verification",
+   "development",
+   "verification",
+   "verification",
+   "verification",
+   "conclusion",
+   "verification",
+   "verification",
+   "verification",
+   "conclusion",
+   "verification",
+   "verification",
+   "verification",
+   "verification",
+   "verification",
+   "verification",
+   "verification"
+  ]
+ },
+ "date": "2026-11-25",
+ "commit": "1fd3a99",
+ "shipped": {
+  "trained": "2026-11-25",
+  "commit": "1fd3a99",
+  "settings": {
+   "C": 1,
+   "class_weight": "balanced"
+  },
+  "min_df": 2,
+  "traces": [
+   "en-cod-anagrams",
+   "en-cod-brackets",
+   "en-cod-dedupe",
+   "en-cod-intervals",
+   "en-cod-lru",
+   "en-cod-palindrome",
+   "en-cod-search",
+   "en-log-hats",
+   "en-log-league",
+   "en-log-liars",
+   "en-log-schedule",
+   "en-mat-clock",
+   "en-mat-coins",
+   "en-mat-dice",
+   "en-mat-digits",
+   "en-mat-ladder",
+   "en-mat-powers",
+   "en-mat-semicircle",
+   "en-mat-square",
+   "en-mat-trains",
+   "ot-cod-tasks",
+   "ot-cod-yen",
+   "ot-log-board",
+   "ot-log-calculator",
+   "ot-log-krakozyabrs",
+   "ot-mat-plums",
+   "ot-mat-trail",
+   "ot-sci-enthalpy"
+  ],
+  "steps": 392,
+  "excluded": [
+   "en-log-pets",
+   "en-log-knights"
+  ],
+  "script": "python -m eval.steptypes"
+ }
+}

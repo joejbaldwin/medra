@@ -1,70 +1,80 @@
-# Clasificador de tipo de paso (2026-11-25, commit d11d9eb)
+# Clasificador de tipo de paso (2026-11-25, commit 3e1e1d8)
 
 ## Tipo de paso (en las fronteras de la referencia)
 
-Clasificador: TF-IDF (palabras iniciales, palabras del tramo, marcador del léxico, primer tramo) y regresión logística, entrenada con los 257 pasos de dev más 5023 pasos de 272 trazas anotadas solo para entrenar (eval/train/); C = 1, pesos de clase balanced, elegidos por validación cruzada agrupada por traza en dev. «Solo dev»: el mismo modelo entrenado solo con dev (C = 1, pesos balanced). Regla: el marcador que abre el tramo, «development» si no hay.
+Clasificador: TF-IDF (palabras iniciales, palabras del tramo, marcador del léxico, primer tramo) y regresión logística; C = 1, pesos de clase balanced, elegidos por validación cruzada agrupada por traza en train. Datos: las 302 trazas anotadas (las 30 de evaluación y las de eval/train/), divididas en train (241 trazas, 4337 pasos) y test (61 trazas, 1104 pasos): 80/20, semilla 0, estratificado por modelo de origen. Regla de marcadores: el tipo del marcador que abre el tramo, «development» si no hay (la primera versión de MeDRA).
 
 | Método | Test: exactitud | Test: F1 macro |
 |---|---|---|
-| Clasificador (dev + 272 trazas) | 0.71 | 0.69 |
-| Clasificador (solo dev) | 0.61 | 0.57 |
-| Regla de marcadores | 0.28 | 0.25 |
-| Siempre «development» | 0.22 | 0.07 |
+| Clasificador | 0.68 | 0.62 |
+| Regla de marcadores | 0.32 | 0.29 |
+| Siempre «development» | 0.19 | 0.05 |
 
-Test: 161 pasos de 11 trazas. Dejando una traza fuera (cada una de las 30 trazas de evaluación con un modelo entrenado con las otras 29 más las trazas extra; 418 pasos): clasificador 0.70 de exactitud y 0.62 de F1 macro; regla 0.28 y 0.20.
+Validación cruzada de 10 particiones sobre las 302 trazas, agrupada por traza (5441 pasos): clasificador 0.71 de exactitud y 0.66 de F1 macro; regla 0.35 y 0.31; siempre «development» 0.18 y 0.05.
 
-Curva de aprendizaje (test, con más trazas extra en el entrenamiento):
+Test por origen:
 
-| Trazas extra | Pasos de entrenamiento | Exactitud | F1 macro |
+| Origen | Trazas | Pasos | Clasificador: exactitud | F1 macro | Regla: exactitud | F1 macro |
+|---|---|---|---|---|---|---|
+| DeepSeek | 29 | 605 | 0.62 | 0.58 | 0.23 | 0.16 |
+| OpenThoughts (DeepSeek-R1) | 32 | 499 | 0.75 | 0.67 | 0.43 | 0.40 |
+
+Curva de aprendizaje (test, entrenando con subconjuntos aleatorios de train):
+
+| Trazas de entrenamiento | Pasos | Exactitud | F1 macro |
 |---|---|---|---|
-| 0 | 257 | 0.61 | 0.57 |
-| 25 | 663 | 0.64 | 0.63 |
-| 50 | 1134 | 0.61 | 0.59 |
-| 100 | 1965 | 0.68 | 0.66 |
-| 150 | 2912 | 0.66 | 0.64 |
-| 200 | 3863 | 0.66 | 0.64 |
-| 272 | 5280 | 0.71 | 0.69 |
+| 25 | 464 | 0.61 | 0.53 |
+| 50 | 864 | 0.63 | 0.57 |
+| 100 | 1779 | 0.65 | 0.58 |
+| 150 | 2695 | 0.67 | 0.61 |
+| 200 | 3601 | 0.67 | 0.61 |
+| 241 | 4337 | 0.68 | 0.62 |
 
 Por tipo, en test:
 
-| Tipo | Clasificador P | R | F1 | Solo dev F1 | Regla F1 | Casos |
-|---|---|---|---|---|---|---|
-| alternative | 0.40 | 0.53 | 0.46 | 0.27 | 0.30 | 15 |
-| conclusion | 0.86 | 0.81 | 0.83 | 0.74 | 0.29 | 31 |
-| development | 0.60 | 0.69 | 0.64 | 0.53 | 0.37 | 36 |
-| planning | 0.77 | 0.74 | 0.76 | 0.65 | 0.11 | 23 |
-| verification | 0.83 | 0.70 | 0.76 | 0.66 | 0.19 | 56 |
+| Tipo | Clasificador P | R | F1 | Regla F1 | Casos |
+|---|---|---|---|---|---|
+| alternative | 0.46 | 0.56 | 0.51 | 0.16 | 146 |
+| backtrack | 0.29 | 0.34 | 0.31 | 0.20 | 29 |
+| conclusion | 0.83 | 0.72 | 0.78 | 0.54 | 258 |
+| development | 0.57 | 0.73 | 0.64 | 0.32 | 207 |
+| planning | 0.77 | 0.71 | 0.74 | 0.26 | 109 |
+| verification | 0.82 | 0.69 | 0.75 | 0.23 | 355 |
 
-Confusión del clasificador en test (referencia → predicción): alternative->alternative: 8, alternative->development: 2, alternative->verification: 5, conclusion->alternative: 1, conclusion->conclusion: 25, conclusion->development: 3, conclusion->planning: 2, development->alternative: 4, development->backtrack: 1, development->conclusion: 2, development->development: 25, development->planning: 2, development->verification: 2, planning->alternative: 1, planning->conclusion: 1, planning->development: 3, planning->planning: 17, planning->verification: 1, verification->alternative: 6, verification->conclusion: 1, verification->development: 9, verification->planning: 1, verification->verification: 39
+Confusión del clasificador en test (referencia → predicción): alternative->alternative: 82, alternative->backtrack: 4, alternative->conclusion: 6, alternative->development: 28, alternative->planning: 7, alternative->verification: 19, backtrack->alternative: 6, backtrack->backtrack: 10, backtrack->conclusion: 1, backtrack->development: 7, backtrack->verification: 5, conclusion->alternative: 23, conclusion->backtrack: 3, conclusion->conclusion: 187, conclusion->development: 28, conclusion->planning: 8, conclusion->verification: 9, development->alternative: 18, development->backtrack: 4, development->conclusion: 15, development->development: 151, development->planning: 3, development->verification: 16, planning->alternative: 6, planning->conclusion: 11, planning->development: 9, planning->planning: 77, planning->verification: 6, verification->alternative: 43, verification->backtrack: 14, verification->conclusion: 4, verification->development: 44, verification->planning: 5, verification->verification: 245
 
-## Selección en dev (validación cruzada agrupada, 5 particiones)
+## Selección en train (validación cruzada agrupada, 5 particiones)
 
 | C | Pesos de clase | Exactitud | F1 macro |
 |---|---|---|---|
-| 0.3 | ninguno | 0.70 | 0.53 |
-| 0.3 | balanced | 0.68 | 0.61 |
-| 1 | ninguno | 0.71 | 0.56 |
-| 1 | balanced | 0.68 | 0.62 |
-| 3 | ninguno | 0.69 | 0.55 |
-| 3 | balanced | 0.70 | 0.57 |
-| 10 | ninguno | 0.70 | 0.57 |
-| 10 | balanced | 0.71 | 0.58 |
-| 30 | ninguno | 0.68 | 0.54 |
-| 30 | balanced | 0.69 | 0.55 |
-| 100 | ninguno | 0.67 | 0.54 |
-| 100 | balanced | 0.68 | 0.61 |
+| 0.3 | ninguno | 0.68 | 0.54 |
+| 0.3 | balanced | 0.68 | 0.64 |
+| 1 | ninguno | 0.71 | 0.59 |
+| 1 | balanced | 0.71 | 0.67 |
+| 3 | ninguno | 0.72 | 0.61 |
+| 3 | balanced | 0.71 | 0.67 |
+| 10 | ninguno | 0.72 | 0.63 |
+| 10 | balanced | 0.71 | 0.66 |
+| 30 | ninguno | 0.71 | 0.63 |
+| 30 | balanced | 0.71 | 0.65 |
+| 100 | ninguno | 0.71 | 0.63 |
+| 100 | balanced | 0.70 | 0.64 |
 
-## Rasgos con más peso (modelo entrenado en dev + trazas extra)
+## Rasgos con más peso (modelo entrenado en train)
 
 o1: primera palabra; o: palabras iniciales; b: palabras del tramo; m: marcador del léxico.
 
-- **alternative**: `b:maybe`, `o:if`, `b:could`, `o:maybe`, `b:alternatively`, `b:remainders`, `m:alternative`, `o1:if`
-- **backtrack**: `b:wait`, `o1:wait`, `m:backtrack`, `o:no`, `o:wait_no`, `o:wait`, `b:earlier`, `o:earlier`
-- **conclusion**: `b:answer`, `m:conclusion`, `b:final`, `o1:so`, `o:so`, `b:therefore`, `o:final`, `o1:therefore`
-- **development**: `b:#`, `b:since`, `b:first`, `b:w`, `b:because`, `b:compute`, `b:now`, `b:x`
-- **planning**: `b:need`, `pos:first`, `o:need`, `o:we_need`, `o1:okay`, `o:okay`, `b:find`, `o1:we`
-- **verification**: `b:yes`, `b:good`, `o:check`, `b:correct`, `b:#`, `b:check`, `o:but_wait`, `b:verify`
+- **alternative**: `b:maybe`, `o:if`, `b:could`, `o:maybe`, `b:alternatively`, `b:remainders`, `m:alternative`, `b:perhaps`
+- **backtrack**: `b:wait`, `o1:wait`, `m:backtrack`, `o:no`, `o:wait_no`, `o:wait`, `o:earlier`, `o:not`
+- **conclusion**: `b:answer`, `m:conclusion`, `b:final`, `o1:so`, `o:so`, `b:therefore`, `o:final`, `o:answer`
+- **development**: `b:since`, `b:#`, `b:return`, `b:o`, `b:x`, `b:w`, `b:first`, `b:m`
+- **planning**: `pos:first`, `b:need`, `o:need`, `b:find`, `o:we_need`, `o1:okay`, `o:okay`, `o1:we`
+- **verification**: `b:yes`, `b:good`, `b:check`, `o:check`, `b:correct`, `b:#`, `m:verification`, `o:but_wait`
 
 ## Modelo instalado
 
-Entrenado en 28 trazas de evaluación (todas salvo las dos de la prueba con usuarios: en-log-pets, en-log-knights) más las 272 trazas extra, 5415 pasos, con los ajustes elegidos en dev. Archivo: backend/medra/mining/models/step_types_en.json.
+Entrenado en 300 trazas (todas salvo las dos de la prueba con usuarios: en-log-pets, en-log-knights), 5415 pasos, con los ajustes elegidos en train. Archivo: backend/medra/mining/models/step_types_en.json.
+
+## Trazas de test
+
+ds-cod-04, ds-cod-10, ds-cod-26, ds-cod-35, ds-cod-37, ds-cod-38, ds-cod-39, ds-log-01, ds-log-04, ds-log-07, ds-log-29, ds-log-31, ds-log-33, ds-log-36, ds-log-49, ds-mat-01, ds-mat-12, ds-mat-20, ds-mat-22, ds-mat-33, ds-mat-34, ds-mat-38, ds-mat-40, ds-mat-48, ds-mat-49, ds-mat-50, ds-sci-10, ds-sci-13, en-log-liars, ot-103583, ot-107866, ot-110833, ot-111903, ot-12638, ot-24436, ot-32416, ot-34344, ot-39482, ot-48195, ot-48760, ot-49041, ot-49802, ot-59317, ot-60145, ot-70628, ot-72092, ot-78941, ot-80204, ot-88785, ot-89808, ot-89840, ot-89845, ot-89862, ot-94355, ot-95220, ot-95243, ot-98747, ot-98751, ot-98760, ot-log-board, ot-sci-enthalpy

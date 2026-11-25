@@ -614,3 +614,46 @@ select {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------------------------------------------------------------- study mode */
+/* Embedded in the user study page (main.ts, STUDY): the trace is fixed, so the
+   source and trace pickers and the composer are hidden. */
+.study-mode .fields, .study-mode .composer-dock { display: none; }
+
+/* Guided tour (tour.ts): the highlighted area stays sharp inside a ring; the
+   four shades around it grey and blur the rest. */
+.tour { position: fixed; inset: 0; z-index: 1000; }
+.tour-shade {
+  position: fixed; cursor: pointer;
+  background: rgba(23, 22, 43, .38);
+  backdrop-filter: blur(5px) grayscale(.7); -webkit-backdrop-filter: blur(5px) grayscale(.7);
+  transition: all .35s cubic-bezier(.3, .7, .3, 1);
+}
+.tour-ring {
+  position: fixed; cursor: pointer; border-radius: calc(var(--radius) + 6px);
+  box-shadow: 0 0 0 3px var(--accent), 0 0 0 9px color-mix(in srgb, var(--accent) 22%, transparent);
+  transition: all .35s cubic-bezier(.3, .7, .3, 1);
+}
+.tour-tip {
+  position: fixed; width: 300px; padding: 16px 18px 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  transition: left .35s cubic-bezier(.3, .7, .3, 1), top .35s cubic-bezier(.3, .7, .3, 1);
+}
+.tour-centred .tour-tip {
+  left: 50% !important; top: 50% !important; transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 32px)); padding: 26px 28px 22px; text-align: center;
+}
+.tour-tip.tour-in { animation: tour-in .3s ease-out; }
+@keyframes tour-in { from { opacity: 0; } }
+.tour-count { margin: 0 0 4px; font-size: 12px; font-weight: 600; color: var(--accent); }
+.tour-title { margin: 0 0 6px; font-size: 17px; }
+.tour-centred .tour-title { font-size: 22px; margin-bottom: 10px; }
+.tour-text { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--muted); }
+.tour-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 14px; }
+.tour-centred .tour-actions { justify-content: center; margin-top: 20px; }
+.tour-next {
+  padding: 8px 16px; border-radius: 10px; border: 1px solid var(--accent);
+  background: var(--accent); color: var(--on-accent); font-weight: 600;
+}
+.tour-next:disabled { opacity: .55; cursor: default; }
+.tour-skip { padding: 0; border: 0; background: none; color: var(--muted); font-size: 13.5px; text-decoration: underline; }

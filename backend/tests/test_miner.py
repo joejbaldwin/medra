@@ -9,6 +9,7 @@ from conftest import SAMPLES, fixture_text, replay_chunks, text_chunks
 from medra.contracts import MiningUpdate, TextChunk
 from medra.mining import TextMiner
 from medra.mining.miner import TFIDF_TOP_K
+from medra.mining.steptypes import STEP_TYPES
 from medra.sources import load_trace
 
 FIXTURES = ["tricky-en.txt", "mixed-en-es.txt"]
@@ -148,17 +149,16 @@ def test_segments_and_step_types_on_the_samples():
     # not use paragraphs directly (a blank line is one cue among three).
     final = final_state(replay_chunks("login-es"))
     assert [s.segment_id for s in final.sentences] == [0] * 4 + [1] * 4 + [2] * 3 + [3] * 5
+    # Spanish: the opening marker's type (no classifier for Spanish).
     assert [(s.step_type, s.marker) for s in final.segments] == [
-        (None, None), ("planning", "Primero"), ("backtrack", "Espera"), ("planning", "Después"),
+        ("development", None), ("planning", "Primero"), ("backtrack", "Espera"), ("planning", "Después"),
     ]
+    # English: the trained classifier (steptypes.py). Only the clearly marked
+    # steps are pinned, so retraining the model does not break the test.
     final = final_state(replay_chunks("odd-sum-en"))
-    assert [(s.step_type, s.marker) for s in final.segments] == [
-        (None, None),
-        ("planning", "One approach"),
-        ("verification", "Wait, let me check"),
-        ("alternative", "Alternatively"),
-        ("conclusion", "So"),
-    ]
+    assert [s.marker for s in final.segments] == [None, "One approach", "Wait, let me check", "Alternatively", "So"]
+    assert [s.step_type for s in final.segments[2:]] == ["verification", "alternative", "conclusion"]
+    assert all(s.step_type in STEP_TYPES for s in final.segments)
     assert not any(s.provisional for s in final.segments)
 
 

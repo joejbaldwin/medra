@@ -76,10 +76,10 @@ def shot(page: Page, args: argparse.Namespace, name: str, scheme: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://localhost:5173/")
-    parser.add_argument("--source", default="replay", choices=["replay", "paste", "deepseek", "ollama"])
+    parser.add_argument("--source", default="replay", choices=["replay", "paste", "deepseek"])
     parser.add_argument("--sample", default="login-es")
     parser.add_argument("--paste-file", help="text file to paste (--source paste)")
-    parser.add_argument("--prompt", help="question for a live model (--source deepseek/ollama); costs API credit")
+    parser.add_argument("--prompt", help="question for DeepSeek (--source deepseek); costs API credit")
     parser.add_argument("--schemes", default="light,dark", help="live runs cost a call each: use --schemes light")
     parser.add_argument("--speed", default="15", help="words per second (value of the speed menu)")
     parser.add_argument("--prefix", default="dashboard")

@@ -15,8 +15,6 @@ const ICONS: Record<string, string> = {
   replay: line("M4 5.5h16v13H4zM8 5.5v13M16 5.5v13M4 9.5h4M4 14.5h4M16 9.5h4M16 14.5h4"),
   // pasted text: a clipboard
   paste: line("M9 4.5h6v2.5H9zM8 5.5H6.5v14h11v-14H16M9 11h6M9 14.5h4"),
-  // a model on this computer: a chip
-  ollama: line("M7 7h10v10H7zM10 3.5V7M14 3.5V7M10 17v3.5M14 17v3.5M3.5 10H7M3.5 14H7M17 10h3.5M17 14h3.5"),
 };
 
 /** The icon of a source as inline SVG (a generic dot for an unknown source). */

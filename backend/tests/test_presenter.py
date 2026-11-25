@@ -180,7 +180,8 @@ def test_steps_follow_segments_with_markers_and_words():
     final = mining[-1]
     steps = [presenter.steps.sent[s.id] for s in final.segments]
     text = load_trace("odd-sum-en").reasoning
-    assert [s.step_type for s in steps] == [None, "planning", "verification", "alternative", "conclusion"]
+    assert [s.step_type for s in steps] == [seg.step_type for seg in final.segments]
+    assert [s.step_type for s in steps][2:] == ["verification", "alternative", "conclusion"]
     assert [text[a:b] for s in steps if s.marker_span for a, b in [s.marker_span]] == [
         "One approach", "Wait, let me check", "Alternatively", "So",
     ]

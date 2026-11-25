@@ -20,11 +20,32 @@ import { SourceMenu } from "./sourceMenu";
 import { statsHtml } from "./statsView";
 import { stepTypeEs } from "./stepGraph";
 import { TextPane, type Block } from "./textPane";
+import { Tour } from "./tour";
 import type { Segmenting, TimelineSelection } from "./timeline";
 import { esc } from "./util";
 
 // Same origin in development (Vite proxies to the backend). Set at build time for deployment.
 const BACKEND = (import.meta.env.VITE_BACKEND_URL as string | undefined) ?? "";
+
+// Study mode (index.html?estudio=1&traza=ID&velocidad=WPS[&guia=1]): the user
+// study page (estudio.html, study.ts) embeds the dashboard in an iframe. The
+// trace replays by itself, the source and trace pickers and the composer are
+// hidden, and the parent page hears when the replay is done and when a view
+// item is selected. With guia=1 (the practice) a guided tour opens first.
+const STUDY = (() => {
+  const q = new URLSearchParams(location.search);
+  if (q.get("estudio") !== "1") return null;
+  return {
+    trace: q.get("traza") ?? "",
+    wordsPerSecond: Number(q.get("velocidad") ?? "15") || 0,
+    tour: q.get("guia") === "1",
+  };
+})();
+if (STUDY) document.documentElement.classList.add("study-mode");
+
+function studyEvent(event: string, detail: Record<string, string> = {}): void {
+  if (STUDY && window.parent !== window) window.parent.postMessage({ source: "medra-study", event, ...detail }, location.origin);
+}
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const els = {
@@ -155,6 +176,7 @@ function wordAt(offset: number, segs: Segmenting): number {
 function select(next: Selection, scroll: boolean): void {
   const same = selected && next && selected.kind === next.kind && selected.id === next.id;
   selected = same ? null : next;
+  if (next) studyEvent("select", { kind: next.kind });
   if (selected && scroll) {
     if (selected.kind === "node") text.scrollToFirst(selected.id);
     if (selected.kind === "step") text.scrollToSegment(selected.id);
@@ -357,6 +379,14 @@ function finish(): void {
   for (const p of panels) p.refresh();
   refreshActive();
   renderStats();
+  // The chat follows the stream to the end; in the study the trace must start
+  // at the top, like the plain-text condition.
+  if (STUDY) {
+    els.chatScroll.scrollTop = 0;
+    requestAnimationFrame(() => (els.chatScroll.scrollTop = 0)); // after the last render
+  }
+  studyEvent("done");
+  tour?.setReady();
 }
 
 /** Abort the running session. Closing the socket stops a replay at the
@@ -401,13 +431,13 @@ function sessionConfig(): SessionConfig | string {
     sample: null,
     text: null,
     prompt: null,
-    words_per_second: Number(els.speed.value),
+    words_per_second: STUDY ? STUDY.wordsPerSecond : Number(els.speed.value),
     chunking: "word",
     seed: 0,
   };
   if (source === "replay") config.sample = els.sample.value;
   if (source === "paste") config.text = els.input.value;
-  if (source === "deepseek" || source === "ollama") config.prompt = els.input.value;
+  if (source === "deepseek") config.prompt = els.input.value;
   const input = config.sample ?? config.text ?? config.prompt ?? "";
   if (!input.trim()) return source === "paste" ? "Pega primero un texto." : source === "replay" ? "Elige primero una traza." : "Escribe primero una pregunta.";
   return config;
@@ -659,6 +689,12 @@ async function loadSamples(): Promise<void> {
     els.sample.replaceChildren(...samples.map((s) => new Option(`${s.title} (${s.language}, ${s.words} palabras)`, s.id)));
     if (samples.some((s) => s.id === DEFAULT_SAMPLE)) els.sample.value = DEFAULT_SAMPLE;
     updateComposer();
+    if (STUDY && samples.some((s) => s.id === STUDY.trace)) {
+      els.source.value = "replay";
+      els.sample.value = STUDY.trace;
+      updateComposer();
+      void start();
+    }
   } catch {
     progress([]);
     setStatus("error", "Backend no disponible");
@@ -692,6 +728,59 @@ const dashboard: Dashboard = new Dashboard({
   notify,
   openPicker: (page, cell, origin) =>
     picker.open({ present: dashboard.kindsOn(page), origin, onSelect: (kind) => dashboard.add(page, cell, kind) }),
+});
+// In the study every participant starts from the same layout: concept map and
+// step graph next to the chat, the topic timeline on page 2.
+if (STUDY) dashboard.openViews([["map", "steps"], ["timeline"]]);
+
+// The practice's guided tour: welcome, then the text, the two views next to it
+// and the page bar. The study page can ask for it again ("Ver la guía otra vez").
+const onPage = (selector: string) => () => document.querySelector(`.page:not([hidden]) ${selector}`);
+const tour = STUDY?.tour
+  ? new Tour(
+      [
+        {
+          title: "Te damos la bienvenida a MeDRA",
+          text: "MeDRA ordena el razonamiento de un modelo de IA en conceptos, pasos y temas, todos enlazados con el texto. Te lo enseñamos en un momento.",
+          next: "Empezar",
+        },
+        {
+          target: () => $("chat-win"),
+          title: "El razonamiento",
+          text: "La pregunta, lo que el modelo piensa y su respuesta. El texto va en tramos, cada uno con su tipo de paso. Las palabras subrayadas son conceptos.",
+        },
+        {
+          target: onPage("[data-win='map']"),
+          title: "Mapa de conceptos",
+          text: "Cada burbuja es un concepto: cuanto más grande, más aparece. Pulsa una y verás dónde se menciona en el texto.",
+        },
+        {
+          target: onPage("[data-win='steps']"),
+          title: "Cadena de razonamiento",
+          text: "Los pasos del modelo en orden, uno por tramo. Pulsa un paso para ir a ese tramo del texto.",
+        },
+        {
+          target: () => document.querySelector(".pager"),
+          title: "Más vistas",
+          text: "En la página 2 está la línea de temas. Con + puedes abrir otra página y añadir la visualización que quieras.",
+        },
+        {
+          title: "Ahora prueba tú",
+          text: "Pulsa una burbuja, un paso y una palabra subrayada. Tómate un par de minutos.",
+          next: "Explorar",
+        },
+      ],
+      () => studyEvent("tour-done"),
+    )
+  : null;
+tour?.start();
+addEventListener("message", (e: MessageEvent) => {
+  const data = e.data as { source?: string; event?: string };
+  if (e.origin !== location.origin || data?.source !== "medra-study-page") return;
+  if (data.event === "tour" && tour && !tour.running) {
+    dashboard.openViews([["map", "steps"], ["timeline"]]); // back to the layout the tour points at
+    tour.start();
+  }
 });
 
 function initTheme(): void {

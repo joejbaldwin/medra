@@ -24,9 +24,7 @@ RUN pip install --no-cache-dir --no-deps -e backend
 USER user
 ENV PYTHONUNBUFFERED=1 \
     # see build plan §4.3: OpenBLAS reserves a buffer per core otherwise
-    OPENBLAS_NUM_THREADS=1 \
-    # no local model server in the container: leave Ollama out of the source menu
-    MEDRA_OLLAMA_URL=""
+    OPENBLAS_NUM_THREADS=1
 EXPOSE 7860
 # Cloud Run sets PORT (8080); elsewhere the container listens on 7860.
 CMD exec uvicorn medra.server:app --host 0.0.0.0 --port ${PORT:-7860} --proxy-headers --forwarded-allow-ips "*"

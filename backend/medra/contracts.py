@@ -36,8 +36,9 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 #     becomes optional) and SourceInfo for GET /sources.
 # 1.4 (step 6): SampleInfo.prompt, so the dashboard can show a trace's prompt before playing it.
 # 1.5 (step 7): SourceInfo.needs_code, so the dashboard asks for an access code.
-# Minor versions only add fields with defaults, so 1.0 producers stay valid.
-SCHEMA_VERSION = "1.5"
+# 1.6 (25/11/2026): the ollama source is removed (live models: DeepSeek only).
+# Minor versions otherwise only add fields with defaults, so 1.0 producers stay valid.
+SCHEMA_VERSION = "1.6"
 
 Span = tuple[int, int]
 """Half-open character range [start, end) into the reasoning text."""
@@ -365,14 +366,13 @@ ServerMessage = Annotated[
 
 MAX_PASTE_CHARS = 100_000
 MAX_PROMPT_CHARS = 4_000
-SourceId = Literal["replay", "paste", "deepseek", "ollama"]
+SourceId = Literal["replay", "paste", "deepseek"]
 
 
 class SessionConfig(_Model):
     """Body of POST /sessions.
 
-    replay needs `sample`, paste needs `text`, deepseek and ollama need
-    `prompt`. words_per_second, chunking and seed only apply to replay and paste
+    replay needs `sample`, paste needs `text`, deepseek needs `prompt`. words_per_second, chunking and seed only apply to replay and paste
     (a live model sets its own pace).
     """
 
@@ -386,7 +386,7 @@ class SessionConfig(_Model):
 
     @model_validator(mode="after")
     def _needs_input(self) -> "SessionConfig":
-        needed = {"replay": "sample", "paste": "text", "deepseek": "prompt", "ollama": "prompt"}[self.source]
+        needed = {"replay": "sample", "paste": "text", "deepseek": "prompt"}[self.source]
         if not (getattr(self, needed) or "").strip():
             raise ValueError(f"source {self.source!r} needs a non-empty {needed!r}")
         return self

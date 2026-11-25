@@ -12,10 +12,10 @@ What is measured:
   MeDRA's segments and of baselines: fixed-size segments, a boundary at every
   blank line, at every discourse marker, and TextTiling (cohesion only, with
   Hearst's adaptive threshold mean - sd/2).
-- Step types: the type MeDRA gives the step opened at each reference boundary
-  (the marker of its first sentence, development if none), against the
-  annotated type. Measured at the reference boundaries so that segmentation
-  errors do not count twice.
+- Step types: the type given to each annotated step (at the reference
+  boundaries, so segmentation errors do not count twice) by the classifier
+  of eval/steptypes.py, trained on dev and scored on test, against the old
+  marker rule and the majority baseline.
 - Concepts: the bubbles of the final view against the annotated concepts,
   both as lemma keys. Baseline: the 16 most frequent terms.
 - Topics: B-cubed F1 of MeDRA's Louvain topics against the annotated topics,
@@ -38,12 +38,11 @@ from sklearn.cluster import AgglomerativeClustering
 
 from eval.annotations import Annotation, load_all
 from eval.common import RESULTS_DIR, Mined, git_commit, lemma_key, mine, source_of, split, trace_ids
-from eval.metrics import bcubed, boundary_prf, classification, mean, pk, set_prf, windowdiff
+from eval.metrics import bcubed, boundary_prf, mean, pk, set_prf, windowdiff
+from eval.steptypes import evaluate as evaluate_step_types, report as step_type_report, steps_of
 from eval.tune import DECISION_GRID
 from medra.mining.segment import SegParams, boundaries, gap_scores
 from medra.mining.topics import MIN_TERM_COUNT, WINDOW as TOPIC_WINDOW
-
-DEVELOPMENT = "development"  # MeDRA's type for a step that no marker opens
 
 
 # ------------------------------------------------------------- segmenters
@@ -131,10 +130,6 @@ def paragraph_min(annotations: list[Annotation]) -> int:
 # ------------------------------------------------------------- other parts
 
 
-def step_type_pairs(a: Annotation, m: Mined) -> list[tuple[str, str]]:
-    return [(kind, m.features[s].marker_type or DEVELOPMENT) for s, kind in zip(a.starts, a.types)]
-
-
 def lenient_match(pred: set[str], gold: set[str]) -> tuple[float, float, float]:
     """A predicted and a gold term match if one's words contain the other's
     ("odd number" and "odd"): MeDRA may show the n-gram where the annotator
@@ -213,15 +208,16 @@ def evaluate(drafts: bool) -> dict:
         methods["tuned"] = ("MeDRA (ajustado)", seg_tuned)
 
     per_trace = []
+    steps = {}
     for a in annotations:
         m = mine(a.trace_id)
+        steps[a.trace_id] = steps_of(a, m)
         row = {
             "trace": a.trace_id, "source": source_of(a.trace_id), "status": a.status, "annotator": a.annotator,
             "split": "test" if a.trace_id in test_ids else "dev", "sentences": a.n_sentences,
             "reference_segments": len(a.starts),
             "segmentation": {key: segmentation_scores(a.starts, fn(m, ctx), a.n_sentences)
                              for key, (_, fn) in methods.items()},
-            "step_types": step_type_pairs(a, m),
             "concepts": concept_scores(a, m) if a.concepts else None,
             "topics": topic_scores(a, m) if a.topics else None,
         }
@@ -238,6 +234,7 @@ def evaluate(drafts: bool) -> dict:
         "tuned_params": asdict(ctx["tuned"]) if ctx["tuned"] else None,
         "methods": {key: label for key, (label, _) in methods.items()},
         "per_trace": per_trace,
+        "step_types": evaluate_step_types(steps, dev_ids, test_ids),
         "out_dir": str(out_dir),
     }
 
@@ -305,18 +302,7 @@ def report(res: dict) -> str:
             if sub:
                 lines += [f"### Test, solo {label} ({len(sub)} trazas)", ""] + _seg_table(sub, res["methods"]) + [""]
 
-    pairs = [tuple(p) for r in rows for p in r["step_types"]]
-    medra_types = classification(pairs)
-    majority = classification([(g, DEVELOPMENT) for g, _ in pairs])
-    lines += ["## Tipo de paso (en las fronteras de la referencia)", "",
-              f"{medra_types['n']} pasos. MeDRA: exactitud {medra_types['accuracy']:.2f}, F1 macro "
-              f"{medra_types['macro_f1']:.2f}. Línea base (siempre «development»): exactitud "
-              f"{majority['accuracy']:.2f}, F1 macro {majority['macro_f1']:.2f}.", "",
-              "| Tipo | Precisión | Cobertura | F1 | Casos |", "|---|---|---|---|---|"]
-    for c, v in medra_types["per_class"].items():
-        lines.append(f"| {c} | {v['precision']:.2f} | {v['recall']:.2f} | {v['f1']:.2f} | {v['support']} |")
-    lines += ["", "Confusión (referencia → MeDRA): " + ", ".join(f"{k}: {n}" for k, n in
-                                                            medra_types["confusion"].items()), ""]
+    lines += step_type_report(res["step_types"])
 
     with_concepts = [r for r in rows if r["concepts"]]
     if with_concepts:

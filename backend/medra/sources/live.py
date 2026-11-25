@@ -1,4 +1,4 @@
-"""Shared pieces of the live sources (DeepSeek, Ollama)."""
+"""Shared pieces of the live source (DeepSeek)."""
 
 from __future__ import annotations
 

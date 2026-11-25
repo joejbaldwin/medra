@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MeDRA · Prueba con usuarios</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+</head>
+<body class="study-page">
+  <header class="study-top">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 44 40" width="34" height="31" aria-hidden="true">
+        <circle cx="15" cy="25" r="11" style="fill: var(--c0)"/>
+        <circle cx="29" cy="9" r="6.5" style="fill: var(--c3)"/>
+        <circle cx="34" cy="31" r="7.5" style="fill: var(--c2)"/>
+      </svg>
+      <span class="study-title">MeDRA · Prueba con usuarios</span>
+    </div>
+    <div id="progress" class="study-progress" role="progressbar" aria-label="Progreso de la prueba" aria-valuemin="1"></div>
+    <span id="who" class="study-who"></span>
+  </header>
+  <main id="main" class="study-main">
+    <section id="material" class="study-material" aria-label="Traza" hidden></section>
+    <section id="card" class="study-card" aria-live="polite"></section>
+  </main>
+  <script type="module" src="/src/study.ts"></script>
+</body>
+</html>

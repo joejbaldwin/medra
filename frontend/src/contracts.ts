@@ -461,15 +461,14 @@ export interface ErrorMessage {
 /**
  * Body of POST /sessions.
  *
- * replay needs `sample`, paste needs `text`, deepseek and ollama need
- * `prompt`. words_per_second, chunking and seed only apply to replay and paste
+ * replay needs `sample`, paste needs `text`, deepseek needs `prompt`. words_per_second, chunking and seed only apply to replay and paste
  * (a live model sets its own pace).
  *
  * This interface was referenced by `MedraContracts`'s JSON-Schema
  * via the `definition` "SessionConfig".
  */
 export interface SessionConfig {
-  source: "replay" | "paste" | "deepseek" | "ollama";
+  source: "replay" | "paste" | "deepseek";
   /**
    * Sample trace id, as listed by GET /datasets.
    */
@@ -518,7 +517,7 @@ export interface SampleInfo {
  * via the `definition` "SourceInfo".
  */
 export interface SourceInfo {
-  id: "replay" | "paste" | "deepseek" | "ollama";
+  id: "replay" | "paste" | "deepseek";
   label: string;
   available: boolean;
   /**

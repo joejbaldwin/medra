@@ -42,6 +42,7 @@ from medra.mining.language import LanguageTracker, lexicon, load_nlp
 from medra.mining.markers import count_hedges, find_marker
 from medra.mining.segment import FROZEN_AFTER, SentenceFeatures, boundaries, gap_scores
 from medra.mining.sentences import find_sentences
+from medra.mining.steptypes import StepInput, step_type
 from medra.mining.terms import decide, extract
 from medra.mining.topics import TopicTracker, communities
 from medra.mining.weights import pmi, tfidf_top_k
@@ -93,6 +94,7 @@ class TextMiner:
         self.vocabulary: set[str] = set()
         self.words_by_lang: Counter[str] = Counter()
         self.recent: list[TokenDecision] = []  # decisions in the current update only
+        self.step_types: dict[tuple[int, int], str] = {}  # (first, last sentence) -> type
 
     # ------------------------------------------------------------------ feed
 
@@ -221,11 +223,28 @@ class TextMiner:
                     end=self.sentences[last].end,
                     provisional=not (self.done or closed),
                     marker=opener.text if opener else None,
-                    step_type=opener.type if opener else None,
+                    step_type=self._step_type(first, last),
                     boundary_score=gaps[first - 1].score if first else 0.0,
                 )
             )
         return segments, seg_of
+
+    def _step_type(self, first: int, last: int) -> str:
+        """Type of the segment of sentences first..last (steptypes.py). Cached:
+        a segment's text only changes when its sentences do."""
+        key = (first, last)
+        if key not in self.step_types:
+            head = self.sentences[first]
+            self.step_types[key] = step_type(
+                StepInput(
+                    opener=self.text[head.start : head.end],
+                    text=self.text[head.start : self.sentences[last].end],
+                    marker_type=head.features.marker_type,
+                    first=first == 0,
+                ),
+                self.sentence_lang[first],
+            )
+        return self.step_types[key]
 
     def _snapshot(self, t: float) -> MiningUpdate:
         reported = self._reported()

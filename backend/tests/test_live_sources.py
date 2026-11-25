@@ -1,7 +1,7 @@
-"""Step 5: pasted text, DeepSeek and Ollama sources.
+"""Step 5: pasted text and the DeepSeek source.
 
-The live sources run against mocked HTTP servers (httpx.MockTransport), so
-the tests spend no API credit and need no local Ollama.
+The live source runs against a mocked HTTP server (httpx.MockTransport), so
+the tests spend no API credit.
 """
 
 import asyncio
@@ -17,7 +17,7 @@ import medra.server as server
 from medra.contracts import ServerMessage, SessionConfig, TextChunk
 from medra.mining import TextMiner
 from medra.settings import Settings
-from medra.sources import DeepSeekSource, OllamaSource, PasteSource, SourceError
+from medra.sources import DeepSeekSource, PasteSource, SourceError
 from medra.sources.think import ThinkSplitter, split_think
 
 KEY = "sk-test-not-a-real-key-123456"
@@ -153,50 +153,13 @@ def test_deepseek_connection_failure_is_a_source_error():
         collect(deepseek(handler))
 
 
-# ---------------------------------------------------------------- Ollama
-
-
-def ndjson(*events: dict) -> bytes:
-    return b"".join(json.dumps(e).encode() + b"\n" for e in events)
-
-
-def ollama(body: bytes, status: int = 200) -> OllamaSource:
-    transport = httpx.MockTransport(lambda r: httpx.Response(status, content=body))
-    return OllamaSource("2+2?", "o", base_url="http://ollama.test", model="deepseek-r1:8b", transport=transport)
-
-
-def test_ollama_with_separate_thinking_field():
-    chunks = collect(ollama(ndjson(
-        {"message": {"role": "assistant", "content": "", "thinking": "Two plus two. "}, "done": False},
-        {"message": {"role": "assistant", "content": "", "thinking": "So 4."}, "done": False},
-        {"message": {"role": "assistant", "content": "It is 4."}, "done": False},
-        {"message": {"role": "assistant", "content": ""}, "done": True},
-    )))
-    assert joined(chunks, "reasoning") == "Two plus two. So 4."
-    assert joined(chunks, "answer") == "It is 4."
-    check_channels_close_once(chunks)
-
-
-def test_ollama_with_inline_think_tags():
-    pieces = ["<thi", "nk>Two plus", " two. So 4.</th", "ink>\n\nIt is", " 4."]
-    chunks = collect(ollama(ndjson(*[{"message": {"content": p}, "done": False} for p in pieces], {"done": True})))
-    assert joined(chunks, "reasoning") == "Two plus two. So 4."
-    assert joined(chunks, "answer") == "It is 4."
-    check_channels_close_once(chunks)
-
-
-def test_ollama_missing_model():
-    with pytest.raises(SourceError, match="ollama pull"):
-        collect(ollama(b'{"error":"model not found"}', status=404))
-
-
 # ---------------------------------------------------------------- server
 
 
 client = TestClient(server.app)
 messages_adapter = TypeAdapter(ServerMessage)
 BASE = Settings(deepseek_api_key=None, deepseek_model="deepseek-flash", deepseek_url="https://api.test",
-                max_tokens=1000, live_disabled=False, ollama_url="http://127.0.0.1:9", ollama_model="m")
+                max_tokens=1000, live_disabled=False)
 
 
 def use_settings(monkeypatch, **kw) -> None:
@@ -230,7 +193,7 @@ def test_sources_reports_what_is_available(monkeypatch):
     by_id = {s["id"]: s for s in client.get("/sources").json()}
     assert by_id["replay"]["available"] and by_id["paste"]["available"]
     assert not by_id["deepseek"]["available"] and "clave" in by_id["deepseek"]["note"]
-    assert not by_id["ollama"]["available"]  # nothing listens on port 9
+    assert set(by_id) == {"replay", "paste", "deepseek"}
     use_settings(monkeypatch, deepseek_api_key=KEY)
     deepseek_info = next(s for s in client.get("/sources").json() if s["id"] == "deepseek")
     assert deepseek_info["available"] and KEY not in json.dumps(deepseek_info)
@@ -247,7 +210,7 @@ def test_live_sessions_need_a_key_and_respect_the_kill_switch(monkeypatch):
     assert client.post("/sessions", json={"source": "deepseek", "prompt": "hi"}).status_code == 503
     use_settings(monkeypatch, deepseek_api_key=KEY, live_disabled=True)
     assert client.post("/sessions", json={"source": "deepseek", "prompt": "hi"}).status_code == 503
-    assert client.post("/sessions", json={"source": "ollama", "prompt": "hi"}).status_code == 503
+    assert client.post("/sessions", json={"source": "ollama", "prompt": "hi"}).status_code == 422  # removed
     # Replay and paste keep working with the kill switch on.
     assert client.post("/sessions", json={"source": "paste", "text": "Some text."}).status_code == 200
     assert client.post("/sessions", json={"source": "paste"}).status_code == 422

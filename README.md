@@ -10,7 +10,7 @@ model takes. Every bubble, segment and topic links back to the words it came fro
 
 The system has four interchangeable layers:
 
-1. **Source**: any text stream (an LLM API, pasted text, a recorded dataset, a local model, transcription).
+1. **Source**: any text stream (an LLM API, pasted text, a recorded dataset).
 2. **Mining**: source-agnostic text mining that outputs metrics and term lists with offsets into the text.
 3. **Presentation**: turns the metrics into visual decisions (bubble sizes, links, highlights).
 4. **Dashboard**: the web frontend.
@@ -78,11 +78,10 @@ The **Fuente** menu picks where the text comes from:
 | Traza de ejemplo | replays a recorded trace from `data/samples/` | nothing |
 | Pegar texto | replays text you paste (a `<think>…</think>` block is split off from the answer) | nothing |
 | DeepSeek Flash | asks `deepseek-flash` and streams its reasoning, then its answer; the menu shows the configured model's name (`MEDRA_DEEPSEEK_MODEL`) | `DEEPSEEK_API_KEY` |
-| Ollama (modelo local) | the same with a local reasoning model (`deepseek-r1:8b` by default) | Ollama running |
 
 Copy `.env.example` to `.env` and put the DeepSeek key there; it is read only by the backend and
 never sent to the browser or logged. Only one DeepSeek session runs at a time, and
-`MEDRA_LIVE_DISABLED=1` switches off both live sources. On the deployed backend a DeepSeek
+`MEDRA_LIVE_DISABLED=1` switches it off. On the deployed backend a DeepSeek
 question also needs an access code (see [Deploy](#deploy)); locally it does not. Questions sent to DeepSeek leave this
 machine, so don't type personal data.
 
@@ -92,7 +91,6 @@ Each layer is also a command reading and writing JSON Lines:
 medra-source replay login-es --chunking random | medra-mine | medra-present > frames.jsonl
 medra-source paste trace.txt | medra-mine | medra-present > frames.jsonl
 medra-source deepseek "¿Cuántos primos hay menores que 50?" | medra-mine > metrics.jsonl
-medra-source ollama "Is 91 prime?" | medra-mine > metrics.jsonl
 ```
 
 ## Tests

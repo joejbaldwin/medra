@@ -100,6 +100,17 @@ export class Dashboard {
     this.o.notify(`${VIZ_TITLES[kind]} ${moving ? "movido" : "añadido"} ${CELL_NAMES[cell]}.`);
   }
 
+  /** Open views without the picker (study mode, main.ts): `pages[i]` lists the
+   *  views for page i in cell order. The first page is shown. */
+  openViews(pages: VizKind[][]): void {
+    pages.forEach((kinds, i) => {
+      while (this.pages.length <= i) this.pages.push(emptyPage());
+      kinds.forEach((kind, cell) => (this.pages[i] = place(this.pages[i], cell, kind)));
+    });
+    this.active = 0;
+    this.render();
+  }
+
   // ------------------------------------------------------------ rendering
 
   private render(): void {

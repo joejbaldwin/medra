@@ -1,0 +1,98 @@
+/* User study page (estudio.html). Uses the dashboard's tokens from styles.css. */
+
+.study-page { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+.study-top {
+  display: flex; align-items: center; gap: 18px; padding: 12px 20px; flex: none;
+  border-bottom: 1px solid var(--line); background: var(--surface);
+}
+.study-top .brand { display: flex; align-items: center; gap: 8px; }
+.study-title { font-weight: 700; font-size: 16px; }
+.study-progress {
+  --done: 0; flex: 1; max-width: 420px; height: 6px; margin-left: auto; border-radius: 3px;
+  background: linear-gradient(to right, var(--accent) calc(var(--done) * 100%), var(--surface-2) 0);
+}
+.study-who { font-family: var(--font-mono); font-size: 13px; color: var(--muted); min-width: 4ch; text-align: right; }
+
+.study-main { flex: 1; min-height: 0; display: flex; justify-content: center; padding: 20px; gap: 20px; }
+.study-main.with-material { justify-content: stretch; }
+
+/* The trace: a dashboard iframe or the plain text. "veiled" keeps it laid out
+   (so D3 measures real sizes while it loads) but out of sight. */
+.study-material { flex: 1; min-width: 0; display: flex; }
+.study-material.veiled { visibility: hidden; }
+.study-material-inner { flex: 1; min-width: 0; display: flex; }
+.study-frame {
+  flex: 1; width: 100%; height: 100%; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.plain {
+  flex: 1; overflow: auto; padding: 22px 26px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow); line-height: 1.6;
+}
+.plain-label { margin: 18px 0 6px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.plain-label:first-child { margin-top: 0; }
+.plain-prompt { padding: 10px 14px; border-radius: 10px; background: var(--surface-2); white-space: pre-wrap; }
+.plain-text { white-space: pre-wrap; color: var(--reason); }
+
+/* The card with the instructions, task or questionnaire. */
+.study-card {
+  width: min(680px, 100%); overflow: auto; padding: 26px 30px; align-self: flex-start; max-height: 100%;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.with-material .study-card { width: 380px; flex: none; align-self: stretch; }
+/* Greyed out while the dashboard's guided tour runs next to it. */
+.study-card { transition: filter .3s, opacity .3s; }
+.study-card.dimmed { filter: blur(3px) grayscale(.8); opacity: .45; }
+.study-card h1 { margin: 0 0 14px; font-size: 24px; line-height: 1.25; letter-spacing: -.01em; }
+.study-card h1.question { font-size: 20px; }
+.study-card p, .study-card li { line-height: 1.55; }
+.study-card ul { padding-left: 20px; }
+.eyebrow { margin: 0 0 6px; font-size: 12.5px; font-weight: 600; color: var(--accent); }
+.muted { color: var(--muted); font-size: 14px; }
+.study-error { color: #C2334D; }
+
+.field-row { display: flex; flex-direction: column; gap: 6px; margin: 16px 0; }
+.field-row > span { font-size: 14px; color: var(--muted); }
+.field-row input, .field-row textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); font-size: 15px;
+}
+.field-row textarea { resize: vertical; }
+.field-row input:disabled, .field-row textarea:disabled { background: var(--surface-2); }
+.check { display: flex; align-items: center; gap: 9px; margin: 10px 0; cursor: pointer; }
+.choice { border: 0; padding: 0; margin: 8px 0; }
+
+.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.actions button {
+  padding: 10px 18px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface);
+  font-weight: 600; font-size: 15px;
+}
+.actions button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.actions button:disabled { opacity: .45; cursor: default; }
+
+/* SUS: one row per statement, a 1-5 scale with labelled ends. */
+.sus-row { border: 0; padding: 14px 0; margin: 0; border-top: 1px solid var(--line); }
+/* Floated so the legend sits inside the row instead of on its top border. */
+.sus-row legend { float: left; width: 100%; padding: 0; margin-bottom: 10px; line-height: 1.45; }
+.scale { clear: both; display: flex; align-items: center; gap: 6px; }
+.scale .end { font-size: 12px; color: var(--muted); width: 92px; line-height: 1.2; }
+.scale .end:last-child { text-align: right; }
+/* The label is the radio's containing block: an absolute input with no
+   positioned ancestor sat outside the card's scroll area, and focusing it on
+   click scrolled the whole page down. */
+.scale label { position: relative; flex: 1; display: flex; justify-content: center; cursor: pointer; }
+.scale input { position: absolute; inset: 0; margin: 0; opacity: 0; pointer-events: none; }
+.scale label span {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--line); font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.scale input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.scale input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 900px) {
+  .study-main.with-material { flex-direction: column; }
+  .with-material .study-card { width: 100%; align-self: auto; }
+  .study-material { min-height: 60vh; }
+}

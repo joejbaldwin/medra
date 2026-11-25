@@ -6,6 +6,11 @@
 - segmentation.png: Pk and WindowDiff of each method on the test traces.
 - boundaries.png: reference vs MeDRA boundaries along one test trace.
 - bench.png: milliseconds per update as the text grows (if bench.json exists).
+- steptypes.png: step-type scores on the classifier's test traces, classifier
+  vs marker rule vs always "development" (if steptypes.json exists).
+- learning_curve.png: the classifier's test macro-F1 as its training set grows.
+
+Numbers use a decimal comma, as in the Spanish text of the memoria.
 
 Static images for a document: light background, thin marks, a legend for
 two or more series, grid and axes kept faint so the data reads first.
@@ -21,6 +26,7 @@ import matplotlib
 
 matplotlib.use("Agg")  # files only, no window
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.ticker import FuncFormatter  # noqa: E402
 
 from eval.annotations import load_all  # noqa: E402
 from eval.common import RESULTS_DIR, mine  # noqa: E402
@@ -41,6 +47,16 @@ plt.rcParams.update({
 })
 
 
+def _num(v: float) -> str:
+    return f"{v:.2f}".replace(".", ",")
+
+
+COMMA = FuncFormatter(lambda v, _: f"{v:g}".replace(".", ","))
+METHODS = {"classifier": "Clasificador", "rule": "Regla de marcadores", "majority": "Siempre «desarrollo»"}
+TYPES = {"planning": "planificación", "development": "desarrollo", "verification": "verificación",
+         "backtrack": "corrección", "alternative": "alternativa", "conclusion": "conclusión"}
+
+
 def _title(ax, text: str, preliminary: bool) -> None:
     ax.set_title(text + ("  (PRELIMINAR: borradores)" if preliminary else ""), loc="left", fontsize=11, color=INK)
 
@@ -58,15 +74,16 @@ def segmentation_chart(res: dict, out: Path) -> None:
     ax.barh([i - h / 2 - 0.01 for i in y], pk, height=h, color=SERIES[0], label="Pk")
     ax.barh([i + h / 2 + 0.01 for i in y], wd, height=h, color=SERIES[1], label="WindowDiff")
     for i in y:
-        ax.text(pk[i] + 0.008, i - h / 2, f"{pk[i]:.2f}", va="center", fontsize=8, color=INK_2)
-        ax.text(wd[i] + 0.008, i + h / 2, f"{wd[i]:.2f}", va="center", fontsize=8, color=INK_2)
+        ax.text(pk[i] + 0.008, i - h / 2, _num(pk[i]), va="center", fontsize=8, color=INK_2)
+        ax.text(wd[i] + 0.008, i + h / 2, _num(wd[i]), va="center", fontsize=8, color=INK_2)
     ax.set_yticks(list(y), labels)
     ax.invert_yaxis()
     ax.grid(axis="y", visible=False)
     ax.set_xlim(0, max(wd + pk) * 1.15)
     ax.set_xlabel("Error (menor es mejor)")
+    ax.xaxis.set_major_formatter(COMMA)
     ax.legend(loc="lower right", frameon=False)
-    _title(ax, f"Segmentación en test ({len(test)} trazas)", res["preliminary"])
+    _title(ax, f"Segmentación en las {len(test)} trazas de prueba", res["preliminary"])
     fig.tight_layout()
     fig.savefig(out, dpi=200)
     plt.close(fig)
@@ -121,6 +138,70 @@ def bench_chart(bench: dict, out: Path) -> None:
     plt.close(fig)
 
 
+def step_type_chart(st: dict, out: Path) -> None:
+    """Left: accuracy and macro-F1 of each method. Right: F1 per type, classifier vs rule.
+    One colour per method in both panels."""
+    test = st["test"]
+    colour = dict(zip(METHODS, SERIES))
+    fig, (left, right) = plt.subplots(1, 2, figsize=(9, 3.6), gridspec_kw={"width_ratios": [1, 2.3]})
+    w = 0.26
+    for j, key in enumerate(METHODS):
+        vals = [test[key]["accuracy"], test[key]["macro_f1"]]
+        xs = [i + (j - 1) * (w + 0.02) for i in range(2)]
+        left.bar(xs, vals, width=w, color=colour[key], label=METHODS[key])
+        for x, v in zip(xs, vals):
+            left.text(x, v + 0.015, _num(v), ha="center", fontsize=8, color=INK_2)
+    left.set_xticks([0, 1], ["Exactitud", "F1 macro"])
+    left.set_ylim(0, 1)
+    left.yaxis.set_major_formatter(COMMA)
+    left.grid(axis="x", visible=False)
+    _title(left, "Todos los pasos", False)
+
+    types = list(TYPES)
+    for j, key in enumerate(("classifier", "rule")):
+        vals = [test[key]["per_class"][t]["f1"] for t in types]
+        xs = [i + (j - 0.5) * (w + 0.02) for i in range(len(types))]
+        right.bar(xs, vals, width=w, color=colour[key])
+        if key == "classifier":  # label the method being presented, not every bar
+            for x, v in zip(xs, vals):
+                right.text(x, v + 0.015, _num(v), ha="center", fontsize=8, color=INK_2)
+    right.set_xticks(range(len(types)),
+                     [f"{TYPES[t]}\n({test['classifier']['per_class'][t]['support']})" for t in types])
+    right.set_ylim(0, 1)
+    right.yaxis.set_major_formatter(COMMA)
+    right.grid(axis="x", visible=False)
+    _title(right, "F1 por tipo (entre paréntesis, pasos en prueba)", False)
+    fig.legend(*left.get_legend_handles_labels(), loc="upper left", ncol=3, frameon=False,
+               bbox_to_anchor=(0.005, 1.0))
+    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    fig.savefig(out, dpi=200)
+    plt.close(fig)
+
+
+def learning_curve_chart(st: dict, out: Path) -> None:
+    curve = st["curve"]
+    xs = [c["train_traces"] for c in curve]
+    ys = [c["macro_f1"] for c in curve]
+    fig, ax = plt.subplots(figsize=(7, 3.4))
+    ax.plot(xs, ys, color=SERIES[0], linewidth=2, marker="o", markersize=6, label=METHODS["classifier"])
+    for key, c in (("rule", SERIES[1]), ("majority", SERIES[2])):
+        v = st["test"][key]["macro_f1"]
+        ax.axhline(v, color=c, linewidth=2, linestyle="--", label=f"{METHODS[key]} (no se entrena)")
+        ax.text(xs[-1], v + 0.02, _num(v), ha="right", fontsize=8, color=INK_2)
+    for i in (0, len(xs) - 1):
+        ax.text(xs[i], ys[i] + 0.035, _num(ys[i]), ha="center", fontsize=8, color=INK_2)
+    ax.set_xticks(xs)
+    ax.set_xlabel("Trazas de entrenamiento (subconjuntos aleatorios de train)")
+    ax.set_ylabel("F1 macro en prueba")
+    ax.set_ylim(0, 1)
+    ax.yaxis.set_major_formatter(COMMA)
+    ax.legend(frameon=False, loc="upper left")
+    _title(ax, f"Curva de aprendizaje del clasificador ({st['test_traces']} trazas de prueba)", False)
+    fig.tight_layout()
+    fig.savefig(out, dpi=200)
+    plt.close(fig)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Draw the evaluation figures.")
     parser.add_argument("--drafts", action="store_true")
@@ -139,6 +220,12 @@ def main() -> None:
     if bench_path.exists():
         bench_chart(json.loads(bench_path.read_text(encoding="utf-8")), RESULTS_DIR / "bench.png")
         print(f"wrote bench.png to {RESULTS_DIR}")
+    st_path = RESULTS_DIR / "steptypes.json"
+    if st_path.exists():
+        st = json.loads(st_path.read_text(encoding="utf-8"))
+        step_type_chart(st, RESULTS_DIR / "steptypes.png")
+        learning_curve_chart(st, RESULTS_DIR / "learning_curve.png")
+        print(f"wrote steptypes.png, learning_curve.png to {RESULTS_DIR}")
 
 
 if __name__ == "__main__":

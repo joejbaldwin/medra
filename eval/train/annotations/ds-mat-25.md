@@ -1,0 +1,77 @@
+---
+trace: ds-mat-25
+annotator: Codex (AI)
+status: corrected
+concepts: []
+topics: []
+---
+[[planning]]We need answer. Need solve. Need parse problem. Shop applies two percentage discounts in sequence to price 500, yielding 336 before rounding. Each discount positive whole percentage divisible by 4. Recover all unordered pairs, and show how to exclude candidates without testing every pair of percentages.
+
+We need determine pairs of percentages (d1,d2?) applied in sequence. Price 500, after discounts = 336. Discounts positive whole % divisible by 4. Need all unordered pairs. Need derive exclude without brute all pairs. [[development]]Need be careful percentage discounts in sequence: If first discount p%, price multiplied by (1 - p/100). Second q% on reduced price multiplied by (1-q/100). Final = 500 * (1-p/100)(1-q/100) = 336. p,q multiples of 4 positive. Since discount positive whole percentage divisible by 4, possible p? Positive, likely less than 100? If 100% discount yields zero, not 336. Divisible by 4. p/q positive integers multiple 4, p,q between 4 and 96? [[alternative]]Could be >100? A percentage discount >100 nonsensical. Assume 4..96.
+
+[[development]]Equation: 500*(1-p/100)*(1-q/100)=336.
+Simplify: 5 * (100-p)(100-q)? Let's calculate: 500/10000 = 1/20. Wait 500*(100-p)/100*(100-q)/100 = 500(100-p)(100-q)/10000 = (1/20? 500/10000=1/20) yes final = ((100-p)(100-q))/20 = 336. Then (100-p)(100-q)=6720. Let a=100-p, b=100-q. p multiples 4, positive -> a=100-4k, so a ≡ 100 ≡ 0 mod 4? Since 100 divisible by 4, a ≡0 mod4. Also p<100 -> a positive multiple of 4? p in {4,8,...,96}; a in {96,92,...,4}, positive multiples of 4. Need a,b positive multiples of 4, product 6720. Let a=4x, b=4y with positive integers x,y. Then 16xy=6720 => xy=420. x=25-p/4? p=100-4x, x integer; p positive means x≤24; p maybe up to 96 yes x=1..24. But a=4x between 4 and96. xy=420. Need x,y positive divisors? x,y ≤? Since p positive <100 gives x,y ≤24. Product 420. Factor 420=2^2*3*5*7. Need divisors x,y ≤24 and x*y=420. unordered pairs (x,y). Let's list divisors x of 420 ≤sqrt? Since unordered assume x≤y, x≤sqrt(420)=20.49. Divisors ≤20: 1,2,3,4,5,6,7,10,12,14,15,20? Let's list divisors 420: 1,2,3,4,5,6,7,10,12,14,15,20,21,28,30,35,42,60,70,84,105,140,210,420. ≤20: 1,2,3,4,5,6,7,10,12,14,15,20. Need y=420/x ≤24? Actually both x,y ≤24 due discount ≤96; check for x small y may >24 invalid because q=100-4y could be negative. Need x,y≤24. Also x y=420. For each x divisor ≤20, y:
+1->420 >24 invalid
+2->210 invalid
+3->140 invalid
+4->105 invalid
+5->84 invalid
+6->70 invalid
+7->60 invalid
+10->42 invalid
+12->35 invalid
+14->30 invalid
+15->28 invalid
+20->21 valid. [[conclusion]]Only (20,21)! [[verification]]Wait check x=21,y=20 included unordered. [[development]]So p=100-4x. For x=20 => p=20%. y=21 => q=100-84=16%. Pair 20%,16%. [[verification]]Check 500*(0.8)*(0.84)=500*0.672=336 yes.
+
+But problem asks "Recover all unordered pairs, and show how to exclude candidates without testing every pair of percentages." [[alternative]]Maybe there may be more if discounts can be any positive whole percentage divisible by four, not necessarily less than 100? Let's examine. If p,q can be e.g. 104% discount? Nonsensical. Could be "percentage discounts" maybe between 0 and 100. If p=100 leading factor zero, no. Good.
+
+But wait "yielding 336 before rounding" perhaps there are multiple pairs if percentages can be e.g. 4,? [[conclusion]]We found one unordered pair. Need show exclude candidates without testing every pair. Need perhaps use scaling and factorization. We need present clear method.
+
+[[verification]]Let's see if there might be a pair 28% and 4%? Compute 500*(0.72)*(0.96)=345.6 no. 16 and20 yes.
+
+[[alternative]]Need "show how to exclude candidates without testing every pair of percentages." We can show transform to product of complement factors; p=4m? Actually p multiple 4. [[development]]Let p=4r, q=4s, positive whole r,s between 1 and24. Equation: 500(1-r/25? p/100 =4r/100=r/25) so final =500(1-r/25)(1-s/25)=336. (25-r)(25-s) =? 500/625=4/5; (4/5)(25-r)(25-s)=336 -> (25-r)(25-s)=420. Let x=25-r etc. Wait earlier a=100-p=100-4r=4(25-r). Then product a b=6720. (25-r)(25-s) =? a b /16 =420. Yes. So x=25-r = (100-p)/4, y=25-s. Need positive integers x,y≤24? r>=1 => x≤24. Equation xy=420. This is even simpler. Need solve x y=420 with x,y positive integers, x,y≤24. Need unordered pairs (x,y) such that product 420 and both ≤24. Then r=25-x, s=25-y. Since x,y≤24 gives r,s≥1. Need r,s? p=4r ≤96 automatically. xy=420. Need x,y maybe up to? If one factor can be >24 then corresponding r negative. So both ≤24. [[conclusion]]Factor pairs of 420 with both ≤24: only (20,21) (since 20*21). Are there (15,28) with 28>24 invalid; (14,30) etc. Thus unique.
+
+[[verification]]But wait x,y positive divisor? x=20,21. Then r=5,4? Let's compute: x=20 -> r=25-20=5 -> p=20%. y=21 -> s=4 -> q=16%. Good.
+
+[[conclusion]]Need perhaps address ordering. Since sequential but multiplication commutes, unordered pair. If ordered, (20,16) and (16,20). "all unordered pairs" unique {16,20}.
+
+Could include "before rounding" because if rounding price to nearest? But final exact 336, no issue.
+
+Need craft final answer at desired oververbosity 5. Should show derivation and exclusion. [[planning]]Also explain no testing every pair: use factorization and bounds. Maybe mention p,q multiples of 4; let p=4r, q=4s. Since a percentage discount less than 100, r,s∈{1,...,24}. Then equation.
+
+Let's carefully derive:
+
+[[development]]Initial price 500. After p% discount: 500(1-p/100). After q%: 500(1-p/100)(1-q/100)=336.
+
+Let p=4r, q=4s. Then p/100=r/25, q/100=s/25. So
+500 * ((25-r)/25)*((25-s)/25)=336.
+500/625 = 4/5.
+(4/5)(25-r)(25-s)=336
+(25-r)(25-s)=336*5/4=420.
+
+Set x=25-r, y=25-s. Because p,q positive divisible by 4 and less than 100, r,s are integers 1..24, so x,y are positive integers at most 24. Need xy=420 and x,y≤24.
+
+Now factor 420=2^2*3*5*7. [[development]]To find possible factors ≤24, note if x≤y then x≤√420≈20.49. Also y=420/x≤24 implies x≥420/24=17.5. Thus x between 18 and 20 inclusive if x≤y. Divisors? 420 divisible by 18? no (420/18=23.333), by 19? no, by20 yes. Thus x=20 and y=21. Alternatively possible divisor 20 only. Need not test all pairs.
+
+[[verification]]Actually bound: assume x≤y. Both ≤24, product 420. Then x≤sqrt(420)<21 and y≤24 implies x=420/y ≥ 420/24 = 17.5. So x is an integer in {18,19,20}; only 20 divides 420. This elegantly excludes. Wait if x≤y, y≤24, then x=420/y ≥17.5. Also x≤sqrt≈20.49, so x∈{18,19,20}; only divisor 20. Good. [[conclusion]]Then y=21. Unordered pair x,y (20,21), or reversed.
+
+Then r=25-x =5 if x=20; s=25-y=4. Percentages p=4r=20, q=4s=16. Reverse same unordered. [[verification]]Check: 500(1-0.16)(1-0.20)=500*0.84*0.8=336.
+
+Need be mindful if order: If x=20,y=21 => r=5,s=4 => p=20,q=16. If reversed p=16,q=20. Unordered pair {16,20}. Since discounts applied in sequence but multiplication commutative, order doesn't change final. If the shop applies in order, both orders give same? Actually (1-p)(1-q) commutative, yes.
+
+[[verification]]Need maybe mention "positive whole percentage divisible by four" includes 4,8,...,96. If p=0? positive so no. If p=100? final zero, not possible. Discount must less than 100 to yield positive 336. We can state.
+
+[[conclusion]]Need answer "Recover all unordered pairs, and show how to exclude candidates without testing every pair of percentages." We can frame "all unordered pairs = { (16%,20%) }". Might say "up to order, the discounts are 16% and 20%." Show exclusion via factorization not pair testing.
+
+[[alternative]]Potential issue: The phrase "before rounding" maybe discounts are applied to prices and rounded? "yielding 336 before rounding" means final mathematical exact maybe. Fine.
+
+Let's consider if the shop applies two percentage discounts "in sequence to a price of 500, yielding 336 before rounding." Each discount positive whole percentage divisible by four. Recover all unordered pairs. Could there be interpretation of percentage discount with rounding after each discount? They say before rounding maybe final before rounding? If rounding after each discount, many possibilities. But "before rounding" maybe they calculate after discounts exactly? The problem specifically says "yielding 336 before rounding", perhaps to disambiguate. We assume no rounding. Good.
+
+[[verification]]Let's think if "percentage divisible by four" could mean percentage amount (e.g., 20% ) as number divisible by 4, but could be greater than 100? No.
+
+Let's see if there are other exact pairs if first discount >100? Suppose p=104%, gives negative price? Not a discount. No.
+
+[[conclusion]]Need final with concise but enough. Desired oververbosity 5; answer with equations.
+
+Let's produce final.

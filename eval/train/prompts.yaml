@@ -1,0 +1,680 @@
+- id: ds-mat-01
+  title: "The crooked raffle"
+  prompt: |
+    A box contains tickets numbered 1 to 60. Jules chooses a ticket uniformly. A host who sees it reports either "even" or "multiple of three", choosing uniformly among true reports and saying "neither" when necessary. Given that the host said "even", what is the probability of a multiple of three? Compare with a host who always gives priority to "even".
+- id: ds-mat-02
+  title: "The folding footpath"
+  prompt: |
+    A rectangular courtyard is 14 m by 9 m. Two gates are on opposite long sides, respectively 3 m and 10 m from the west wall. A walker must touch the west wall once between gates. Find the shortest route and its contact point. Verify the point lies on the wall segment.
+- id: ds-mat-03
+  title: "Two readings of growth"
+  prompt: |
+    A newsletter has 800 subscribers and says "monthly growth improved by 25% from last month's 8%". Quantify two interpretations of the new growth rate, predict the next subscriber count under each, and determine which reading could double the audience within six further months at that rate.
+- id: ds-mat-04
+  title: "Silent draws"
+  prompt: |
+    An urn holds four white, three blue and two orange beads. Draw without replacement until the first orange. What is the expected number of different non-orange colours seen before stopping? Check your result by a method that does not enumerate complete draw sequences.
+- id: ds-mat-05
+  title: "Counting clean cuts"
+  prompt: |
+    You can cut a 6 by 8 grid of identical unit tiles into two rectangles by one straight cut along a grid line. Then split the larger rectangle into two equal rectangles with another grid-line cut. How many distinct final sets of tiles are possible if the first cut must leave a strictly larger piece and the grid has labelled coordinates? Watch for repeated final partitions.
+- id: ds-mat-06
+  title: "The rented drill"
+  prompt: |
+    A workshop needs a drill for an integer number of consecutive days from 1 through 12, each equally likely. Renting costs 7 per day and buying costs 32 at the start of any day. You learn whether another day is needed only at each day's end. Find the best prechosen day to buy if still needed, including never buying, and justify optimality.
+- id: ds-mat-07
+  title: "Offsets on a dial"
+  prompt: |
+    On a circular dial with 15 equally spaced marks, choose three different marks uniformly. What is the probability that they form a triangle with a right or an obtuse angle? Justify how you count triangles on the boundary of the condition.
+- id: ds-mat-08
+  title: "Two grading rules"
+  prompt: |
+    An exam has 12 questions worth one raw point each. The instructor will "drop the worst two questions". One reading removes two questions for each student; another removes the same two globally. A student answered 8 correctly. Find the possible adjusted percentages under each reading and show which global outcomes can occur.
+- id: ds-mat-09
+  title: "The vanishing term"
+  prompt: |
+    A sequence starts at a1=2 and satisfies a(n+1)=(3a(n)+1)/(a(n)+3). Find an exact expression for a20 and decide on which side of 1 it lies. Confirm the expression directly from the recurrence for two small indices.
+- id: ds-mat-10
+  title: "Shared birthday month"
+  prompt: |
+    Four friends independently choose uniformly random months for a trip. Given that at least two picked the same month, what is the probability that exactly two distinct months were picked? Count the conditioning event in two ways to check the denominator.
+- id: ds-mat-11
+  title: "A patch of paint"
+  prompt: |
+    On the unit square colour a point if its distance to the left edge is smaller than its distance to both horizontal edges. Compute the coloured area. How does the result change if "distance to the left edge" is replaced by distance to the lower left corner? Derive both geometrically.
+- id: ds-mat-12
+  title: "Twelve sample jars"
+  prompt: |
+    A laboratory owns twelve identical jars. It divides them among four labelled shelves, each holding from one to five jars. Count the allocations and verify the count using a second representation. Does imposing that shelves one and two have different loads simply halve the count?
+- id: ds-mat-13
+  title: "The lantern shadow"
+  prompt: |
+    An upright 2 m pole stands 3 m from a point lamp whose height is uniformly distributed from 3 m to 6 m. Find the mean length of the pole's shadow on level ground and the probability it exceeds that mean. Explain why using the mean lamp height can give a different value.
+- id: ds-mat-14
+  title: "Balanced brochure"
+  prompt: |
+    A square sheet of side 24 has squares of the same integer side removed at all four corners before folding an open box. The volume must be at least 900 cubic units. Determine every allowed integer cut size and prove that your list covers the full range.
+- id: ds-mat-15
+  title: "Misleading average speed"
+  prompt: |
+    A delivery driver covers a route in two legs at 18 and 30 km/h. Their app says "half at each speed". Determine the overall speed under the equal-time and equal-distance readings. If only the total distance 72 km and the mean speed 24 km/h are known, reconstruct the leg lengths.
+- id: ds-mat-16
+  title: "Unequal envelopes"
+  prompt: |
+    Five cards carry the values 1, 1, 2, 3 and 5. Shuffle and place two in a red envelope and three in a blue one. What is the probability that the product in red strictly exceeds the sum in blue? Compare equally likely physical pairs with equally likely distinct value pairs.
+- id: ds-mat-17
+  title: "A lattice window"
+  prompt: |
+    Count integer points strictly inside the triangle with vertices (0,0), (12,0) and (4,8). Obtain the count once by horizontal slices and once using its area and boundary lattice points. Explain how to handle slices through a vertex.
+- id: ds-mat-18
+  title: "Consecutive page blocks"
+  prompt: |
+    A printer numbers pages 1 to 480. An entire consecutive block of pages is reprinted and adds exactly 137 printed digit characters, counting digits only. What are the smallest and largest possible numbers of pages in that block? Give examples and prove both bounds.
+- id: ds-mat-19
+  title: "The leaky census"
+  prompt: |
+    A club reports 60% of respondents cycle and 45% swim. Each percentage was rounded to the nearest whole percent, with half rounded upward. There are exactly 77 respondents. Find all possible numbers doing both, given that everyone does at least one, or show the report is inconsistent.
+- id: ds-mat-20
+  title: "Choosing a chord"
+  prompt: |
+    An artist draws "a random chord" of a unit circle. Compute the chance its length exceeds the radius for two procedures: join two independent uniform boundary points, or choose a uniform midpoint in the disc and draw the chord bisected there. Explain the role of the centre.
+- id: ds-mat-21
+  title: "Tangent pots"
+  prompt: |
+    Two open cylindrical pots share a total base area of 100 square centimetres and must each hold exactly 200 cubic centimetres. Ignoring the bases, minimise their combined lateral area. Justify whether allowing very unequal radii could improve on equal ones.
+- id: ds-mat-22
+  title: "The missing regression point"
+  prompt: |
+    Five paired observations have mean x=3, mean y=4, sum of squared x deviations 10 and sum of cross deviations 15. Add the point (9,4). Find the new least-squares slope and intercept, and check that the fitted line goes through the new mean point.
+- id: ds-mat-23
+  title: "Lottery with replacement"
+  prompt: |
+    A ticket lists three distinct letters from A through H. A machine draws three times with replacement. The prize rule says "two matches". Calculate the probability under exactly two matching draws and under exactly two distinct ticket letters appearing. Identify a draw counted by only one reading.
+- id: ds-mat-24
+  title: "Rounding a queue"
+  prompt: |
+    Four counters display daily visitor counts rounded independently to the nearest ten, ties rounded up. They display 20, 40, 50 and 70. The grand total rounded to the nearest ten is 200. Which exact totals can the original four counters sum to? Prove attainability or explain a contradiction.
+- id: ds-mat-25
+  title: "The repeated discount"
+  prompt: |
+    A shop applies two percentage discounts in sequence to a price of 500, yielding 336 before rounding. Each discount is a positive whole percentage divisible by four. Recover all unordered pairs, and show how to exclude candidates without testing every pair of percentages.
+- id: ds-mat-26
+  title: "Poles in the orchard"
+  prompt: |
+    An orchard boundary follows a 54 m by 36 m rectangle. Poles must be equally spaced by an integer number of metres with a pole at each corner. Between 25 and 50 poles are available. Which stock sizes allow every pole to be used? Check by walking the perimeter.
+- id: ds-mat-27
+  title: "Volume of the spill"
+  prompt: |
+    A rectangular tank is 50 cm long, 20 cm wide and 30 cm deep. It contains water to a depth of 24 cm. Tilt it about a lower edge running along its width so the base makes 20 degrees to horizontal, allowing water to spill. Find the volume remaining and verify the shape used in the calculation.
+- id: ds-mat-28
+  title: "Meeting the target"
+  prompt: |
+    Seven shots are taken independently. The first three hit with probability 0.4 and the remaining four hit with probability 0.7. Given exactly six hits, what is the probability the miss was in the first three? Compare counting by shot with a likelihood-ratio calculation.
+- id: ds-mat-29
+  title: "Averaging error bars"
+  prompt: |
+    Two instruments report 10.0 plus or minus 0.4 and 11.0 plus or minus 0.3 in the same units. Find the uncertainty on their equally weighted mean under worst-case bounded errors and under independent zero-mean errors with those standard deviations. Would perfectly shared proportional fluctuations change the second calculation?
+- id: ds-mat-30
+  title: "Spokes and gaps"
+  prompt: |
+    A necklace is made from three identical amber and five identical white beads. Count designs if rotations coincide but reflections do not. Count again if reflections also coincide. Use the gaps between amber beads to justify how symmetric patterns are handled.
+- id: ds-mat-31
+  title: "The shifted tile"
+  prompt: |
+    A disc of radius 2 is centred at a uniformly random point of a square of side 10. Find the probability it crosses exactly one supporting line of the square. Check by partitioning the square into regions with zero, one and two crossings.
+- id: ds-mat-32
+  title: "The missed calibration"
+  prompt: |
+    A value is multiplied by a constant positive factor every hour. Exact readings are 160 at hour 2 and 250 at hour 4. A report labels the change an "average hourly increase". Give the arithmetic increase per hour and the constant percentage rate, then compare their hour-6 predictions if used as forecasting rules.
+- id: ds-mat-33
+  title: "A rational staircase"
+  prompt: |
+    Starting with the interval [1,2], insert the mediant of its endpoints and retain the half containing the square root of 2. Repeat for six insertions, keeping endpoints as reduced fractions. Find the final bracket using integer comparisons and justify why none of the decisions needs rounding.
+- id: ds-mat-34
+  title: "Interrupted install"
+  prompt: |
+    An update has two stages lasting 3 and 5 minutes. Each attempt at a stage independently succeeds with probability 3/4. A failure is discovered only at that stage's end. Find the expected finishing time if failure restarts only its own stage, and if it restarts the entire update.
+- id: ds-mat-35
+  title: "Boxed quartiles"
+  prompt: |
+    A sorted list of nine nonnegative integers has median 8. Using the median of each four-item half after excluding the centre, its quartiles are 4 and 12. Its maximum is 15. Find the largest possible mean and give a list achieving it. Show why no higher value works.
+- id: ds-mat-36
+  title: "The repaired timetable"
+  prompt: |
+    A periodic service runs every 18 minutes, another every 24. Both run throughout the day. The first is due at 08:04, the second at 08:10. Find all common arrivals before noon and determine which shifts of the second timetable by 1 through 6 minutes preserve a common arrival.
+- id: ds-mat-37
+  title: "Shortest wraparound"
+  prompt: |
+    Two points are chosen independently and uniformly on a circle of circumference 1. Let D be the shorter arc length between them. Find the probability D exceeds 0.2 and its expected value. Check the distribution by fixing the first point and by considering the ordinary distance between two coordinates.
+- id: ds-mat-38
+  title: "A voting threshold"
+  prompt: |
+    A proposal needs "two thirds approval". Of 83 members, 67 cast valid yes or no votes and 16 abstain. For which counts of yes votes do the readings "of all members" and "of valid votes" give opposite outcomes? Give the interval both for at least two thirds and for strictly more.
+- id: ds-mat-39
+  title: "The overfull bowl"
+  prompt: |
+    Four different positive integers are chosen from 1 to 15 with sum 30. What are the smallest and largest possible products? Prove each extremum and address the restriction that all entries must differ.
+- id: ds-mat-40
+  title: "Two kinds of reuse"
+  prompt: |
+    A photographer places six distinct photographs in a two-row, three-column frame. Two arrangements may be called "the same" after rotating the frame by 180 degrees, or after also allowing mirror reflection across its horizontal axis. Count under both conventions and justify any division by a symmetry factor.
+- id: ds-mat-41
+  title: "A strip of wallpaper"
+  prompt: |
+    A repeating vertical pattern is 37 cm long. Three 215 cm strips must begin at the same phase and come from a single roll starting at that phase. The trailing end needs no alignment. Find the minimum roll length and check whether four 215 cm strips can be cut from a 9 m roll.
+- id: ds-mat-42
+  title: "The biased spinner"
+  prompt: |
+    A spinner independently shows red with unknown probability p on each turn. The probability of seeing different colours on two turns is 0.32. Infer all possible values of p and the resulting possible probabilities of a red majority in five turns. Explain why the data might not determine a unique answer.
+- id: ds-mat-43
+  title: "A diagonal shortcut"
+  prompt: |
+    A rectangular sheet has perimeter 70 cm and integer side lengths. Its diagonal is within 1 cm of 25 cm, including the endpoints. Determine all possible unordered side pairs. Use a bound to shorten the search and check the endpoint cases.
+- id: ds-mat-44
+  title: "Ordered divisions"
+  prompt: |
+    Divide the integers 1 through 8 into two groups of four. Find the number of divisions in which the two sums are equal, first with labelled groups and then with unlabelled groups. Verify your count by pairing complementary four-element sets.
+- id: ds-mat-45
+  title: "The recalibrated scale"
+  prompt: |
+    A scale reads a linear function of true mass. It reads 12 g for an empty bowl and 72 g for the same bowl plus a known 50 g mass. With the bowl and some flour it reads 150 g. Determine the flour mass. Can one determine the mass of the empty bowl from these data? Show why.
+- id: ds-mat-46
+  title: "A fractional bet"
+  prompt: |
+    A player repeatedly stakes the same fraction f of current tokens, gaining the stake on a win and losing it on a loss. After six wins and four losses, find f in [0,1] that maximises the final balance. Does maximising the expected balance for ten independent games with win chance 0.6 select the same f?
+- id: ds-mat-47
+  title: "Upper or lower median"
+  prompt: |
+    Two groups have sizes five and seven and medians 12 and 20. Scores are integers from 0 through 30 with repetitions allowed. What are the possible minimum and maximum of the average of positions six and seven after merging? Give attaining examples and order-based bounds.
+- id: ds-mat-48
+  title: "Counting backwards"
+  prompt: |
+    Define a function on positive integers by sending an even input to half its value and an odd input to three times its value plus one. Find all positive starts that first reach 10 after exactly three applications. Verify your reverse search by applying the rules forward.
+- id: ds-mat-49
+  title: "A worn measuring tape"
+  prompt: |
+    A tape has stretched uniformly so its 100 cm interval actually spans 102 cm. A rectangular floor measures 380 by 260 tape centimetres. Estimate the true area in square metres and the signed percentage error if the uncorrected area is quoted. Specify which area your error uses as denominator.
+- id: ds-mat-50
+  title: "Picking a floor"
+  prompt: |
+    A lift makes five independent stops, uniformly distributed over floors 1 to 8. What is the probability that the highest visited floor occurs exactly twice? Derive a sum and verify by computing the answer for the analogous case of two floors.
+- id: ds-mat-51
+  title: "A skewed sample"
+  prompt: |
+    A sample of 20 observations has mean 14. Removing the largest changes the mean to 12. Removing the smallest from the original instead changes it to 14.5. Determine the range. Could every observation have been an integer? Justify both answers.
+- id: ds-mat-52
+  title: "Floor tile deficit"
+  prompt: |
+    A 7 by 9 board has two opposite corner squares removed. Can the rest be tiled with 1 by 2 dominoes if only one more square of your choice may be removed? Exhibit a tiling if possible, or rule out every possible choice. Distinguish permission from a requirement to remove the extra square.
+- id: ds-mat-53
+  title: "Repeated rescaling"
+  prompt: |
+    A picture of width 101 pixels is scaled to 70% of its current width twice, rounding to the nearest integer after each step. Compare this with a single 49% scaling. For integer starting widths 100 through 119, determine all discrepancies and verify ties with a stated rounding convention (use half-up).
+- id: ds-mat-54
+  title: "The reflected route"
+  prompt: |
+    A robot starts at 0 on the integer segment 0 through 4. At interior positions it moves left or right with equal probabilities. At 0 it must move to 1. Find the expected number of moves to first reach 4. Check by deriving the successive expected times to climb one new level.
+- id: ds-mat-55
+  title: "Uneven instalments"
+  prompt: |
+    A buyer pays 120 now, 120 in one year and 120 in two years, or 327 now. For which nonnegative annual discount rates is the instalment plan cheaper in present value? Give the break-even rate and verify which side of it favours the plan.
+- id: ds-log-01
+  title: "The gallery lights"
+  prompt: |
+    Six lamps on a ring are numbered 0 through 5. Pressing a lamp flips it and its two neighbours. Initially only 0 and 3 are lit. Can you turn all lamps off? Find a shortest sequence if one exists, or prove impossibility. Try to certify the result without enumerating orders.
+- id: ds-log-02
+  title: "Which ribbon ends meet?"
+  prompt: |
+    A strip has left-to-right labels A B C D E F on one face. Fold exactly along a gap so all labels of the shorter part lie over labels of the longer part. The observer reports that B overlaps E. Determine all possible fold lines, then reconsider if the observer saw B overlap D instead.
+- id: ds-log-03
+  title: "Two pans and a promise"
+  prompt: |
+    There are seven visually identical tokens. Exactly one is heavier and exactly one other is lighter than the common mass, by the same amount. A single balance weighing compares tokens 1 and 2 against tokens 3 and 4 and balances. How many ordered heavy/light possibilities remain? Check by subtracting the unbalanced outcomes.
+- id: ds-log-04
+  title: "The stamp dispenser"
+  prompt: |
+    A machine starts in one of states A,B,C. Pressing blue sends A to B, B to C, C to A. Pressing green sends A to A, B to A, C to C. You cannot see the state. Find a shortest sequence that guarantees state A whatever the start and show why fewer presses cannot suffice.
+- id: ds-log-05
+  title: "Round-robin reading"
+  prompt: |
+    Eight people stand in a labelled circle. Starting at person 1, count 1,2,3 repeatedly, removing whoever hears 3 and restarting the count at the next survivor. Who remains? A second host says to "resume at the next number" instead. Would continuing the cyclic count after a removal actually change the result?
+- id: ds-log-06
+  title: "The drawer guarantee"
+  prompt: |
+    A drawer contains four red, five green and six blue discs, all individually distinct. Discs are drawn without looking. Find how many draws guarantee two disjoint same-colour pairs. Compare allowing the two pairs to be the same colour with requiring different colours. Give an extremal draw in each case.
+- id: ds-log-07
+  title: "Circuit of arrows"
+  prompt: |
+    Six signposts in a row initially point R,R,L,L,R,L. At each step a walker follows the arrow at their position by one cell, then that arrow flips. The walker starts at cell 3, indexed from 1. Which end do they leave, and when? Would flipping before following give the same exit? Verify against the changes at the boundary.
+- id: ds-log-08
+  title: "Three catalogue clues"
+  prompt: |
+    A catalogue code uses three distinct digits from 1 to 6. Compared with 123 it has exactly one correct digit in the correct position and no other shared digit. Compared with 345 it has two shared digits, neither correctly placed. Compared with 561 it has exactly one digit correctly placed, with any other matches unspecified. List all possible codes.
+- id: ds-log-09
+  title: "Nested envelopes"
+  prompt: |
+    There are five envelopes A through E of strictly increasing sizes. A smaller envelope can be put directly into a larger one, but each holds at most one direct child. After nesting, exactly two envelopes remain visible. How many different immediate-containment patterns are possible? Explain whether the order of assembling them matters.
+- id: ds-log-10
+  title: "The silent vote"
+  prompt: |
+    Four jurors privately choose yes or no. Each reads the other three votes, then raises a hand if they see strictly more yes than no. An observer sees exactly two hands. What can be inferred about the private votes and the votes of the hand-raisers? Would knowing only that at least two hands rose be sufficient?
+- id: ds-log-11
+  title: "Stepping stones"
+  prompt: |
+    Stones 0 through 13 lie in a row. Two players alternate moving a common marker forward by one or three stones without passing 13. A move to 8 is forbidden, but jumping over it is allowed. Landing on 13 wins; a player with no moves loses. Determine all winning first moves from 0 and verify the decisive positions.
+- id: ds-log-12
+  title: "Two beacon reports"
+  prompt: |
+    A lighthouse flashes at slots 1,4,7,... and a buoy flashes at slots 2,6,10,... . An observer notes exactly one flash in each of three consecutive slots, without distinguishing source. List every possible starting slot modulo the joint period. How does counting a simultaneous flash as one visible event affect the answer?
+- id: ds-log-13
+  title: "Maps with a torn edge"
+  prompt: |
+    Five villages A through E are linked by a connected undirected network with no repeated links. Their degrees in that order are 1,2,2,2,1. A is linked to C, and B is not linked to D. List all possible networks or show the clues conflict. What if the torn note instead says B is not linked to C?
+- id: ds-log-14
+  title: "A painted folding cube"
+  prompt: |
+    In a row of four unit squares write W,X,Y,Z from left to right. Attach square P above X and Q below Y. Fold this net into a cube. Which unordered triples of labelled faces meet at a vertex? Give a way of checking the list that does not depend on the drawing's orientation.
+- id: ds-log-15
+  title: "Word ladder detour"
+  prompt: |
+    Use only these words: CAT, COT, COG, DOG, DAT, DOT, DAG, DIG, DUG. One move changes exactly one letter while staying in the list. How many shortest ladders go from CAT to DUG? Does requiring the ladder to visit DOG somewhere alter the minimum and the count?
+- id: ds-log-16
+  title: "The two sliding trays"
+  prompt: |
+    Two trays each hold three numbered tiles in a left-to-right line. Initially the top is 1,2,3 and the bottom is 4,5,6. Allowed moves cyclically rotate either row or exchange the entire top and bottom rows without reversing them. Decide whether top 5,6,4 and bottom 3,1,2 is reachable. Count all reachable displays.
+- id: ds-log-17
+  title: "Last square on the carpet"
+  prompt: |
+    A token starts on the upper left of a 4 by 4 board. It moves only right or down one square. Two players alternate moves, and whoever first reaches the lower right wins. Once in the game either player may instead move diagonally one square right and down. Can the opener force a win? Show what changes if the shared diagonal move is compulsory before finishing.
+- id: ds-log-18
+  title: "One incorrect sensor"
+  prompt: |
+    Four sensors announce integer readings 9, 11, 12, 14. Three working sensors differ from the same unknown integer temperature by at most 2. The fourth has no accuracy guarantee. List each temperature and unreliable sensor identity consistent with the observations. Can an unreliable sensor happen to give an accurate value here?
+- id: ds-log-19
+  title: "Private postcards"
+  prompt: |
+    Four people each posted one card to a different one of the other three, and everyone received exactly one. Ada did not write to Ben and Cara did not write to Dee. Determine all possibilities if Ben received from Dee. Then remove that last clue and decide whether a single cycle of four is forced.
+- id: ds-log-20
+  title: "The rotating mosaic"
+  prompt: |
+    A two-by-two mosaic starts with A B on the top row and C D below. You may rotate the whole mosaic a quarter-turn clockwise or swap its two top tiles. Can you reach D B / C A in three moves or fewer? Give a shortest route or a checkable lower bound for any claimed impossibility.
+- id: ds-log-21
+  title: "An unreliable intercom"
+  prompt: |
+    A device signals low, medium or high. Exactly once in every run of four consecutive signals it emits high. Its first ten outputs were L,H,M,L,L,?,M,L,?,H. Determine all possible values at the two missing places. Does the rule also force the unobserved eleventh output?
+- id: ds-log-22
+  title: "The square trail"
+  prompt: |
+    Mark cells in a 3 by 4 grid. Each row must contain an odd number of marks and each column an even number. Is this possible? If one named column is allowed an odd number instead, count configurations by first choosing marks in the top two rows and then accounting for the last row.
+- id: ds-log-23
+  title: "Buckets with a shared mark"
+  prompt: |
+    An empty 4-litre jug and an empty 7-litre jug have no internal marks. One move fills a jug, empties it, or pours until a jug empties or fills. Obtain 5 litres in one jug. Find the fewest moves and justify minimality by listing the new reachable states up to the decisive depth.
+- id: ds-log-24
+  title: "A row of footprints"
+  prompt: |
+    A path contains eight impressions, each L or R. The first and last are L, there are exactly four L's, and there is exactly one pair of consecutive R's counted by starting position. How many possible paths fit? Explain how an RRR run would affect the pair count.
+- id: ds-log-25
+  title: "Exchange at the museum"
+  prompt: |
+    Nine identical counters lie in a pile. A turn removes one or two counters. Each player, once per game, may instead pass, except immediately after the opponent passes. Taking the last counter loses. With optimal play, does the opener win? Include whose passes remain when justifying the strategy.
+- id: ds-log-26
+  title: "Three front labels"
+  prompt: |
+    Three transparent-front drawers each contain a red or a blue ball. Their labels read respectively "at least two balls are red", "drawer 1 and drawer 3 match", and "this drawer is blue". Exactly one label is true. Enumerate all possible colourings. Which single drawer observation would best reduce the worst-case number of possibilities?
+- id: ds-log-27
+  title: "Blind turntable"
+  prompt: |
+    Four coins at labelled positions around a square show H,H,T,T clockwise. A move flips opposite coins or rotates the whole square by one position. Is all-heads reachable? If a move flipping adjacent coins is also allowed exactly once, find the fewest moves and explain the invariant that changes.
+- id: ds-log-28
+  title: "Crossing the park gates"
+  prompt: |
+    A park has paths AB, AC, BC, BD, CD, CE, DE and EF, undirected. Start at A and cross every path exactly once, finishing anywhere. Can this be done? If exactly one path may be walked twice, list all choices of that path which allow the walk and give one route.
+- id: ds-log-29
+  title: "The missing domino"
+  prompt: |
+    Use the six undirected dominoes 00, 01, 02, 11, 12, 22 exactly once in a chain with matching ends. Can both ends show 0? Suppose a domino was lost before play. Which single losses allow a chain starting at 0 and ending at 2? Check the effect of losing a double.
+- id: ds-log-30
+  title: "Four claims about a number"
+  prompt: |
+    An integer lies from 10 to 40 inclusive. Of the claims "a multiple of 3", "one above a square", "has two distinct prime divisors", and "its digits sum to 7", exactly three are true. Which integers qualify? Show how to organise the cases and verify each survivor.
+- id: ds-log-31
+  title: "The coupled timers"
+  prompt: |
+    Two hourglasses last 5 and 8 minutes. Start both at time zero. You may flip either or both only when a glass empties. Find a way to signal exactly 11 minutes after the start, or prove none is possible. Explain why timing an 11-minute interval beginning later would be a different task.
+- id: ds-log-32
+  title: "The truncated tournament"
+  prompt: |
+    Six players each played exactly two different opponents, with no repeated pair. Ada played Ben and Cam; Dee played Eli; Finn did not play Ada. Which components can the undirected game graph have? Give all possible sets of Finn's opponents, with a supporting completion for each set.
+- id: ds-log-33
+  title: "Page of binary clues"
+  prompt: |
+    Five switches A to E each take value zero or one. Exactly two of A,B,C are on, exactly one of B,D,E is on, and A equals E. List the possible states. A final note says "C or D". Explain what changes when this means inclusive or versus exclusive or.
+- id: ds-log-34
+  title: "Packing the stage props"
+  prompt: |
+    There are six indivisible props weighing 2,3,4,5,6,7 kg. Each crate may hold at most 10 kg and at most two props. Find the minimum number of crates, and count the distinct packings achieving it when crates are unlabelled. Verify the lower bound and avoid counting reordered crates twice.
+- id: ds-log-35
+  title: "Chains of permission"
+  prompt: |
+    There are four doors A,B,C,D. All are initially closed. A can be toggled freely, B only while A is open, C only while B is open and A closed, D only while C is open and A,B closed. What is the shortest sequence leaving only D open? Explain how you know no shortcut works.
+- id: ds-log-36
+  title: "Echo in a corridor"
+  prompt: |
+    A row of five bells has positive integer pitches. Each interior pitch is the absolute difference of its two neighbours. The first pitch is 6 and the last is 6. Find all feasible rows with pitches at most 12, or prove none exist. Check every interior equality for each proposed row.
+- id: ds-log-37
+  title: "The four windows"
+  prompt: |
+    Four binary digits form a circular word. A viewer reports four overlapping consecutive two-digit windows, one per starting point, but loses their order. Can the multiset 00,01,10,11 come from such a word? Find all reconstructions up to rotation. Compare with the multiset 01,01,10,10.
+- id: ds-log-38
+  title: "Splitting chocolate strips"
+  prompt: |
+    A player chooses one strip with at least two squares and breaks it into two unequal positive lengths. Players alternate and the last to move wins. Starting with a strip of length 8, identify all winning first breaks. Show why considering only the longest resulting strip can give a wrong game analysis.
+- id: ds-log-39
+  title: "The two couriers"
+  prompt: |
+    A parcel may pass along directed links A to B, A to C, B to D, C to D, C to E, D to F, E to F and B to E. Two couriers must each pick a different A-to-F route. How many unordered pairs share no internal village? How would requiring only that no directed link is shared alter the answer?
+- id: ds-log-40
+  title: "Silent guessing game"
+  prompt: |
+    A host secretly chooses 1 through 8. You may ask yes/no questions, and the host will either answer all truthfully or give exactly one false answer at an unknown point. Can three questions always identify the choice? Can five fixed questions suffice? Give a counting obstruction when applicable rather than assuming each answer halves the possibilities.
+- id: ds-log-41
+  title: "A row of sliding books"
+  prompt: |
+    Five distinct books begin as A,B,C,D,E. A move removes the leftmost book and reinserts it anywhere, including at the far right. What is the minimum number of moves to reach C,E,B,A,D? Exhibit the moves and identify the part of the original order that must survive fewer moves.
+- id: ds-log-42
+  title: "Board of mirrors"
+  prompt: |
+    A square has corners NW, NE, SE, SW in cyclic order. Four cards are numbered 1 through 4, one per corner. The number at NW is smaller than both neighbours and the two diagonals have equal sums. Determine all labelled arrangements. If a mirror through the NW-SE diagonal identifies arrangements, how many classes remain?
+- id: ds-log-43
+  title: "Two corrupted receipts"
+  prompt: |
+    Three items X,Y,Z each cost a distinct whole number from 1 to 8. Four receipts report X+Y=9, Y+Z=10, X+Z=7 and X+Y+Z=14. Exactly one total was copied incorrectly. Which receipt could be wrong and what prices are then possible? Check whether a putative correction changes the reported number.
+- id: ds-log-44
+  title: "The coin pathway"
+  prompt: |
+    From a pile of 18 counters the first player may take 1, 2 or 4. Later players have the same choices but may not repeat the immediately preceding number. Taking the last wins; a player with no legal move loses. Find all winning opening choices. Use a small state table to check boundary cases.
+- id: ds-log-45
+  title: "Museum admission"
+  prompt: |
+    A badge grants admission to rooms 1 through 6. Exactly three rooms must be open. If room 1 opens, room 4 opens; exactly one of 2 and 5 opens; room 6 can only open with room 3. List feasible triples. A notice reads "3 only with 6" instead of the last rule: which triples change?
+- id: ds-log-46
+  title: "Toppling the pegs"
+  prompt: |
+    Seven pegs form a row. A move knocks over two adjacent standing pegs, and fallen pegs cannot be moved or skipped across. Normal play awards the win to the last mover. Find every winning first pair, treating the positions as labelled. Check whether simply counting the maximum possible moves determines the answer.
+- id: ds-log-47
+  title: "The missing postcard edge"
+  prompt: |
+    A 2 by 3 rectangular postcard is cut into six unit squares, still oriented upright. The scraps show A left of B sharing an edge, D directly below A, and E and F in the same column. C shares an edge with D. Reconstruct every possible layout and identify any adjacency forced in every layout.
+- id: ds-log-48
+  title: "Three scrolling counters"
+  prompt: |
+    Three displays repeat cycles 0,1,2; 0,1,2,3; and 0,1,2,3,4. All show zero initially. Each tick advances exactly two displays of your choice one step. Can the triple (1,0,0) occur within six ticks? Find a shortest schedule or prove the bound impossible by counting advances.
+- id: ds-log-49
+  title: "The second reveal"
+  prompt: |
+    Two cards are drawn without replacement from cards numbered 1 through 6 and laid in order face down. You learn that exactly one card is even. You may ask either "is the first card even?" or "is the first larger?" Which question minimises the worst-case number of still-possible ordered pairs? Show your partition sizes.
+- id: ds-log-50
+  title: "Building letters"
+  prompt: |
+    You start with the word A. In one move replace one A with AB, or one B with BA. Can you reach ABBAA in four moves? Count the distinct predecessor words at each reverse step as evidence. Would treating histories that select equal letters in different positions as distinct change reachability?
+- id: ds-cod-01
+  title: "Latest reading per device"
+  prompt: |
+    Write a Python function consuming a one-pass iterable of (device, timestamp, value) triples. Return the value from the greatest timestamp per device, using the last arrival on ties, with keys in order of first appearance. Check on a stream where a late-arriving record is older and a value is None. State the space bound.
+- id: ds-cod-02
+  title: "The multiplied rows"
+  prompt: |
+    A spreadsheet prototype builds its grid with grid = [[0] * width] * height and then fills the main diagonal. Explain the actual grid after filling a 3-by-3 diagonal with 1,2,3. Give a fix and explain whether copying only the outer list before writing would also fix it.
+- id: ds-cod-03
+  title: "Repeated river levels"
+  prompt: |
+    For a list of positive, zero or negative daily changes, return the length of the longest nonempty consecutive period whose total is zero, or 0 if absent. Derive a linear-time Python solution and check it against a simple exhaustive algorithm on [2,-2,3,0,-3,4].
+- id: ds-cod-04
+  title: "A generator for pairs"
+  prompt: |
+    Write a generator taking any one-pass iterable and yielding pairs of successive items. Support a flag to include a final pair from last back to first; specify what that means for empty input and a singleton. Explain what goes wrong with zip(it,it) when it is already an iterator.
+- id: ds-cod-05
+  title: "The file suffix question"
+  prompt: |
+    Write a Python function to split a filename into a stem and extension under two conventions: only its last suffix counts, or all suffixes count together. A leading dot alone never starts a suffix. Specify how you treat trailing dots, and demonstrate on .profile, archive.tar.gz, a. and .theme.dark.json.
+- id: ds-cod-06
+  title: "Fast rolling totals"
+  prompt: |
+    A developer computes trailing means with sum(a[max(0,i-k+1):i+1])/k. Identify both its numerical behaviour near the start and its time complexity. Implement the full-window-only and the available-prefix conventions for a one-pass source when k is positive. Check both on the same short input.
+- id: ds-cod-07
+  title: "Smallest missing seat"
+  prompt: |
+    Given an unsorted mutable list of n integers, return the smallest absent positive integer in O(n) time with O(1) extra space. Explain termination when there are duplicates. Trace your algorithm on [3,4,-1,1,1] and justify the largest value one needs to consider.
+- id: ds-cod-08
+  title: "Page stream compression"
+  prompt: |
+    Design a Python generator that converts a nondecreasing stream of positive page numbers, possibly repeated, into inclusive runs such as (4,7). Repeated pages do not lengthen a run. Raise ValueError if the stream decreases. Explain when it is safe to yield the final run and check singleton and duplicate-only cases.
+- id: ds-cod-09
+  title: "Two definitions of depth"
+  prompt: |
+    A nested Python list may contain integers or sublists, including empty ones. Define and implement two functions: deepest integer nesting level (outer integers have level 1, return 0 if absent) and deepest list level (outer list is level 1). Use an iterative traversal and demonstrate a case where these answers differ by more than one.
+- id: ds-cod-10
+  title: "Bidirectional timetable"
+  prompt: |
+    Given a list of directed station-to-station links with positive travel times, find the cheapest return journey from a named start that uses at least one link. The route may revisit stations. Design an algorithm faster than running a fresh search per outgoing link; handle one-way dead ends and a self-loop.
+- id: ds-cod-11
+  title: "Copying a scoreboard"
+  prompt: |
+    A function takes a dictionary mapping team names to score lists, stores old = scores.copy(), and appends new scores to existing lists. Explain why its change report shows no appended entries. Give two fixes with different copying costs when exactly one named team changes; show whether a brand-new key has the same problem.
+- id: ds-cod-12
+  title: "Runoff counting"
+  prompt: |
+    Write a function returning every item occurring strictly more than n/3 times in a sequence that can be traversed twice but cannot be stored. Use constant extra candidate slots. Justify why candidates must be verified and give an example where a surviving candidate is below the threshold.
+- id: ds-cod-13
+  title: "Escaped field separator"
+  prompt: |
+    Parse a sequence of fields separated by commas. A backslash quotes the next character, including a comma or another backslash. Keep empty fields, and reject an unpaired final backslash. Implement a one-pass parser in Python and explain how to distinguish two backslashes before a comma from one.
+- id: ds-cod-14
+  title: "Conveyor lookahead"
+  prompt: |
+    Given an iterable of integers, produce the same elements but remove each element immediately followed by a larger one in the original input. Does removing elements repeatedly to a fixed point give the same sequence? Implement the one-pass rule with bounded memory and exhibit a case distinguishing the readings.
+- id: ds-cod-15
+  title: "Rotating a matrix in place"
+  prompt: |
+    For a rectangular matrix stored as a list of equal-length row lists, compare returning a fresh clockwise rotation with mutating a square matrix to rotate it. Write both algorithms. Trace a non-symmetric example and explain what row aliasing would do to the mutating version.
+- id: ds-cod-16
+  title: "The nearest previous sample"
+  prompt: |
+    For each position in a list, return the index of the closest earlier strictly smaller value, or -1 if none. Implement an O(n) Python function and justify the amortised bound. Use repeated equal values to show why the comparison chosen when removing candidates matters.
+- id: ds-cod-17
+  title: "Frequencies that tie"
+  prompt: |
+    Given a sequence of hashable labels, return the k most frequent ones, breaking ties by first appearance even when labels cannot be ordered. Compare full sorting with a heap capped at k. Verify that your heap's tie direction keeps the right item when the frequencies at the cutoff are equal.
+- id: ds-cod-18
+  title: "Calibration segments"
+  prompt: |
+    Split a list of signed integers into as many nonempty consecutive blocks of equal sum as possible, covering the whole list. Give a correct algorithm for up to 500 entries. Explain whether a method that only tests positive target sums works, and check [2,-2,3,-3,0].
+- id: ds-cod-19
+  title: "Streaming transpose"
+  prompt: |
+    Write a generator that takes a finite list of row iterators of possibly unequal length and yields columns, padding missing entries with a caller-chosen value. Distinguish real values equal to the padding value from exhaustion. Avoid emitting one all-padding column after the last input item; check two empty rows.
+- id: ds-cod-20
+  title: "Inventory transaction"
+  prompt: |
+    Design a Python function that applies a batch of signed integer stock changes in listed order. Reject the entire batch if any intermediate stock would be negative, even if the final total would be valid. Unknown items start at zero. Preserve the caller's dictionary on failure; compare copying it with staging only touched items.
+- id: ds-cod-21
+  title: "Which path is first?"
+  prompt: |
+    In an unweighted directed graph with string vertex names, return a shortest path between two vertices, choosing the lexicographically smallest full vertex sequence on ties. Show whether keeping the smallest immediate predecessor is enough. Provide an algorithm and check a graph where the last predecessor comparison looks misleading.
+- id: ds-cod-22
+  title: "The growing string"
+  prompt: |
+    A parser constructs a string prefix one character at a time and stores every prefix in a Python list. Someone claims replacing repeated concatenation with a final join makes the whole routine linear. Assess the claim if every prefix must remain a separate ordinary string, and design a different representation if consumers only request prefixes occasionally.
+- id: ds-cod-23
+  title: "Deque with expiry"
+  prompt: |
+    Timestamped readings arrive in nondecreasing time order. After each reading at time t, return the maximum value among readings in (t-10,t], including readings already seen at t. Implement amortised O(1) processing per reading. Check a sample with duplicate times and a reading exactly on the left boundary.
+- id: ds-cod-24
+  title: "Unpacking a flat tree"
+  prompt: |
+    In a preorder list each record is (label, number_of_children). Reconstruct the ordered tree or report invalid input; reject both an incomplete tree and extra records. Describe an iterative implementation that handles depth greater than Python's recursion limit. Check a root with zero children followed by another record.
+- id: ds-cod-25
+  title: "A fair merge"
+  prompt: |
+    Write a generator which takes a finite list of possibly infinite iterators and yields one item per live iterator per round in original order. Retire exhausted inputs without skipping the one after them. Explain fairness and check the first two rounds when the middle iterator is empty.
+- id: ds-cod-26
+  title: "Updating a ranking"
+  prompt: |
+    Implement dense and competition ranking for scores in arbitrary order, returning ranks aligned to the original input with highest score ranked 1. Use [70,90,90,80,70] to test the distinction. Discuss how to avoid sorting all n entries when there are only u distinct scores.
+- id: ds-cod-27
+  title: "The bad default queue"
+  prompt: |
+    A function def log_event(x, history=[]): history.append(x); return history is called twice with omitted history, and a caller keeps both results. What do both references contain? Implement independent default histories while preserving a caller-supplied empty list by identity. Explain why history = history or [] can fail that contract.
+- id: ds-cod-28
+  title: "Near-equal packets"
+  prompt: |
+    A packet stream contains integers. Flag a packet if a previous packet of the same value occurred at most k positions earlier. Design an O(n) scan with O(min(n,k)) memory. Explain how to expire a value that has occurred several times and check both k=0 and distance exactly k.
+- id: ds-cod-29
+  title: "Stable odd-even bands"
+  prompt: |
+    Write a function to reorder a list so all odd integers come before all even integers, preserving relative order within both groups. Compare a linear extra-space method with a simple constant-extra-space stable method. Demonstrate why an ordinary two-pointer partition need not be stable.
+- id: ds-cod-30
+  title: "The missing delivery count"
+  prompt: |
+    A depot receives parcels with identifiers and positive weights. A report asks for the contiguous run with the most parcels whose total weight is at most W; ties go to the earliest start. Write a linear-time Python solution that also returns its endpoints, and trace it on [6,1,1,4,2,2] with W=6. Explain what breaks if a correction can have negative weight.
+- id: ds-cod-31
+  title: "Scatter to a spare shelf"
+  prompt: |
+    A permutation p says that the element originally at i must finish at p[i]. Design an in-place Python rearrangement using at most one Boolean mark per index and one carried element. Explain how this differs from filling result[i] with old[p[i]], and verify the direction on a cycle of length four.
+- id: ds-cod-32
+  title: "Distance to the next service"
+  prompt: |
+    A daily timetable is a sorted list of integer minutes from 0 through 1439. For each query minute, compute waiting time for the next service, wrapping midnight. Give versions where a service at that very minute counts and where it has just been missed. Address duplicate departure times and an empty timetable.
+- id: ds-cod-33
+  title: "The incomplete keypad"
+  prompt: |
+    A keypad encodes letters as positive integer codes 1 through 26 written without spaces. Return the number of possible decodings of a decimal string, forbidding leading zero in any code and defining the empty string as one decoding. Derive a constant-space recurrence and trace it on 10120 and 100.
+- id: ds-cod-34
+  title: "Weaving two messages"
+  prompt: |
+    Write a Python function to decide whether string s preserves both internal orders when formed by interleaving strings a and b, using all characters exactly once. Show a short counterexample to always taking a match from a first. Give the time and space bounds of a correct algorithm.
+- id: ds-cod-35
+  title: "Counting distinct routes"
+  prompt: |
+    In a directed acyclic graph, count routes from s to t. The input may list the same (u,v) twice. Explain and implement the difference between treating entries as distinct services and treating them as a single connection. Verify on a graph where a duplicate occurs before a branch.
+- id: ds-cod-36
+  title: "Minimum batch capacity"
+  prompt: |
+    Items of positive integer weights must be shipped in their listed order over at most d days. Each day's contiguous batch cannot exceed a shared capacity. Find the minimum feasible capacity, explain why feasibility is monotone, and test whether allowing a batch to skip an item changes the answer on [6,6,4,4] with d=2.
+- id: ds-cod-37
+  title: "Stable sampling of endpoints"
+  prompt: |
+    Downsample n ordered samples to k indices, retaining endpoints and placing targets at integer indices nearest to j*(n-1)/(k-1), ties toward the smaller index. Write an integer-only Python function for 2 <= k <= n. Prove it never emits duplicates and check a case with an exact half-integer target.
+- id: ds-cod-38
+  title: "Relative document links"
+  prompt: |
+    Normalise an abstract slash-separated path with components '.', '..' or ordinary names. Absolute paths stop at the root, relative paths must preserve unresolved leading '..', repeated separators collapse. Write a stack-based function with examples and explain why removing every '..' together with its preceding token can be wrong. No filesystem access is needed.
+- id: ds-cod-39
+  title: "One faulty recurrence"
+  prompt: |
+    A programmer counts ways to climb n stairs with jumps of one or two and no two consecutive jumps of two, using ways[n]=ways[n-1]+ways[n-2]. Find the first n where this fails, derive a corrected recurrence with base cases, and verify it by listing valid jump sequences at that n.
+- id: ds-cod-40
+  title: "Tree view from the right"
+  prompt: |
+    Given a binary tree, return the node visible furthest right at each depth, including nodes in a left subtree when the right subtree is shallow. Compare breadth-first and right-first depth-first algorithms. Explain whether following only right children works and construct a small counterexample.
+- id: ds-cod-41
+  title: "Ticket range summary"
+  prompt: |
+    A function summarises consecutive integer ticket IDs in the order received. Business users disagree on whether a repeated ID breaks a run or is ignored globally. Define both behaviours precisely, implement them, and trace [4,5,5,6,2,3,4]. Discuss which behaviour permits memory independent of stream length.
+- id: ds-cod-42
+  title: "Two strings one deletion"
+  prompt: |
+    Decide whether deleting exactly one character from the longer of two strings can make them equal. Also return every possible deletion index, counting indices separately when letters repeat. Design an O(n) algorithm and test on the longer string baaac and shorter baac.
+- id: ds-cod-43
+  title: "A level budget"
+  prompt: |
+    A rooted tree is given as an adjacency list of children. You may delete one full depth level, and descendants of deleted nodes remain with their original depths for reporting. Return the depth that removes the most total weight, using the shallower one on ties. Weights may be negative. Contrast the optional-deletion and mandatory-deletion readings.
+- id: ds-cod-44
+  title: "An iterator consumed twice"
+  prompt: |
+    A Python function accepts integer readings, computes n=sum(1 for _ in readings), then calculates the sum in a second loop. Explain its behaviour on lists and generators. Write a one-pass mean function that handles empty input explicitly. Then extend the task to returning the earliest reading closest to the final mean. Compare what storage is needed for a replayable source and for a one-shot stream.
+- id: ds-cod-45
+  title: "Peak queue size"
+  prompt: |
+    Given (time,arrival_or_departure) events from a valid queue history starting empty, find its peak occupancy. At a shared timestamp, one convention processes all arrivals before departures, another observes occupancy only after the group. Implement both and design a test where equal net change conceals a strict peak.
+- id: ds-sci-01
+  title: "Buoyancy with an overhang"
+  prompt: |
+    A rigid cylinder of uniform density 750 kg/m³ floats vertically in water of density 1000 kg/m³, held upright by a frictionless guide. It is 40 cm tall with cross-sectional area 50 cm². A 300 g load rests on top. Find its new freeboard and the largest further mass it can carry before the top reaches the water. Verify by displaced volume.
+- id: ds-sci-02
+  title: "The two cooling logs"
+  prompt: |
+    Assume a cup obeys Newton's law of cooling in a room fixed at 20 °C. Its temperature is 80 °C initially and 50 °C after 12 minutes. Estimate its temperature after a further 18 minutes and when it first falls below 25 °C. Check whether extrapolating the first average cooling rate is consistent with the model.
+- id: ds-sci-03
+  title: "Hidden resistance in the meter"
+  prompt: |
+    A 12 V ideal supply feeds two series resistors of 40 kΩ and 80 kΩ. A voltmeter with 80 kΩ input resistance is placed across the latter. Calculate its reading and the percentage by which it changes the original voltage across that resistor. Check the answer by calculating the two parallel branch currents.
+- id: ds-sci-04
+  title: "Orbit from a transit"
+  prompt: |
+    A small planet crosses the centre of a star's disc in 6.0 hours at constant projected speed. Its own diameter is one tenth of the star's diameter of 1.40 million km. Estimate speed if duration is first to last contact and if it is second to third contact. State the geometry behind each reading.
+- id: ds-sci-05
+  title: "Two layers of insulation"
+  prompt: |
+    A steady one-dimensional heat flow crosses two layers in perfect contact. They have equal area 0.50 m², thicknesses 2.0 and 3.0 cm, and thermal conductivities 0.20 and 0.60 W/(m K), respectively. The outside faces are held at 40 and 10 °C, with the first layer on the hot side. Find the heat flow and interface temperature. Check what changes when the layer order is reversed.
+- id: ds-sci-06
+  title: "Echo with a breeze"
+  prompt: |
+    A stationary recorder faces a reflecting cliff 340 m away. Sound travels 340 m/s relative to still air; a steady 10 m/s wind blows from recorder to cliff. Compute the round-trip echo time and the inferred distance if wind is ignored. Explain whether opposite wind corrections cancel exactly.
+- id: ds-sci-07
+  title: "A diluted dye sample"
+  prompt: |
+    A 10.0 mL dye sample is diluted to 50.0 mL. In a 1.00 cm cell its absorbance is 0.420 including a blank of 0.020. The dye's molar absorptivity is 8000 L/(mol cm). Find the original concentration. Predict the reading through a 2.00 cm cell for the diluted sample if the blank is a fixed detector offset, then if it scales with path length.
+- id: ds-sci-08
+  title: "The evaporating salt pan"
+  prompt: |
+    A pan contains 300 g of a 12% salt solution by mass. Water evaporates, leaving 100 g total in the pan at a temperature where at most 36 g of salt dissolve per 100 g of liquid water. Find the masses of dissolved and crystalline salt. Check conservation and distinguish concentration in the liquid from salt fraction of the whole pan.
+- id: ds-sci-09
+  title: "The pulley and the sensor"
+  prompt: |
+    Two blocks of 2 kg and 3 kg are joined over a frictionless pulley by a light inextensible string. A stationary support holds the pulley; both free string segments hang vertically. Take g=9.8 m/s². Find acceleration, tension and the downward force from the string on the pulley. Verify by considering the momentum change of the two-block system.
+- id: ds-sci-10
+  title: "Lens with two positions"
+  prompt: |
+    A slide and a screen are fixed 90 cm apart. A thin converging lens produces a sharp real image at either of two positions 30 cm apart. Infer the focal length and both image magnifications. Check by substituting the distances into the thin-lens formula, and explain whether the signs of the magnifications distinguish the positions.
+- id: ds-sci-11
+  title: "Sampling a tide"
+  prompt: |
+    A tide gauge samples a sinusoidal water level every four hours. The sampled readings repeat after exactly three samples with sequence 2, -1, -1 metres relative to mean. Assuming a crest at the first sample, find the two longest distinct continuous periods consistent with this record, and suggest one sampling time that would distinguish them.
+- id: ds-sci-12
+  title: "Capacitors under two conditions"
+  prompt: |
+    A 6 microfarad capacitor is charged to 12 V. A dielectric that doubles its capacitance is inserted, first with the battery disconnected and in a separate experiment with it connected. Compute the stored energy change in each case and the battery's work when connected. Account for the difference in the energy balance.
+- id: ds-sci-13
+  title: "Which sound level?"
+  prompt: |
+    Two independent sound sources give 60 dB and 66 dB at the same microphone relative to the same reference intensity. Calculate the level when both run continuously. Then calculate the equivalent constant level if only one runs at a time for equal durations. Compare with taking an arithmetic mean of the two decibel readings.
+- id: ds-sci-14
+  title: "Peak versus average sunlight"
+  prompt: |
+    A panel receives sunlight for 10 hours with incident power rising linearly from zero to 600 W at noon and then falling linearly to zero. Its converter outputs 80% of incident power but clips electrical output at 320 W. Calculate daily electrical energy, identifying when clipping begins for a symmetric day, and check against the unclipped upper bound.
+- id: ds-sci-15
+  title: "Motion on a rotating record"
+  prompt: |
+    Two stickers sit 4 cm and 11 cm from the centre of a rigid turntable. Starting at rest, it accelerates uniformly to 45 revolutions per minute in 6 seconds. Calculate each sticker’s tangential and inward accelerations just before acceleration stops. At what time are the two acceleration components equal in magnitude? Check whether the answer depends on radius.
+- id: ds-sci-16
+  title: "A star's two magnitudes"
+  prompt: |
+    Two unresolved stars differ in apparent magnitude by 1.5. Use m1-m2=-2.5 log10(F1/F2). During an eclipse the brighter star loses 40% of its observed flux and the fainter is unchanged. By how many magnitudes does the combined object fade? Verify that the result falls between physically meaningful bounds.
+- id: ds-sci-17
+  title: "The tilted rain gauge"
+  prompt: |
+    Raindrops fall vertically at a uniform rate equivalent to 12 mm on horizontal ground. A cylindrical gauge of cross-sectional area 20 cm² perpendicular to its axis is tilted 30° from vertical. Find the collected volume. Would converting that volume to a depth using the nominal mouth area or its horizontal projection give the ground rainfall?
+- id: ds-sci-18
+  title: "Ice at the boundary"
+  prompt: |
+    An insulated cup holds 100 g of ice at 0 °C and 200 g of water at 30 °C. Use latent heat of fusion 334 J/g and liquid specific heat 4.18 J/(g K). Determine the final temperature and masses. Find the threshold initial water temperature required for the last ice to melt and use it to check the phase assumption.
+- id: ds-sci-19
+  title: "Mismatched wheel readings"
+  prompt: |
+    A wheel of radius 0.30 m rolls at a constant angular speed of 8.0 rad/s. A marker on its rim makes one revolution while the axle travels 1.65 m. Assuming a level track and steady motion, infer axle speed and the bottom point's horizontal velocity relative to the ground. State whether pure rolling fits and verify the direction of slip.
+- id: ds-sci-20
+  title: "The oxygen budget of a pond"
+  prompt: |
+    A well-mixed pond contains 4000 L of water. At dawn dissolved oxygen is 6 mg/L. During six daylight hours photosynthesis supplies 4 g/h and respiration removes 1.5 g/h. Air exchange continuously removes 0.20 per hour times the excess oxygen mass above 24 g. Model the mass over those hours, find the ending concentration, and check against the no-exchange prediction.

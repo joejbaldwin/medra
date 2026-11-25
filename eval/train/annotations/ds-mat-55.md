@@ -1,0 +1,78 @@
+---
+trace: ds-mat-55
+annotator: Codex (AI)
+status: corrected
+concepts: []
+topics: []
+---
+[[planning]]We need answer. Need parse problem. Buyer pays 120 now, 120 in one year and 120 in two years, or 327 now. For which nonnegative annual discount rates is installment plan cheaper in PV? Give break-even rate and verify side.
+
+Need compute PV of installments at annual discount rate? Wording "annual discount rates" ambiguous: discount rate maybe interest rate used for PV, v=1/(1+r)? Could be "discount rate" as rate i? Need be careful. In finance, discount rate often denoted i? We need solve. [[development]]Payment plan: 120 now + 120/(1+r) + 120/(1+r)^2 versus 327 now. Find r nonnegative where plan cheaper (PV < 327). Break-even solve 120 + 120/(1+r)+120/(1+r)^2 = 327. Let x=1/(1+r), 120(1+x+x^2)=327 => 1+x+x^2 = 327/120 = 2.725 = 109/40. Then x^2+x+1-109/40= x^2+x -69/40 = 0? 1 - 109/40 = -69/40. Yes x^2+x-69/40=0. x = [-1 ± sqrt(1 + 4*69/40)]/2 = [-1 ± sqrt(1+276/40)]/2 = [-1 ± sqrt(1+6.9)]/2 = [-1 ± sqrt(7.9)]/2. sqrt(7.9)=sqrt(79/10)=? positive = ( -1 + 2.8106938645)/2 =0.9053469323. Negative invalid. r=1/x -1 = 1/0.90534693 -1 =0.10455? compute. x = (sqrt7.9 -1)/2. r = 1/x -1. Let's calculate accurately. x~0.9053469323. reciprocal ~1.104548? Let's compute: 0.9053469323 *1.10455 =? 0.9053469 + 0.09465 = 0.999996 maybe. r~0.10455 =10.455%. Let's exact.
+
+Equation in r perhaps multiply. [[verification]]Need verify side. At r=0: PV installments =360 >327, not cheaper. As r increases, future payments discounted more, PV decreases. At break-even ~10.45%. [[conclusion]]For r > break-even, PV installment <327, cheaper. Nonnegative annual discount rates: r > ~10.45% (if "rate" means discount/interest rate with v=1/(1+r)). [[alternative]]Need mention if using continuous or discount rate d differs.
+
+But problem phrase: "For which nonnegative annual discount rates is the instalment plan cheaper in present value? Give the break-even rate and verify which side of it favours the plan." Could annual discount rate mean discount rate d with present value factor 1-d? Some actuarial contexts "discount rate" is d, not interest rate i. Need determine likely. The use "discount rates" maybe in math finance, "annual discount rate" often means interest rate? Need examine.
+
+Payments: 120 now, 120 in one year, 120 in two years, or 327 now. Asked "For which nonnegative annual discount rates is the instalment plan cheaper in present value? Give the break-even rate and verify which side of it favours the plan." Could from a textbook section about discount rates? In many contexts, "annual discount rate" r means discounting by (1+r)^n. But if they say "discount rates" maybe "rate of discount" d.
+
+Let's parse wording: "annual discount rates" nonnegative. They ask "Give the break-even rate and verify which side of it favours the plan." They may expect solving inequality with discount rate i? We can include note if discount rate means d? Need maybe provide both? [[planning]]Let's derive both and state convention. But final answer can mention under standard PV convention discount rate r (interest rate) break-even 10.45%; if by bank discount rate d, break-even ~9.47%. Need decide.
+
+Let's inspect: A buyer pays 120 now, 120 in one year and 120 in two years, or 327 now. "For which nonnegative annual discount rates is the instalment plan cheaper in present value?" Could be from actuarial math? [[development]]The phrase "annual discount rates" in actuarial science: effective rate of discount d = i/(1+i), accumulation factor (1-d)^{-1}, present value (1-d)^n. Then solve 120 + 120(1-d)+120(1-d)^2 <327. Let x=1-d. Same quadratic x^2+x -69/40=0, x=0.9053469, d=1-x=0.0946531=9.465%. For d >? [[verification]]At d=0, PV=360 >327. As d increases (positive), PV future decreases. At d=9.465%, break even. For d >9.465%, installment cheaper (provided d<1). [[conclusion]]So threshold ~9.47%, not 10.45%. [[alternative]]The wording "discount rates" rather than "interest rates" might point to d. They explicitly say "annual discount rates" perhaps effective discount rates. In present value, discount rate commonly r. But "nonnegative annual discount rates" could be r. Need formulate answer with convention.
+
+[[verification]]Let's find exact for r = i: solve 120 + 120/(1+i) + 120/(1+i)^2 = 327. Let (1+i)=? Could solve quadratic in v. Alternate in i:
+120(1+i)^2 +120(1+i)+120 =327(1+i)^2
+0=207(1+i)^2 -120(1+i)-120? Let's compute: 120(1+2i+i²)+120+120i+120 =360+360i+120i²? Wait using y=1+i. 120(1 + 1/y +1/y²)=327. Multiply y²: 120(y²+y+1)=327y² => 0=207y² -120y -120. Divide3: 69y² -40y -40=0. y = [40 ± sqrt(1600 + 11040)]/(138)= [40 ± sqrt12640]/138. sqrt12640= sqrt(16*790)=4sqrt790 ≈4*28.10694=112.4278. y=(40+112.4278)/138=1.10455. i=0.10455. yes.
+
+[[verification]]If d, v=1-d. Equation 120(1+v+v²)=327. v²+v+1=2.725. v²+v-1.725=0 v=(-1+sqrt(1+6.9))/2 =0.9053469. d=0.0946531.
+
+Need "verify which side of it favours the plan": At rate below break-even, PV installment >327, lump sum cheaper. At above break-even, PV installment <327, installment cheaper. Need be explicit: If using discount rate r=interest, for r>10.455% installment cheaper. If using effective discount rate d, for d>9.465% installment cheaper.
+
+[[conclusion]]Need decide final answer. Maybe include primary with r and note alternate. The problem asks "discount rates", likely in a course maybe "annual discount rate" is r in present value. If they expected exact break-even maybe quote as effective interest/discount. Let's search memory? This exact question maybe from an actuarial/math finance text: "A buyer pays 120 now, 120 in one year and 120 in two years, or 327 now. For which nonnegative annual discount rates is the instalment plan cheaper in present value? Give the break-even rate and verify which side of it favours the plan." The phrase "installment plan" maybe from financial mathematics. [[alternative]]They may use "annual discount rate" as d? In actuarial notation, effective rate of discount d. They might ask "nonnegative annual discount rates" to test inequalities. Break-even rate likely d = 9.465%. Let's infer.
+
+If it were interest rate, they might say "annual interest rates" or "annual effective interest rates". Since they specifically say "discount rates", likely use d, where present value factor is (1-d)^n. The phrase "discount rate" in many finance textbooks refers to interest rate though. But actuarial: "annual discount rate" = d. The problem context unknown. The wording "instalment plan" British spelling; could be from UK math? In UK, "rate of discount" perhaps d used in financial mathematics. [[conclusion]]Need perhaps answer both, emphasizing if by annual discount rate d.
+
+Let's craft final: Define the annual (effective) discount rate d, so the PV factor for a payment t years later is (1-d)^t. PV plan P(d)=120[1+(1-d)+(1-d)^2]. Set P(d)=327. Let x=1-d. Then 120(1+x+x²)=327 ⇒ x²+x-69/40=0 ⇒ x=(√(79/10)-1)/2≈0.9053469. Since d=1-x, break-even d≈0.094653 (9.4653%). For d between 0 and break-even: at d=0 P=360>327, so plan more expensive. Since P decreases as d increases (future payments discounted more), for d>break-even (and d<1) P<327, installment plan cheaper. [[verification]]At d=0.05, compute P? 120(1+0.95+0.9025)=120*2.8525=342.3 >327, confirms below. At d=0.15, x=.85, sum=1+.85+.7225=2.5725*120=308.7<327. So above favors installment.
+
+If using interest discount rate r (PV factor (1+r)^-t), break-even r≈10.455%, and plan cheaper for r>10.455%. Include note. [[development]]Need final moderate detail.
+
+Let's make sure exact d expression: d = 1 - (√(79/10)-1)/2 = (3 - √(79/10))/2? Since 1 - (s -1)/2 = (2 - s +1)/2 = (3 - s)/2. With s=√(79/10) ≈2.810693864. d=(3-2.810693864)/2=0.094653068. Percentage 9.4653068%.
+
+[[verification]]Let's calculate accurate d:
+sqrt(7.9). Use Newton. sqrt 7.9. 2.810693864511. d=(3-2.810693864511)/2=0.0946530677445. yes 9.465306774%. Actually double check with exact x. x=(s-1)/2=(1.8106938645)/2=0.905346932255. d=0.094653067745. yes.
+
+[[development]]r exact: y=1/(1-d)? r = d/(1-d). d/0.905346932=0.10455. Exact r = 1/x -1 = (1-x)/x = d/x =0.09465307/0.90534693=0.104548? Compute formula y=(20+2√790? Wait exact y maybe 1/x = 2/(s-1)=2(s+1)/(s²-1)=2(s+1)/(7.9-1)=2(s+1)/6.9=(20/69)(s+1)? s=√(79/10)=√790/10. y=(?).
+Compute r = 1/x -1 = d/(1-d). Let's decimal. x=0.9053469323. Reciprocal. Use series: 1/(1-a) with a=0.0946530677 =1+a+a²+a³... a=.0946531; a²=.0089592; a³=.0008480; a4=.0000803; a5=.0000076. Sum=1+0.0946531+0.0089592+0.0008480+0.0000803+0.0000076=1.1045482. r=.1045482. percentage 10.4548. [[verification]]Let's compute more precisely via quadratic 69y²-40y-40=0. y=(40+√(1600+11040))/(138)=(40+√12640)/138. √12640. 112.427755? Let's compute sqrt 12640. 112.4²=12633.76; add 6.24/(224.8)=0.02776 =>112.42776. y=(152.42776)/138=1.10454899? 138*1.1045=152.421; add .000048? Let's compute accurately: 152.427755 /138. 138*1.104548 =152.427624? 1.104548*100=110.4548; *38=41.972824; total 152.427624. y=1.10454895. r=0.10454895 =10.4549%.
+
+[[verification]]Let's exact r via d: d=0.094653067745. x=0.905346932255. r=d/x. Compute. 0.094653067745 /0.905346932255. Use r=1/x -1. 1/x = 1/(1-d) = 1/(0.905346932255). Let's long: let r=0.10455. (1+r)=1.10455. multiply x*(1+r)=0.905346932255*1.10455 =0.905346932255 + 0.094653? compute .905346932255*.10455. .905346932255*.1=.0905346932255; *.00455=.004120? .905346932255*.004 =.003621387729; *.00055=.000497940813; sum .004119328542; total .0946540217675; add .905346932255=0.999...? =1.000000954? So 1.104548 maybe.
+
+[[verification]]Let's derive exact r formula. For interest, equation 207(1+i)^2 -120(1+i)-120=0. Let z=1+i. 207z² -120z -120=0. Divide3:69z²-40z-40=0. z=(40 ±√(1600+4*69*40))/(138)=(40±√(1600+11040))/138=(40±√12640)/138. √12640 = √(16*790)=4√790. So z=(40+4√790)/138=(20+2√790)/69. Thus i=(20+2√790 -69)/69 = (2√790 -49)/69. √790≈28.106938645? Wait earlier sqrt 12640=112.42775458; divide 4 gives sqrt790=28.106938645. 2√790=56.21387729; minus49=7.21387729; /69=0.1045489462. So r=0.104548946. d = i/(1+i)? d =0.104548946/1.104548946=0.094653068 yes.
+
+Good.
+
+[[alternative]]Need maybe include "assuming effective annual discount rate d, with d in [0,1)." If d can be nonnegative but >1 PV factors sign? Usually d<1. Break-even d 9.47%. For d>9.47% up to 100%, installment cheaper? Check P(d) = 120(1+(1-d)+(1-d)^2). For d in [0,1], x in [0,1], P decreases as d increases. At d=1, x=0, PV=120 (only now payment) <327. For d>1, x negative and x² positive; maybe weird. But "discount rates" generally less than 1. Nonnegative only maybe d≥0, but effective discount can be >1? impossible for positive accumulation. Usually 0≤d<1. If using r, nonnegative all.
+
+[[conclusion]]Let's decide final presentation. Since prompt says "annual discount rates" and "break-even rate", I can lead with effective annual discount rate d and note alternate convention. That covers. The final answer should be not too overlong but include calculation and side verification. Use exact and decimal. Mention at d=0, PV=360>327. For d>d*, because x=1-d less, PV lower, installment cheaper. At d* equal indifferent. For d<d* (including 0) lump sum cheaper. Also if problem uses market interest rate r in denominator, threshold 10.4549%, with installment cheaper for r>r*. This avoids ambiguity.
+
+Let's craft final in coherent style.
+
+Potential issue: "instalment plan cheaper in present value" means PV of installment plan compared to 327 now. At high discount rates, future payments count little, so installments cheaper. Yes.
+
+Let's include equation:
+PV_plan(d)=120+120(1-d)+120(1-d)^2.
+Set equal:
+120[1+(1-d)+(1-d)^2]=327.
+Let x=1-d:
+x²+x-69/40=0.
+x = [-1 + √(1+4*69/40)]/2 = (√(79/10)-1)/2 ≈0.90534693.
+Thus d* =1-x≈0.0946531=9.4653%.
+
+Verification:
+d=0 => PV=360>327.
+d=d* => equal.
+d=0.15 => PV=120(1+0.85+0.7225)=308.7<327.
+So plan cheaper for d>9.4653% (within effective discount rates 0≤d<1); lump sum cheaper below.
+If using annual interest/discount rate r with PV=120+120/(1+r)+120/(1+r)^2, r*=10.4549%, plan cheaper for r>10.4549%.
+
+Need phrase "discount rates" could mean "annual discount rates" as d. Good.
+
+Let's final.

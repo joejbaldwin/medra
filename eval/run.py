@@ -14,8 +14,9 @@ What is measured:
   Hearst's adaptive threshold mean - sd/2).
 - Step types: the type given to each annotated step (at the reference
   boundaries, so segmentation errors do not count twice) by the classifier
-  of eval/steptypes.py, trained on dev and scored on test, against the old
-  marker rule and the majority baseline.
+  of eval/steptypes.py, trained on dev + the training-only traces of
+  eval/train/ and scored on test, against the same model trained on dev
+  only, the old marker rule and the majority baseline.
 - Concepts: the bubbles of the final view against the annotated concepts,
   both as lemma keys. Baseline: the 16 most frequent terms.
 - Topics: B-cubed F1 of MeDRA's Louvain topics against the annotated topics,
@@ -39,7 +40,7 @@ from sklearn.cluster import AgglomerativeClustering
 from eval.annotations import Annotation, load_all
 from eval.common import RESULTS_DIR, Mined, git_commit, lemma_key, mine, source_of, split, trace_ids
 from eval.metrics import bcubed, boundary_prf, mean, pk, set_prf, windowdiff
-from eval.steptypes import evaluate as evaluate_step_types, report as step_type_report, steps_of
+from eval.steptypes import evaluate as evaluate_step_types, extra_traces, report as step_type_report, steps_of
 from eval.tune import DECISION_GRID
 from medra.mining.segment import SegParams, boundaries, gap_scores
 from medra.mining.topics import MIN_TERM_COUNT, WINDOW as TOPIC_WINDOW
@@ -234,7 +235,7 @@ def evaluate(drafts: bool) -> dict:
         "tuned_params": asdict(ctx["tuned"]) if ctx["tuned"] else None,
         "methods": {key: label for key, (label, _) in methods.items()},
         "per_trace": per_trace,
-        "step_types": evaluate_step_types(steps, dev_ids, test_ids),
+        "step_types": evaluate_step_types(steps, dev_ids, test_ids, extra_traces()),
         "out_dir": str(out_dir),
     }
 

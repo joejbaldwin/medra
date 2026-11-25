@@ -1,0 +1,46 @@
+---
+trace: ds-log-13
+annotator: Codex (AI)
+status: corrected
+concepts: []
+topics: []
+---
+[[planning]]We need answer. Need solve. Need be careful network simple connected undirected on 5 vertices degrees: A=1,B=2,C=2,D=2,E=1. A linked to C. B not linked to D. List all possible networks or contradiction. Then variant B not C.
+
+Need enumerate simple connected undirected graphs with degree sequence (1,2,2,2,1) and constraints. Need list all possible networks. Need maybe unlabelled? Since villages labeled and clues mention labels, list edge sets.
+
+Let's solve thoroughly.
+
+[[development]]Vertices A,B,C,D,E. Degree target A1 B2 C2 D2 E1. A linked C means edge AC exists. A has degree 1, so no AB,AD,AE. C uses one degree for A, needs one more among B,D,E (not A). B needs 2 among C,D?,E plus maybe? B not D first: possible B-C, B-E (since B-A no, B-D no). Need B degree2 exactly, so both BC and BE must exist. Then B done. C has AC and BC now degree2, done; no CD,CE. D degree2 among? DA no, DB no (constraint), DC no (C done), DE only one available. Can't reach degree 2. [[verification]]Contradiction? Let's verify B not D forces B connected to C and E indeed. Then C done with A,B. D only possible E (not A? A deg full, B forbidden, C full) one edge, degree1, impossible. Also E degree 1 with B and maybe D? [[backtrack]]Wait E currently linked B. E has deg1, so cannot link D. Then D degree0. Even stronger. Wait if E degree 1 and BE exists, E done, so DE absent. D no possible. [[conclusion]]Contradiction. So first conflicts. [[verification]]But let's consider B not linked to D. Yes.
+
+But perhaps AC plus A degree1. Need B degree2; cannot A, cannot D; can C,E. Must both. Then E degree includes BE=1, so E has no other. D cannot A (A full), cannot B, C? C already AC + BC =2, so can't D. D has no edges -> degree0 not 2. Contradiction.
+
+[[alternative]]Second variant: A-C, B not linked C. Enumerate.
+
+[[development]]A deg 1, AC present, so A no other.
+
+B degree2, not C, not A (A full), possible D,E only. Thus B-D and B-E must exist. Then B done.
+
+D degree2; has BD one. Possible A? A full no. C possible. E possible. Need one more among C,E (since degree currently 1; B is one). But E degree? E has BE one, target E=1, so E full, no D. Therefore D's second must be C: DC exists. Then D done.
+
+C degree2; has AC one, CD one, done. C no E, no B (also clue). Edges: AC, BD, BE, CD. [[verification]]Wait C degree AC+CD=2. D degree DB+DC=2. E degree EB=1. A=1 B=2. Connected? Edges form path A-C-D-B-E? AC, CD, DB, BE yes connected. [[conclusion]]Unique.
+
+Need maybe if network "no repeated links" just simple. So answer: first clue set conflict, no possible network. Second possible unique network path A-C-D-B-E (or edges AC, CD, DB, BE). Need maybe list all possible networks for first, no.
+
+[[verification]]But wait check degree sequence (1,2,2,2,1) is path on 5 vertices. Without constraints there are many labeled paths corresponding to Hamiltonian path endpoints degree1 vertices A and E. Since A and E are leaves. Connected graph with degree sequence >? Could there be cycles? Sum degrees 8 edges=4 connected on 5 has tree. Degrees max2, so path. Yes graph necessarily path with endpoints A,E. Thus internal vertices are B,C,D in some order. A and E endpoints, possibly path A - (perm of B,C,D) - E. Constraints.
+
+First: A is linked C. In path, A endpoint adjacent to first internal C. So path: A-C-(one of B,D)- (other)-E or A-C-? Wait C internal must have degree2, neighbor A and one of remaining. Need B not linked D. Since B,D both internal; in path any two internal may be adjacent depending ordering. Let's enumerate paths from A to E with internal B,C,D. Since A adjacent C, C must be first internal after A. Remaining B,D can order: A-C-B-D-E or A-C-D-B-E (or A-C-B? E? Actually E endpoint at end, all three internal in between: A-C-B-D-E or A-C-D-B-E). Edge B-D is present in both? In A-C-B-D-E: B-D yes. In A-C-D-B-E: D-B yes. Indeed B and D are consecutive (the remaining two internal) because C at first; so B-D edge always. Constraint B not D conflicts. Nice concise.
+
+[[alternative]]Second: B not linked C. Enumerate paths A-C-?-?-E where remaining B,D. Possible A-C-B-D-E includes C-B edge (violates). Other A-C-D-B-E has B not C? Edges A-C,C-D,D-B,B-E. B not linked C yes (B adjacent D,E). [[conclusion]]Unique. Good.
+
+Need craft final with maybe explanation. User asks "List all possible networks or show clues conflict. What if torn note instead says B is not linked to C?" Need answer both. Could state first conflict, second unique edge set. Ensure maybe "network" as diagram. We can mention as path notation.
+
+Let's prepare final. Need include degrees check. Could include edge sets.
+
+Need maybe if first clue says B not linked to D, there is clue conflict. Show quickly: Since deg(A)=1 and A-C, A has no other link. B has degree2 and cannot link A or D; so B must link C and E. Then E has its one link (BE), so E cannot link D. C already has AC plus BC = degree2, so C cannot link D. A cannot D, B cannot D, C can't D, E can't D, so D would have degree 0, not 2. Contradiction. This is robust.
+
+Second: A-C. B not C. Since A degree1, B can only connect to D,E, so B-D and B-E. Since E degree1, E has BE and no other; D needs degree2, already B, cannot E, cannot A, so D-C. Then C has A,D and degree2. Edge set AC, BD, BE, CD. Graph is path A-C-D-B-E. Could mention no other.
+
+Need maybe note order edges: A-C-D-B-E means edges AC, CD, DB, BE. Yes.
+
+Let's final with moderate detail.

@@ -1,0 +1,157 @@
+---
+trace: ds-cod-16
+annotator: Codex (AI)
+status: corrected
+concepts: []
+topics: []
+---
+[[planning]]We need answer. Need parse. User asks: "For each position in a list, return the index of the closest earlier strictly smaller value, or -1 if none. Implement an O(n) Python function and justify the amortised bound. Use repeated equal values to show why the comparison chosen when removing candidates matters."
+
+We need craft answer. Need include implementation monotonic stack previous smaller element strictly smaller. Need be careful with repeated equal values and comparison chosen when removing candidates. Need show why >= vs > matters. [[development]]For strictly smaller, while stack and arr[stack[-1]] >= arr[i]: pop. Then if stack: answer = stack[-1] else -1. append i. [[development]]If use > only, equal remains and can cause wrong for later? Let's test.
+
+We want closest earlier strictly smaller. Standard monotonic increasing stack. For each i, remove candidates >= current because they cannot be previous strictly smaller for current or future elements that are <=? Need demonstrate with repeated equal values.
+
+Suppose arr = [5,5,?]. If at i=1 value 5, stack has index0 value5. Using >= removes index0, ans[1]=-1. If use >, we keep equal: ans[1]=0 (wrong, since 5 not strictly smaller than 5). So immediate. But maybe "comparison chosen when removing candidates matters" could refer to using >? Need explain.
+
+[[development]]Need implement O(n). Amortized bound: each index pushed once and popped at most once, loop operations O(n). While total pops ≤ n, so O(n). Space O(n) worst-case (e.g., strictly increasing list). Need maybe mention integer indices.
+
+Need perhaps discuss "closest earlier strictly smaller" not monotonic stack? Yes.
+
+Need be precise: For each position, return index of closest earlier strictly smaller. Algorithm:
+def previous_smaller_indices(a):
+    res = [-1] * len(a)
+    stack = []  # indices with strictly increasing values? Actually after popping >=, stack values strictly increasing? Let's verify. We pop >= current, then previous stack values < current, append current. So values strictly increasing from bottom to top. Yes.
+    for i, x in enumerate(a):
+        while stack and a[stack[-1]] >= x:
+            stack.pop()
+        res[i] = stack[-1] if stack else -1
+        stack.append(i)
+    return res
+
+[[verification]]Need check if arr = [2,1,2,1,2]. At i2 x2 stack after i1: [1] val1. while 1>=2 false, ans[2]=1 (closest earlier smaller index1 yes). Push idx2 val2, stack [1 val1,2 val2]. i3 x1: pop idx2 val2 >=1, pop idx1 val1 >=1, ans -1. push3. i4 x2 ans3. Good.
+
+[[verification]]Now repeated equal values: arr=[4,2,4,2,3]. If using while arr[top] > x (or >=? Let's trace with > to see future wrong maybe not immediate only equal). For i0 4 stack [0]; i1 2: while 4>2 pop; ans -1; stack[1 val2]. i2 4: while 2>4 false; ans1; stack [1,2]. i3 2: while top val4>2 pop idx2; top val2>2 false; ans=1. But index1 value 2 is equal not strictly smaller, so wrong. If using >=, pop idx1 too, ans -1. That's a good repeated equal example showing not just immediate equal adjacency but future equal can expose stale equal. arr [4,2,4,2] with > gives ans at i3=1 wrong. With >= gives -1. This clearly shows comparison chosen when removing candidates matters.
+
+Need perhaps mention if one uses `>` instead of `>=`, equal values remain and can become "fake" smaller. [[conclusion]]The correct pop condition for "strictly smaller" is `>=` because equal values cannot be answer. Also stale larger candidates behind? Let's formulate.
+
+Question wording: "Use repeated equal values to show why the comparison chosen when removing candidates matters." Could be they expect discuss both `>` and `>=`. Need include example.
+
+[[development]]Need maybe include "closest earlier" property: Stack stores indices of increasing values. Popping elements >= current is safe because for current x, any popped value cannot be strictly smaller. For future y: If popped value p >= x at current i, then x occurs later and is <= p. For any future position j>i, if p were a candidate and p < y, then x <= p < y, and x is later/closer than p, so p is dominated. [[verification]]If equal complication: if p = x, p is not strictly smaller for future y if y > x? Wait for future y > p, x equal p is also < y and closer, so p dominated. For y = p? Neither strictly smaller. For y between? no. Thus pop equal too. This is "comparison chosen when removing candidates matters."
+
+[[planning]]Need answer maybe include code only? Need explanation.
+
+Need decide final structure:
+- Function with docstring.
+- Example maybe `a = [4, 2, 4, 2, 3]` and outputs [ -1, -1, 1, -1, 3 ]? [[verification]]Let's compute with correct. a = [4,2,4,2,3]:
+i0 4: stack [], ans -1 push0
+i1 2: pop0 4>=2, ans -1 push1
+i2 4: stack top val2>=4 false, ans1 push2 stack [1(val2),2(val4)]
+i3 2: pop2 val4>=2, pop1 val2>=2, ans -1 push3
+i4 3: top val2>=3 false, ans3. Result [-1,-1,1,-1,3]. Correct.
+[[verification]]Using while a[stack[-1]] > x:
+i0 -1 stack [0]
+i1 pop0, ans -1, stack [1]
+i2 top2 >4 false ans1, stack [1,2]
+i3 top4 >2 pop idx2; top2 >2 false; ans=1 (wrong because a[1]=2 not strictly smaller than a[3]=2). result [-1,-1,1,1,?]. i4: stack [1(val2),3(val2)]? Wait after i3 append index3: stack [1 val2,3 val2]. For i4 x3: while > x? top2>3 false ans3 (closest idx3 value2) correct. So incorrect at i3 demonstrates equal. Good.
+
+Need mention "If using `>` for pop while arr[stack[-1]] > arr[i], then for i=3 it returns 1, but a[1]=2 is equal, not strictly smaller. Correct condition `>=` pops equals." Maybe include.
+
+[[development]]Amortized proof: Each index enters stack exactly once via append. The while loop can pop an index only once. Therefore total iterations of while across entire for loop <= n. For loop n. Work O(n). Not just amortized? The while loop total O(n), yes.
+
+Need maybe mention "list length 0 works". Return list.
+
+[[verification]]Potential subtlety: "closest earlier strictly smaller value" means index, not value. We return index. Good.
+
+Need discuss repeated equal values: if `arr[stack[-1]] >= x: pop`. For equal, pop earlier equal. If not pop, index top equal is not smaller and may block true smaller behind it. Example above where index1 equal hides? Actually with `>` pop condition, equal index1 remains on top at i3, answer incorrectly index1. Wait the true smaller behind? In example i3 val2, stack [1 val2,2 val4] after popping idx2. index1 equal on top, no true smaller behind. [[alternative]]But if there were smaller behind equal (arr [1,2,3,? equal?])? Let's find case where equal blocks true smaller. But question just asks show comparison matters, wrong answer enough. If use `>` equal at top triggers answer equal not strictly smaller. It also can prevent popping larger values above? Hmm.
+
+Let's consider repeated equal values and removal criterion. [[verification]]Suppose array [2, 1, 2, 1]. Correct:
+i0 2 ans -1
+i1 1 pop0 ans -1
+i2 2 ans1
+i3 1 pop2(2), pop1(1>=1) ans -1
+If using >, at i3 pop idx2 val2; top idx1 val1 >1 false; ans1 (wrong equal). Same.
+
+[[alternative]]Could also use `>` but then after answering, maybe need handle equal? No.
+
+Need maybe mention "Strictly smaller" means when looking for previous smaller, candidates equal to x are invalid; they should be removed as soon as a later equal (or smaller) value appears because the later equal is at least as good for future queries. This is the key.
+
+[[conclusion]]Let's write final with code:
+
+def previous_strictly_smaller_indices(nums):
+    res = [-1] * len(nums)
+    stack = []  # indices, nums[stack] strictly increasing
+    for i, x in enumerate(nums):
+        # Remove candidates that are not strictly smaller than x.
+        while stack and nums[stack[-1]] >= x:
+            stack.pop()
+        if stack:
+            res[i] = stack[-1]
+        stack.append(i)
+    return res
+
+Need maybe add type hints.
+
+Then examples:
+>>> previous_strictly_smaller_indices([4,2,4,2,3])
+[-1,-1,1,-1,3]
+>>> previous_strictly_smaller_indices([5,5,5])
+[-1,-1,-1]
+
+For repeated equal discussion:
+If while used `nums[stack[-1]] > x`, for `[4,2,4,2]`:
+- At i=3 x=2, it pops 4 but leaves index 1 value 2, returns 1. But value at index1 equals current, not strictly smaller, so answer should be -1.
+- With `>=`, index1 is popped too, so returns -1.
+Also for `[5,5]`, `>` returns 0 instead of -1. That's simpler. But maybe use repeated equal values to show why comparison chosen when removing candidates matters. Use both maybe.
+
+Justification amortized:
+- Each index pushed once.
+- Every pop permanently removes index. Across n iterations at most n pops. While total O(n). For loop O(n). Space O(n) worst-case.
+- It is amortized O(1) per element; total O(n). Worst-case for strictly increasing input stack can have n indices.
+
+Need maybe mention "The stack is monotone: after the while, all remaining values < current; appending current keeps values strictly increasing. Therefore top is closest earlier index among remaining valid candidates because stack indices increase and candidates are not dominated." We need justify closest property. Let's articulate:
+For each i, stack contains indices of a subsequence of earlier positions with strictly increasing values, and no index in stack has been dominated by a later index with value ≤ it. When processing i, pop all values ≥ x_i because they cannot serve as strictly smaller for i; after popping, top is the latest remaining earlier index. [[verification]]Is it guaranteed closest earlier strictly smaller? Suppose there is an earlier index j < i with a[j] < x_i that is not in stack (popped). It was popped by some k with j<k≤i? Actually popped by later value y ≤ a[j] at time k. If y ≤ a[j] < x_i, then k (or another later) is a closer candidate with value y < x_i, and either remains or was itself popped by even closer smaller/equal. Thus the top after popping should be closest. Standard monotonic stack invariant.
+
+[[conclusion]]Let's formulate in final maybe concise.
+
+Need maybe discuss "comparison chosen when removing candidates matters" not just while condition. The comparison is `>=` not `>` because strictly smaller. If looking for previous less-or-equal, use `>` to keep equals. But for strictly smaller, pop equal. Could mention if problem asked "previous smaller or equal" then use `>`; but here strictly smaller requires `>=`.
+
+Let's produce final answer with headings.
+
+Potential issue: If using comparison chosen when removing candidates might refer to "When removing candidates, use `>=` rather than `>`; using `>` leaves equal values and they can be falsely returned." That's exactly.
+
+Let's ensure final not too overlong but includes all. Desired oververbose 5. Good.
+
+Need not mention "amortised bound" perhaps "amortized." Use US spelling? User uses amortised. We can use both? "amortised/amortized".
+
+Let's craft final:
+
+```
+def prev_smaller_indices(a):
+    ans = [-1] * len(a)
+    st = []
+    for i, x in enumerate(a):
+        while st and a[st[-1]] >= x:
+            st.pop()
+        if st:
+            ans[i] = st[-1]
+        st.append(i)
+    return ans
+```
+
+Then example.
+
+[[verification]]Need maybe include repeated equal example with wrong `>`:
+For `a=[4,2,4,2]`, correct `[-1,-1,1,-1]`.
+Using `>`:
+- i=3 x=2, stack before? Let's recalc with >:
+i0: ans[-1], st[0]
+i1 x2: pop0 (4>2), ans -1, st[1]
+i2 x4: 2>4 false ans1, st[1,2]
+i3 x2: top a[2]=4>2 pop; top a[1]=2>2 false; ans=1. Wrong; output [-1,-1,1,1].
+Correct with >=:
+i2 same ans1; i3 pop idx2(4>=2), pop idx1(2>=2), ans -1. output [-1,-1,1,-1].
+This explicitly uses repeated equal value 2 at indices 1 and 3. Good.
+
+[[conclusion]]Maybe also `[5,5]` simple. Include both maybe not necessary. We'll include one.
+
+Need final.

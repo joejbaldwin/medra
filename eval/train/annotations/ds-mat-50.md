@@ -1,0 +1,44 @@
+---
+trace: ds-mat-50
+annotator: Codex (AI)
+status: corrected
+concepts: []
+topics: []
+---
+[[planning]]We need answer. Need parse problem. "A lift makes five independent stops, uniformly distributed over floors 1 to 8. What is the probability that the highest visited floor occurs exactly twice? Derive a sum and verify by computing the answer for the analogous case of two floors."
+
+Need understand: Five independent stops uniformly among floors 1..8, likely with replacement. We want probability that the highest visited floor (maximum of 5 stops) occurs exactly twice in the sample. Need derive sum. Verify by computing analogous case of two floors. Hmm "analogous case of two floors" could mean five stops uniformly over floors 1 to 2, probability highest visited floor occurs exactly twice. Need compute direct perhaps.
+
+Need be careful: "highest visited floor occurs exactly twice" means among the five stop floor values, max value appears exactly two times. We need probability.
+
+We can derive using max m. [[development]]Let X_i iid uniform {1,...,8}. n=5. Let M=max. Want P(N_M=2), where N_M= count equal maximum in sample.
+
+For max = k, event all Xi ≤ k, at least one = k, and exactly two equal k. Number sequences length 5 over [k] with exactly two k and other 3 in [1,k-1] but max must be k (ensured by exactly k's). Choose positions for two k's C(5,2), remaining each choices (k-1)^3. Thus count = C(5,2)(k-1)^3 for k≥1? For k=1, (0)^3 and n=5 exactly two ones impossible, zero. It works if k=1: C(5,2)*0^3=0 but if n? exactly two 1s and other positions in empty set impossible. yes.
+
+[[development]]Total sequences 8^5. Probability sum k=1 to8 C(5,2)(k-1)^3 / 8^5 = 10/32768 * sum_{j=0}^7 j^3. Sum cubes 0^3+...+7^3 = (7*8/2)^2=28^2=784. Numerator 10*784=7840. Denom 32768. simplify 7840/32768. /? 32? 245/1024? [[conclusion]]7840/32=245, 32768/32=1024. yes probability 245/1024 ≈0.2392578125. Check.
+
+[[alternative]]But maybe "lift makes five independent stops" could mean stops are distinct floors? "independent stops, uniformly distributed over floors 1 to 8" implies with replacement independent. If lift makes stops, physically cannot stop at same floor twice? But "independent stops" and "highest floor occurs exactly twice" requires repeats possible. So with replacement.
+
+[[planning]]"Derive a sum and verify by computing the answer for the analogous case of two floors." Maybe they want general? [[verification]]For two floors, n=5, floors 1,2. Probability highest visited floor occurs exactly twice. Highest floor is floor 2 if any stop at 2; need exactly two stops at floor 2 and remaining three at floor 1. Number sequences exactly two 2s among 5 = C(5,2)=10. Total 2^5=32. probability 10/32=5/16=0.3125. Need check also if no floor 2 then highest=1; occurs exactly twice would require exactly two 1s and three impossible since only floors? Wait if no 2s, all five stops at 1, count of highest floor is 5, not exactly 2. If there is at least one 2, highest=2, need exactly two 2s. If exactly two 2s, remaining three must be 1, okay. If exactly? yes. [[conclusion]]So P=5/16.
+
+[[alternative]]But "verify by computing the answer for the analogous case of two floors." Perhaps derive formula with floors m and stops r? For two floors analogous case maybe use n=?? Could be "two floors" means with two stops? Wait analogous case of two floors might mean change 8 to 2 in formula, keeping five stops. [[conclusion]]We'll present.
+
+Need craft final with derivation sum and verification. Maybe mention if instead analogous "two stops" not floors? User says two floors. Use m=2.
+
+[[development]]Need perhaps provide closed form general n=5, F floors? Could derive sum: P_F = binom(5,2)/F^5 * sum_{j=0}^{F-1} j^3? Wait for exactly twice highest, other 3 stops can be any of the lower F-1 floors, with repeats; yes. For general F. For F=8: 10/8^5 sum_{j=0}^7 j^3 = 245/1024.
+
+[[verification]]Let's ensure formula: If max floor m (1-indexed), exactly two stops equal m. Choose their positions: C(5,2). Remaining 3 stops must be in {1,...,m-1}. No requirement that all lower? Max is m due to two m's. Good. Sequence count for max m exactly C(5,2)(m-1)^3. Sum m=1..8. For m=1 zero. Yes.
+
+Let's compute sum: sum_{m=1}^8 (m-1)^3 = sum_{j=0}^7 j^3 = (7*8/2)^2 = 28^2=784. Numerator = 10*784=7840. denominator=8^5=32768. Simplify gcd? 7840/32768. Divide by 32 =245/1024. 245=5*7^2, 1024 power 2, no further. Decimal 0.2392578125.
+
+[[verification]]Verification F=2: P = C(5,2)/2^5 * sum_{j=0}^{1} j^3 =10/32*(0+1)=10/32=5/16. Alternatively direct: highest floor (floor 2) exactly twice: choose 2 of 5 stops floor 2, other 3 floor 1, 10 favorable sequences out of 32. Good.
+
+Need perhaps mention "independent stops uniformly distributed" assumes order of stops matters (equally likely sequences). If stops unordered, independent implies multinomial.
+
+Potential nuance: "highest visited floor occurs exactly twice" Could highest floor "visited" maybe among stops, if multiple people? fine.
+
+[[conclusion]]Let's write final in concise but sufficient steps. Include sum.
+
+Need maybe "derive a sum" could be sum over possible highest floor h. Let's present.
+
+Need final with no over-explanation.

@@ -1,0 +1,25 @@
+{
+  "id": "ds-sci-05",
+  "title": "Two layers of insulation",
+  "language": "en",
+  "prompt": "A steady one-dimensional heat flow crosses two layers in perfect contact. They have equal area 0.50 m², thicknesses 2.0 and 3.0 cm, and thermal conductivities 0.20 and 0.60 W/(m K), respectively. The outside faces are held at 40 and 10 °C, with the first layer on the hot side. Find the heat flow and interface temperature. Check what changes when the layer order is reversed.",
+  "reasoning": "We need answer. Need solve. Need be careful units. Need maybe note \"first layer on hot side\" with k=0.20 thickness2cm, second k=0.60 thickness3cm, outside hot 40, cold10. Steady 1D heat flow through series thermal resistances. Area 0.5. R_i = L/(kA). L1=0.02 m, k1=.2, A=.5 -> R1=0.02/(0.1)=0.2 K/W. L2=.03, k2=.6, A=.5 -> denom .3, R2=.1 K/W. Total .3 K/W. Qdot = ΔT/R =30/0.3=100 W. Interface: T_i = T_hot - Q R1 =40 -100*.2=20 C. Or cold + Q R2 =10+100*.1=20. Good.\n\nCheck reversed layer order: Need clarify. If same outside faces 40 and 10 and layer order reversed, hot side now sees layer2 (k=.6 thickness 3cm) first? Or \"layer order reversed\" likely same two layers but second first; first layer on hot side changes. Since total thermal resistance independent of order for series, heat flow same 100 W. But interface differs. Need compute interface between layers if hot side is original layer 2: R_hot=0.1. T_i =40 -100*0.1=30 C. If simply calling first layer (k .2) is on cold side then interface? Let's set hot at left 40, then layer 2 (L=3 cm k=0.6) adjacent hot, layer1 (L=2cm k=.2) adjacent cold. R layer2 .1, layer1 .2 total .3. Q 100. Interface =40 - Q*0.1=30; or 10+Q*0.2=30. Yes.\n\nNeed also check if \"heat flow\" perhaps asks heat flux? They gave area so heat flow W. Heat flux q''= Q/A=200 W/m². Could mention. Interface for original: 20 °C. For reversed: 30 °C. Heat flow unchanged because resistance sum order independent.\n\nNeed maybe mention temperatures outside faces are boundary values, perfect contact interface common temp. Need maybe sign direction from hot to cold. Use formula. Answer concise but with steps.\n\nPotential nuance: In original, k1=0.20 and L1=2.0 cm (hot side); k2=.60 and L2=3.0 cm. Yes.\n\nLet's craft final with equations. Ensure units \"W/(m K)\" written W m^-1 K^-1. Could use \\( \\dot Q \\). Mention heat flows from 40 to 10. Use area. Include resistances. For reversed, interface. Maybe also if reversed but keeping labels? No, explain.\n\nLet's final with enough detail.",
+  "answer": "Use series thermal resistances:\n\n\\[\nR_i=\\frac{L_i}{k_i A}, \\qquad \\dot Q=\\frac{\\Delta T}{R_1+R_2}\n\\]\n\nGiven:\n\n- \\(A=0.50\\ \\text{m}^2\\)\n- \\(L_1=2.0\\ \\text{cm}=0.020\\ \\text{m},\\quad k_1=0.20\\ \\text{W/(m K)}\\)\n- \\(L_2=3.0\\ \\text{cm}=0.030\\ \\text{m},\\quad k_2=0.60\\ \\text{W/(m K)}\\)\n- Hot face \\(T_h=40^\\circ\\text{C}\\), cold face \\(T_c=10^\\circ\\text{C}\\)\n\nResistances:\n\n\\[\nR_1=\\frac{0.020}{0.20(0.50)}=0.20\\ \\text{K/W}\n\\]\n\n\\[\nR_2=\\frac{0.030}{0.60(0.50)}=0.10\\ \\text{K/W}\n\\]\n\nTotal resistance:\n\n\\[\nR_\\text{tot}=0.20+0.10=0.30\\ \\text{K/W}\n\\]\n\nHeat flow:\n\n\\[\n\\dot Q=\\frac{40-10}{0.30}=100\\ \\text{W}\n\\]\n\nHeat flux:\n\n\\[\nq''=\\frac{\\dot Q}{A}=\\frac{100}{0.50}=200\\ \\text{W/m}^2\n\\]\n\nInterface temperature, with layer 1 on the hot side:\n\n\\[\nT_i=T_h-\\dot Q R_1\n=40-(100)(0.20)=20^\\circ\\text{C}\n\\]\n\nor equivalently,\n\n\\[\nT_i=T_c+\\dot Q R_2\n=10+(100)(0.10)=20^\\circ\\text{C}\n\\]\n\nSo:\n\n\\[\n\\boxed{\\dot Q=100\\ \\text{W},\\qquad T_i=20^\\circ\\text{C}}\n\\]\n\nDirection: from the \\(40^\\circ\\text{C}\\) face toward the \\(10^\\circ\\text{C}\\) face.\n\n### If the layer order is reversed\n\nThe total thermal resistance remains the same:\n\n\\[\nR_\\text{tot}=0.10+0.20=0.30\\ \\text{K/W}\n\\]\n\nso the heat flow is unchanged:\n\n\\[\n\\boxed{\\dot Q=100\\ \\text{W}}\n\\]\n\nBut now the \\(3.0\\ \\text{cm}\\), \\(k=0.60\\ \\text{W/(m K)}\\) layer is on the hot side. Its resistance is \\(0.10\\ \\text{K/W}\\), so:\n\n\\[\nT_i=40-(100)(0.10)=30^\\circ\\text{C}\n\\]\n\nThus, when reversed:\n\n\\[\n\\boxed{\\dot Q=100\\ \\text{W},\\qquad T_i=30^\\circ\\text{C}}\n\\]\n\nFinal answers:\n\n\\[\n\\boxed{\n\\begin{aligned}\n&\\text{Original order: } \\dot Q=100\\ \\text{W},\\quad T_i=20^\\circ\\text{C}\\\\\n&\\text{Reversed order: } \\dot Q=100\\ \\text{W},\\quad T_i=30^\\circ\\text{C}\n\\end{aligned}}\n\\]\n\nThe heat flow is unchanged because the same two thermal resistances are in series; only the interface temperature changes.",
+  "origin": "Razonamiento real de DeepSeek (deepseek-flash, modo thinking), grabado el 2026-11-25 con eval/record_traces.py; sin editar.",
+  "meta": {
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 128,
+      "completion_tokens": 1325,
+      "total_tokens": 1453,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 626
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 128
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
  "date": "2026-11-25",
- "commit": "1fd3a99",
+ "commit": "d11d9eb",
  "preliminary": false,
  "annotations": {
   "n": 30,
@@ -3128,83 +3128,151 @@
    "C": 1,
    "class_weight": "balanced"
   },
+  "dev_settings": {
+   "C": 1,
+   "class_weight": "balanced"
+  },
   "grid": [
    {
     "C": 0.3,
     "class_weight": null,
-    "accuracy": 0.4785992217898833,
-    "macro_f1": 0.30607012035583464
+    "accuracy": 0.7003891050583657,
+    "macro_f1": 0.5309106585524828
    },
    {
     "C": 0.3,
     "class_weight": "balanced",
-    "accuracy": 0.5642023346303502,
-    "macro_f1": 0.42466640336976474
+    "accuracy": 0.6809338521400778,
+    "macro_f1": 0.6116833507330417
    },
    {
     "C": 1,
     "class_weight": null,
-    "accuracy": 0.5642023346303502,
-    "macro_f1": 0.38908434878560594
+    "accuracy": 0.7120622568093385,
+    "macro_f1": 0.5613739625037127
    },
    {
     "C": 1,
     "class_weight": "balanced",
-    "accuracy": 0.5992217898832685,
-    "macro_f1": 0.4361403235758241
+    "accuracy": 0.6848249027237354,
+    "macro_f1": 0.622293988829015
    },
    {
     "C": 3,
     "class_weight": null,
-    "accuracy": 0.5758754863813229,
-    "macro_f1": 0.399071522899572
+    "accuracy": 0.6926070038910506,
+    "macro_f1": 0.5523011361004145
    },
    {
     "C": 3,
     "class_weight": "balanced",
-    "accuracy": 0.5992217898832685,
-    "macro_f1": 0.42033952860112594
+    "accuracy": 0.7003891050583657,
+    "macro_f1": 0.5700882070745085
    },
    {
     "C": 10,
     "class_weight": null,
-    "accuracy": 0.5719844357976653,
-    "macro_f1": 0.3953294110314185
+    "accuracy": 0.7042801556420234,
+    "macro_f1": 0.5653697553229559
    },
    {
     "C": 10,
     "class_weight": "balanced",
-    "accuracy": 0.5992217898832685,
-    "macro_f1": 0.4186444159989886
+    "accuracy": 0.708171206225681,
+    "macro_f1": 0.5756540291527893
    },
    {
     "C": 30,
     "class_weight": null,
-    "accuracy": 0.5836575875486382,
-    "macro_f1": 0.40320119584825465
+    "accuracy": 0.6770428015564203,
+    "macro_f1": 0.5403587441291625
    },
    {
     "C": 30,
     "class_weight": "balanced",
-    "accuracy": 0.5914396887159533,
-    "macro_f1": 0.4124266800737389
+    "accuracy": 0.688715953307393,
+    "macro_f1": 0.5547856914889223
    },
    {
     "C": 100,
     "class_weight": null,
-    "accuracy": 0.5836575875486382,
-    "macro_f1": 0.4046603401670676
+    "accuracy": 0.6731517509727627,
+    "macro_f1": 0.5365941712846153
    },
    {
     "C": 100,
     "class_weight": "balanced",
-    "accuracy": 0.5836575875486382,
-    "macro_f1": 0.40696315525044807
+    "accuracy": 0.6770428015564203,
+    "macro_f1": 0.6089093540171936
    }
   ],
   "dev_steps": 257,
+  "extra_traces": 272,
+  "extra_steps": 5023,
   "test": {
    "classifier": {
+    "n": 161,
+    "accuracy": 0.7080745341614907,
+    "macro_f1": 0.6888677880910891,
+    "per_class": {
+     "alternative": {
+      "precision": 0.4,
+      "recall": 0.5333333333333333,
+      "f1": 0.4571428571428572,
+      "support": 15
+     },
+     "conclusion": {
+      "precision": 0.8620689655172413,
+      "recall": 0.8064516129032258,
+      "f1": 0.8333333333333334,
+      "support": 31
+     },
+     "development": {
+      "precision": 0.5952380952380952,
+      "recall": 0.6944444444444444,
+      "f1": 0.6410256410256411,
+      "support": 36
+     },
+     "planning": {
+      "precision": 0.7727272727272727,
+      "recall": 0.7391304347826086,
+      "f1": 0.7555555555555555,
+      "support": 23
+     },
+     "verification": {
+      "precision": 0.8297872340425532,
+      "recall": 0.6964285714285714,
+      "f1": 0.7572815533980581,
+      "support": 56
+     }
+    },
+    "confusion": {
+     "alternative->alternative": 8,
+     "alternative->development": 2,
+     "alternative->verification": 5,
+     "conclusion->alternative": 1,
+     "conclusion->conclusion": 25,
+     "conclusion->development": 3,
+     "conclusion->planning": 2,
+     "development->alternative": 4,
+     "development->backtrack": 1,
+     "development->conclusion": 2,
+     "development->development": 25,
+     "development->planning": 2,
+     "development->verification": 2,
+     "planning->alternative": 1,
+     "planning->conclusion": 1,
+     "planning->development": 3,
+     "planning->planning": 17,
+     "planning->verification": 1,
+     "verification->alternative": 6,
+     "verification->conclusion": 1,
+     "verification->development": 9,
+     "verification->planning": 1,
+     "verification->verification": 39
+    }
+   },
+   "dev_only": {
     "n": 161,
     "accuracy": 0.6086956521739131,
     "macro_f1": 0.569268913177269,
@@ -3368,76 +3436,120 @@
     }
    }
   },
+  "curve": [
+   {
+    "extra_traces": 0,
+    "train_steps": 257,
+    "accuracy": 0.6086956521739131,
+    "macro_f1": 0.569268913177269
+   },
+   {
+    "extra_traces": 25,
+    "train_steps": 663,
+    "accuracy": 0.639751552795031,
+    "macro_f1": 0.625917259496908
+   },
+   {
+    "extra_traces": 50,
+    "train_steps": 1134,
+    "accuracy": 0.6149068322981367,
+    "macro_f1": 0.5931368442886147
+   },
+   {
+    "extra_traces": 100,
+    "train_steps": 1965,
+    "accuracy": 0.6832298136645962,
+    "macro_f1": 0.6595524021320908
+   },
+   {
+    "extra_traces": 150,
+    "train_steps": 2912,
+    "accuracy": 0.6583850931677019,
+    "macro_f1": 0.6440131688917157
+   },
+   {
+    "extra_traces": 200,
+    "train_steps": 3863,
+    "accuracy": 0.6645962732919255,
+    "macro_f1": 0.6409150707791131
+   },
+   {
+    "extra_traces": 272,
+    "train_steps": 5280,
+    "accuracy": 0.7080745341614907,
+    "macro_f1": 0.6888677880910891
+   }
+  ],
   "loto": {
    "classifier": {
     "n": 418,
-    "accuracy": 0.6148325358851675,
-    "macro_f1": 0.48461722808442365,
+    "accuracy": 0.6985645933014354,
+    "macro_f1": 0.6222704590998068,
     "per_class": {
      "alternative": {
-      "precision": 0.34375,
-      "recall": 0.275,
-      "f1": 0.3055555555555556,
+      "precision": 0.38596491228070173,
+      "recall": 0.55,
+      "f1": 0.4536082474226804,
       "support": 40
      },
      "backtrack": {
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
+      "precision": 0.25,
+      "recall": 0.5,
+      "f1": 0.3333333333333333,
       "support": 2
      },
      "conclusion": {
-      "precision": 0.7078651685393258,
-      "recall": 0.7411764705882353,
-      "f1": 0.7241379310344828,
+      "precision": 0.8472222222222222,
+      "recall": 0.7176470588235294,
+      "f1": 0.7770700636942675,
       "support": 85
      },
      "development": {
-      "precision": 0.5463917525773195,
-      "recall": 0.5520833333333334,
-      "f1": 0.5492227979274611,
+      "precision": 0.603448275862069,
+      "recall": 0.7291666666666666,
+      "f1": 0.6603773584905661,
       "support": 96
      },
      "planning": {
-      "precision": 0.676923076923077,
-      "recall": 0.6875,
-      "f1": 0.6821705426356589,
+      "precision": 0.7894736842105263,
+      "recall": 0.703125,
+      "f1": 0.743801652892562,
       "support": 64
      },
      "verification": {
-      "precision": 0.6370370370370371,
-      "recall": 0.6564885496183206,
-      "f1": 0.6466165413533835,
+      "precision": 0.8303571428571429,
+      "recall": 0.7099236641221374,
+      "f1": 0.7654320987654321,
       "support": 131
      }
     },
     "confusion": {
-     "alternative->alternative": 11,
-     "alternative->conclusion": 2,
-     "alternative->development": 7,
-     "alternative->planning": 3,
-     "alternative->verification": 17,
-     "backtrack->development": 1,
+     "alternative->alternative": 22,
+     "alternative->development": 9,
+     "alternative->verification": 9,
+     "backtrack->backtrack": 1,
      "backtrack->verification": 1,
-     "conclusion->alternative": 1,
-     "conclusion->conclusion": 63,
-     "conclusion->development": 9,
+     "conclusion->alternative": 6,
+     "conclusion->conclusion": 61,
+     "conclusion->development": 11,
      "conclusion->planning": 7,
-     "conclusion->verification": 5,
-     "development->alternative": 6,
+     "development->alternative": 10,
+     "development->backtrack": 1,
      "development->conclusion": 4,
-     "development->development": 53,
-     "development->planning": 10,
-     "development->verification": 23,
-     "planning->conclusion": 13,
-     "planning->development": 4,
-     "planning->planning": 44,
-     "planning->verification": 3,
-     "verification->alternative": 14,
-     "verification->conclusion": 7,
-     "verification->development": 23,
-     "verification->planning": 1,
-     "verification->verification": 86
+     "development->development": 70,
+     "development->planning": 3,
+     "development->verification": 8,
+     "planning->alternative": 7,
+     "planning->conclusion": 5,
+     "planning->development": 6,
+     "planning->planning": 45,
+     "planning->verification": 1,
+     "verification->alternative": 12,
+     "verification->backtrack": 2,
+     "verification->conclusion": 2,
+     "verification->development": 20,
+     "verification->planning": 2,
+     "verification->verification": 93
     }
    },
    "rule": {
@@ -3562,108 +3674,108 @@
   },
   "top_features": {
    "alternative": [
-    "o:#_#",
-    "o:#",
-    "o:b_#",
-    "b:e",
-    "b:dollar",
-    "o:#_d",
-    "b:not",
-    "o:#_b"
+    "b:maybe",
+    "o:if",
+    "b:could",
+    "o:maybe",
+    "b:alternatively",
+    "b:remainders",
+    "m:alternative",
+    "o1:if"
    ],
    "backtrack": [
-    "b:k",
-    "b:variables",
-    "b:interval",
-    "b:x",
-    "b:tuple",
-    "b:intervals",
-    "b:sorted",
-    "b:d"
+    "b:wait",
+    "o1:wait",
+    "m:backtrack",
+    "o:no",
+    "o:wait_no",
+    "o:wait",
+    "b:earlier",
+    "o:earlier"
    ],
    "conclusion": [
-    "b:final",
     "b:answer",
-    "o:final",
     "m:conclusion",
-    "o1:let's",
+    "b:final",
     "o1:so",
-    "b:include",
-    "o:answer"
+    "o:so",
+    "b:therefore",
+    "o:final",
+    "o1:therefore"
    ],
    "development": [
-    "b:w",
-    "b:s",
-    "b:h",
-    "b:return",
-    "b:def",
+    "b:#",
     "b:since",
-    "b:l",
-    "b:stack"
+    "b:first",
+    "b:w",
+    "b:because",
+    "b:compute",
+    "b:now",
+    "b:x"
    ],
    "planning": [
     "b:need",
     "pos:first",
-    "o:we_need",
-    "o1:we",
-    "o:need_answer",
     "o:need",
-    "o:we",
-    "b:solve"
+    "o:we_need",
+    "o1:okay",
+    "o:okay",
+    "b:find",
+    "o1:we"
    ],
    "verification": [
-    "b:#",
-    "o:check",
-    "b:wait",
     "b:yes",
-    "b:which",
+    "b:good",
+    "o:check",
+    "b:correct",
+    "b:#",
     "b:check",
-    "o:but",
-    "o1:but"
+    "o:but_wait",
+    "b:verify"
    ]
   },
   "test_predictions": {
    "en-cod-anagrams": [
     "planning",
     "planning",
-    "planning",
-    "development",
     "development",
     "planning",
-    "development",
     "alternative",
-    "planning",
-    "planning",
+    "development",
+    "conclusion",
+    "verification",
+    "alternative",
+    "development",
     "planning",
     "conclusion",
     "verification",
     "development",
-    "conclusion",
+    "alternative",
     "conclusion"
    ],
    "en-cod-dedupe": [
     "planning",
     "development",
     "development",
+    "verification",
     "development",
     "development",
     "planning",
-    "planning",
+    "development",
+    "verification",
     "development",
     "alternative",
-    "development",
-    "development",
     "verification",
-    "planning",
-    "development",
-    "planning",
+    "conclusion",
+    "verification",
+    "conclusion",
     "verification",
     "conclusion",
     "development",
+    "verification",
     "development",
-    "development",
-    "development",
-    "conclusion",
+    "verification",
+    "planning",
     "alternative",
     "conclusion"
    ],
@@ -3673,11 +3785,11 @@
     "verification",
     "conclusion",
     "verification",
-    "conclusion",
+    "alternative",
     "conclusion",
     "verification",
     "alternative",
-    "conclusion",
+    "development",
     "development",
     "conclusion",
     "conclusion"
@@ -3685,35 +3797,35 @@
    "en-log-liars": [
     "planning",
     "alternative",
-    "planning",
+    "development",
     "development",
     "development",
     "verification",
-    "conclusion",
+    "planning",
     "planning",
     "conclusion",
-    "alternative",
-    "alternative",
     "development",
-    "alternative",
+    "development",
+    "development",
+    "development",
     "verification",
-    "alternative",
+    "verification",
     "conclusion"
    ],
    "en-log-pets": [
     "planning",
     "planning",
     "development",
-    "verification",
-    "alternative",
-    "alternative",
-    "conclusion",
-    "verification",
-    "verification",
-    "planning",
-    "verification",
-    "conclusion",
     "development",
+    "alternative",
+    "alternative",
+    "alternative",
+    "verification",
+    "alternative",
+    "planning",
+    "alternative",
+    "conclusion",
+    "verification",
     "verification",
     "conclusion"
    ],
@@ -3721,10 +3833,10 @@
     "planning",
     "development",
     "development",
-    "alternative",
+    "development",
     "development",
     "conclusion",
-    "conclusion",
+    "development",
     "development",
     "alternative",
     "alternative",
@@ -3732,13 +3844,13 @@
    ],
    "en-mat-semicircle": [
     "planning",
-    "development",
+    "alternative",
     "development",
     "development",
     "verification",
     "planning",
     "development",
-    "conclusion",
+    "alternative",
     "verification",
     "conclusion"
    ],
@@ -3748,22 +3860,22 @@
     "alternative",
     "verification",
     "conclusion",
-    "verification",
     "development",
+    "alternative",
     "development",
     "conclusion"
    ],
    "ot-cod-yen": [
     "planning",
     "verification",
+    "planning",
+    "development",
+    "backtrack",
+    "verification",
+    "development",
     "conclusion",
     "verification",
-    "verification",
-    "verification",
-    "verification",
-    "conclusion",
-    "verification",
-    "verification",
+    "development",
     "conclusion",
     "verification",
     "conclusion",
@@ -3772,7 +3884,7 @@
    ],
    "ot-log-calculator": [
     "planning",
-    "verification",
+    "development",
     "verification",
     "verification",
     "verification",
@@ -3795,7 +3907,7 @@
     "verification",
     "conclusion",
     "verification",
-    "verification",
+    "alternative",
     "verification",
     "conclusion",
     "verification",
@@ -3804,7 +3916,7 @@
     "verification",
     "verification",
     "verification",
-    "verification"
+    "conclusion"
    ]
   }
  }

@@ -12,8 +12,8 @@ valid..."). This module replaces that rule for English with a linear model:
   marker type (so the rule is one feature among others) and whether it is the
   trace's first step. TF-IDF weighted (sublinear tf, l2 norm).
 - Model: multinomial logistic regression (scikit-learn), trained by
-  eval/steptypes.py, which also chooses its settings on the dev traces and
-  reports it on the test traces.
+  eval/steptypes.py, which also chooses its settings on its train traces
+  and reports it on its test traces (an 80/20 split of 302 annotated traces).
 
 The trained model is stored as JSON (vocabulary, idf, weights), not a pickle:
 it is readable, safe to load, and independent of the scikit-learn version.

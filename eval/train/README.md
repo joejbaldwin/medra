@@ -1,9 +1,10 @@
 # Training traces for the step-type classifier
 
-Annotated traces used only to **train** the step-type classifier
-(`backend/medra/mining/steptypes.py`, trained by `python -m eval.steptypes`). They are kept apart
-from the 30 evaluation traces in `eval/traces/`, so the evaluation set and its dev/test split never
-change and the test results stay comparable.
+Annotated traces for the step-type classifier (`backend/medra/mining/steptypes.py`, trained by
+`python -m eval.steptypes`). They are kept apart from the 30 evaluation traces in `eval/traces/`, so
+the 19/11 dev/test split of the segmentation, concept and topic results never changes. The
+classifier pools these and the 30 evaluation traces (302 in all) and makes its own fixed 80/20
+train/test split (seed 0, stratified by source model).
 
 | Path | What |
 |---|---|

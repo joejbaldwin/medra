@@ -21,3 +21,14 @@ def test_training_traces_stay_out_of_the_evaluation_split():
     assert len(ids) == 30 and not any(i.startswith("ds-") or i.split("-")[1].isdigit() for i in ids)
     dev, test = split(ids)
     assert len(dev) == 19 and len(test) == 11
+
+
+def test_step_type_split_is_80_20_over_every_annotated_trace():
+    from eval.common import train_trace_ids
+    from eval.steptypes import step_split
+
+    ids = trace_ids() + train_trace_ids()
+    train, test = step_split(ids)
+    assert len(ids) == 302 and len(train) + len(test) == 302 and not set(train) & set(test)
+    assert len(test) == 61  # 20% of each source: 29 of 144 DeepSeek, 32 of 158 OpenThoughts
+    assert step_split(list(reversed(ids))) == (train, test)  # depends only on the ids and the seed

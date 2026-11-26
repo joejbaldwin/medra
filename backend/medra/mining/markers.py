@@ -1,4 +1,4 @@
-"""Discourse markers and hedges (build plan §4.2 steps 10 and 11).
+"""Discourse markers and hedges.
 
 A marker is a phrase that opens a reasoning step ("Wait,", "Alternatively",
 "Let me check", "Primero"). Only sentence-initial markers count: "so" in the

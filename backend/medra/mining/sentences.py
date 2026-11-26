@@ -1,4 +1,4 @@
-"""Step 2a: sentence boundaries that do not depend on how the text was chunked.
+"""Sentence boundaries that do not depend on how the text was chunked.
 
 spaCy's parser can split sentences, but its decision for a boundary can
 change when more text arrives after it, so a streamed trace and the same

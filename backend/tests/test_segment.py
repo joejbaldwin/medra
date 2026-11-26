@@ -1,4 +1,4 @@
-"""Step 4: discourse markers, segmentation (TextTiling + markers) and topics."""
+"""Discourse markers, segmentation (TextTiling + markers) and topics."""
 
 import random
 from collections import Counter

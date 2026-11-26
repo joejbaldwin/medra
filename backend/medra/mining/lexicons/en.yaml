@@ -29,14 +29,14 @@ stopwords:
   - way
   - let
   - approx
-  # Telegraphic CoT of deepseek-flash ("Need answer Spanish. Final only."),
-  # seen in live traces on 2026-10-30: here "need" is tagged as a noun.
+  # Telegraphic CoT of deepseek-flash ("Need answer Spanish. Final only."):
+  # here "need" is tagged as a noun.
   - need
   - spanish
   - english
 
-# Discourse markers that open a reasoning step, by step type (build plan
-# §4.2 step 10, after the DeepSeek-R1 "Thoughtology" taxonomy). Matched
+# Discourse markers that open a reasoning step, by step type (after the
+# DeepSeek-R1 "Thoughtology" taxonomy). Matched
 # case-insensitively at the start of a sentence, optionally after up to two
 # prefixes (below), as whole words. A marker after a prefix wins over the
 # prefix itself: "Wait, let me check" is verification, "Wait." is backtrack.

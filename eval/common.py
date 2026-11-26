@@ -60,7 +60,7 @@ def source_of(trace_id: str) -> str:
 
 
 SPLIT_SEED = 0
-TEST_SHARE = 0.375  # 6 of 16 traces
+TEST_SHARE = 0.375  # 11 of the 30 evaluation traces
 
 
 def split(ids: list[str], seed: int = SPLIT_SEED, test_share: float = TEST_SHARE) -> tuple[list[str], list[str]]:

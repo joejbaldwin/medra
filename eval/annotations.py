@@ -1,11 +1,11 @@
-"""Hand annotations of the evaluation traces: format, loading and checks.
+"""Annotated traces: format, loading and checks.
 
 One file per trace, eval/annotations/<id>.md:
 
     ---
     trace: en-log-pets
-    annotator: claude-draft
-    status: draft            # draft | corrected
+    annotator: <name>
+    status: corrected        # draft | corrected; results use corrected files only
     concepts: [dog owner, house, parrot]
     topics:
       - [house, number, neighbour]
@@ -159,7 +159,7 @@ def _first_difference(a: str, b: str) -> str:
 
 
 def write(trace_id: str, tags: dict[int, str], *, concepts: list[str], topics: list[list[str]],
-          annotator: str, status: str = "draft", path: Path | None = None) -> Path:
+          annotator: str, status: str = "corrected", path: Path | None = None) -> Path:
     """Write an annotation file with a tag before each given sentence index."""
     mined = mine(trace_id)
     text = mined.text
@@ -225,7 +225,7 @@ def main() -> None:
             n = len(mine(args.write).spans)
             if max(tags) >= n:
                 raise AnnotationError(f"the trace has {n} sentences (0-{n - 1}); got sentence {max(tags)}")
-            path = write(args.write, tags, concepts=[], topics=[], annotator=args.annotator, status="corrected")
+            path = write(args.write, tags, concepts=[], topics=[], annotator=args.annotator)
         except (AnnotationError, ValueError) as exc:
             sys.exit(f"FAIL {args.write}: {exc}")
         print(f"ok   {path}: {len(tags)} steps")

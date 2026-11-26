@@ -6,10 +6,10 @@ Replay and paste cost nothing and need no code.
 
     MEDRA_ACCESS_CODES="profesor:40,grupo:20"   (code:sessions per day)
 
-When the variable is unset (local development) no code is asked for, so a
-local run behaves as before. Counts live in memory: they reset at UTC
-midnight and when the process restarts (a Hugging Face Space restarts when it
-wakes from sleep). That is acceptable here because MEDRA_MAX_TOKENS caps the
+When the variable is unset (local development) no code is asked for.
+Counts live in memory: they reset at UTC midnight and when the process
+restarts (Cloud Run starts a new instance after scaling to zero). That is
+acceptable here because MEDRA_MAX_TOKENS caps the
 cost of each session and MEDRA_LIVE_DISABLED switches live sessions off
 entirely; a lost count can only ever give back one day's budget.
 """

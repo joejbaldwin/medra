@@ -1,4 +1,4 @@
-"""Interaction check of the dashboard layout (build step 6).
+"""Interaction check of the dashboard layout.
 
 Drives the real dashboard in a browser and checks the window manager, the
 «Añadir visualización» picker and the chat: search and filters, Escape and
@@ -104,8 +104,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(800)
     check(page.inner_text("#prompt") == "Crea una página de login.", "user message shows the trace prompt")
 
-    # Decluttered chat and views: no legend lines, no status strip, a smaller send button.
-    check(page.locator(".panel-sub, #chat-status, #ticker-now").count() == 0, "no view subtitles or status strip")
+    # No hint lines in the views: how to read each one is in its title's tooltip.
     check(not page.is_visible(f"{ACTIVE} .step-detail") and not page.is_visible(f"{ACTIVE} .map-info"), "no hint lines while nothing is selected")
     check("Densidad de menciones" in (page.get_attribute(f"{ACTIVE} [data-win='timeline'] .win-title", "title") or ""), "the view hint lives in the title tooltip")
     box = page.locator("#send").bounding_box()
@@ -275,7 +274,7 @@ with sync_playwright() as p:
     page.focus(f"{ACTIVE} [data-win='map'] .grip")
     page.keyboard.press("ArrowDown")
     check(cells(page) == ["slot:0", "map:1,3", "timeline:2"], f"ArrowDown moves the enlarged map as a row {cells(page)}")
-    page.click(btn("timeline", "column"))  # covers the map: allowed now, the map goes back to its cell
+    page.click(btn("timeline", "column"))  # covers the map, which goes back to its cell
     check(cells(page) == ["slot:0", "map:1", "timeline:2,3"], f"timeline fills its column over the map {cells(page)}")
     check(not page.is_visible("#toast"), "no refusal message")
     page.click(btn("timeline", "column"))
@@ -307,7 +306,6 @@ with sync_playwright() as p:
     choose_source(page, "replay")
     choose_source(page, "paste")
     check(page.input_value("#composer-input").startswith("Okay, let me think"), "paste draft kept when switching sources")
-    check(page.locator("#source-note").count() == 0, "no source note under the composer")
 
     # Stop: the send button becomes a square while a session runs, and aborts it.
     page.select_option("#speed", "8")

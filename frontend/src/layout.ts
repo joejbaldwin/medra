@@ -29,7 +29,7 @@ export const sibling = (c: Cell): Cell => c ^ 1;
 /** The other cell in the same row. */
 export const across = (c: Cell): Cell => c ^ 2;
 
-/** The first page (Joe, 2026-11-02): the chat fills the right column and
+/** The first page: the chat fills the right column and
  *  both slots on the left are empty, for the user to choose views. */
 export function firstPage(): Page {
   return { cells: [null, null, "chat", "chat"] };

@@ -1,5 +1,5 @@
-"""The real miner (step 2). The two checks the build plan requires:
-offsets round-trip, and random chunking gives the same final state."""
+"""The text miner. The two key checks: offsets round-trip, and random
+chunking gives the same final state."""
 
 import math
 
@@ -117,7 +117,7 @@ def test_hand_counted_terms_english():
 
 
 def test_inline_maths_is_not_a_term():
-    # Live CoT (deepseek-flash, step 5) writes equations without $...$; spaCy keeps them as one token.
+    # Live CoT (deepseek-flash) writes equations without $...$; spaCy keeps them as one token.
     text = "Let t be the crossing time. Then 120+120t=620-100t gives t=500/220=25/11 hours, so x2=620 km. Check the time."
     final = final_state(text_chunks(text))
     ids = {t.id for t in final.terms}

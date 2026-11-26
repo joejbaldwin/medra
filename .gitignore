@@ -17,13 +17,14 @@ dist/
 .env.*
 !.env.example
 
-# Data and outputs too large to commit
-data/raw/
-eval/results/*.jsonl
-eval/results/drafts/
+# JSON Lines output of the medra-source / medra-mine / medra-present commands
+*.jsonl
 
 # Report screenshots (regenerate with scripts/screenshots.py)
 screenshots/
+
+# Local walkthrough page, not part of the submission
+docs/medra-walkthrough.html
 
 # Editors / OS
 .vscode/*

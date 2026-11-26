@@ -134,7 +134,7 @@
           "type": "string"
         },
         "schema_version": {
-          "default": "1.6",
+          "default": "1.7",
           "type": "string"
         },
         "session_id": {
@@ -260,32 +260,12 @@
       "title": "Marker",
       "type": "object"
     },
-    "MiningMessage": {
-      "additionalProperties": false,
-      "description": "Optional: the raw miner output, for a debug panel.",
-      "properties": {
-        "type": {
-          "const": "mining",
-          "default": "mining",
-          "type": "string"
-        },
-        "mining": {
-          "$ref": "#/$defs/MiningUpdate"
-        }
-      },
-      "required": [
-        "type",
-        "mining"
-      ],
-      "title": "MiningMessage",
-      "type": "object"
-    },
     "MiningUpdate": {
       "additionalProperties": false,
       "description": "Full snapshot of the miner's state after a commit.\n\nEmitted each time at least one sentence is committed. It is a snapshot,\nnot a diff: Layer 2 and 3 run in the same process, so this costs no\nnetwork traffic, and it keeps the \"incremental == batch\" test simple.\nDiffing happens in Layer 3, before the network.",
       "properties": {
         "schema_version": {
-          "default": "1.6",
+          "default": "1.7",
           "type": "string"
         },
         "session_id": {
@@ -1069,7 +1049,7 @@
       "description": "A piece of streamed text. Boundaries are arbitrary (may split a word).",
       "properties": {
         "schema_version": {
-          "default": "1.6",
+          "default": "1.7",
           "type": "string"
         },
         "session_id": {
@@ -1331,7 +1311,7 @@
       "description": "What the screen should show, as a diff against the previous update.\n\nThe first update of a session has kind=\"snapshot\". After that, each list\nholds only items that were added or changed (upsert by id), and `removed`\nlists ids to delete. `timeline` and `stats`, when present, replace the\nprevious value whole. `ticker` items are appended.",
       "properties": {
         "schema_version": {
-          "default": "1.6",
+          "default": "1.7",
           "type": "string"
         },
         "session_id": {
@@ -1465,7 +1445,6 @@
           "end": "#/$defs/EndMessage",
           "error": "#/$defs/ErrorMessage",
           "hello": "#/$defs/HelloMessage",
-          "mining": "#/$defs/MiningMessage",
           "text": "#/$defs/TextMessage",
           "view": "#/$defs/ViewMessage"
         },
@@ -1480,9 +1459,6 @@
         },
         {
           "$ref": "#/$defs/ViewMessage"
-        },
-        {
-          "$ref": "#/$defs/MiningMessage"
         },
         {
           "$ref": "#/$defs/EndMessage"
@@ -1518,5 +1494,5 @@
   ],
   "title": "MedraContracts",
   "type": "object",
-  "$comment": "MeDRA contracts, schema_version 1.6. Generated; do not edit."
+  "$comment": "MeDRA contracts, schema_version 1.7. Generated; do not edit."
 }

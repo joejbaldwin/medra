@@ -1,6 +1,6 @@
 /* Generated from docs/contracts/v1.schema.json by `npm run gen:types`. Do not edit. */
 
-export type ServerMessage = HelloMessage | TextMessage | ViewMessage | MiningMessage | EndMessage | ErrorMessage;
+export type ServerMessage = HelloMessage | TextMessage | ViewMessage | EndMessage | ErrorMessage;
 
 /**
  * Not a message: a container so every contract lands in one schema.
@@ -431,16 +431,6 @@ export interface TextMessage {
 export interface ViewMessage {
   type: "view";
   view: ViewUpdate;
-}
-/**
- * Optional: the raw miner output, for a debug panel.
- *
- * This interface was referenced by `MedraContracts`'s JSON-Schema
- * via the `definition` "MiningMessage".
- */
-export interface MiningMessage {
-  type: "mining";
-  mining: MiningUpdate;
 }
 /**
  * This interface was referenced by `MedraContracts`'s JSON-Schema

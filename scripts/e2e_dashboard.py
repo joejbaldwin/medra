@@ -1,4 +1,4 @@
-"""End-to-end check of traceability in the real dashboard (build step 3).
+"""End-to-end check of traceability in the real dashboard.
 
 Adds a concept map to the first page through the «Añadir visualización»
 picker, plays a sample in a headless browser, then for every bubble:
@@ -75,7 +75,7 @@ def main() -> int:
         page.select_option("#speed", "30")
         page.click("#send")
 
-        # Step 4 goal: paragraph blocks and the topic chart update while the text streams.
+        # Paragraph blocks and the topic chart update while the text streams.
         page.wait_for_function(
             "document.getElementById('status').dataset.state === 'live'"
             " && document.querySelectorAll('.page:not([hidden]) .chart g.c-topic').length > 0"

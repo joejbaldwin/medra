@@ -85,13 +85,12 @@ def source_main(argv: list[str] | None = None) -> None:
 
 def mine_main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="medra-mine", description="Layer 2: TextChunks in, MiningUpdates out.")
-    parser.add_argument("--miner", choices=["text", "stub"], default="text")
-    args = parser.parse_args(argv)
-    from medra.mining import Miner, make_miner
+    parser.parse_args(argv)
+    from medra.mining import TextMiner
 
-    miner: Miner | None = None
+    miner: TextMiner | None = None
     for chunk in read_jsonl(sys.stdin, TextChunk):
-        miner = miner or make_miner(args.miner, chunk.session_id)
+        miner = miner or TextMiner(chunk.session_id)
         update = miner.feed(chunk)
         if update is not None:
             write_jsonl(update)
@@ -99,11 +98,10 @@ def mine_main(argv: list[str] | None = None) -> None:
 
 def present_main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="medra-present", description="Layer 3: MiningUpdates in, ViewUpdates out.")
-    parser.add_argument("--presenter", choices=["view", "stub"], default="view")
-    args = parser.parse_args(argv)
-    from medra.present import StubPresenter, ViewPresenter
+    parser.parse_args(argv)
+    from medra.present import ViewPresenter
 
-    presenter = ViewPresenter() if args.presenter == "view" else StubPresenter()
+    presenter = ViewPresenter()
     for update in read_jsonl(sys.stdin, MiningUpdate):
         view = presenter.present(update)
         if view is not None:

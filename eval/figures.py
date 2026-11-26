@@ -1,7 +1,6 @@
 """Figures for the memoria, from the files eval.run / eval.bench wrote.
 
-    python -m eval.figures            # from eval/results/
-    python -m eval.figures --drafts   # from eval/results/drafts/ (marked PRELIMINAR)
+    python -m eval.figures            # from eval/results/, into eval/results/
 
 - segmentation.png: Pk and WindowDiff of each method on the test traces.
 - boundaries.png: reference vs MeDRA boundaries along one test trace.
@@ -57,8 +56,8 @@ TYPES = {"planning": "planificación", "development": "desarrollo", "verificatio
          "backtrack": "corrección", "alternative": "alternativa", "conclusion": "conclusión"}
 
 
-def _title(ax, text: str, preliminary: bool) -> None:
-    ax.set_title(text + ("  (PRELIMINAR: borradores)" if preliminary else ""), loc="left", fontsize=11, color=INK)
+def _title(ax, text: str) -> None:
+    ax.set_title(text, loc="left", fontsize=11, color=INK)
 
 
 def segmentation_chart(res: dict, out: Path) -> None:
@@ -83,7 +82,7 @@ def segmentation_chart(res: dict, out: Path) -> None:
     ax.set_xlabel("Error (menor es mejor)")
     ax.xaxis.set_major_formatter(COMMA)
     ax.legend(loc="lower right", frameon=False)
-    _title(ax, f"Segmentación en las {len(test)} trazas de prueba", res["preliminary"])
+    _title(ax, f"Segmentación en las {len(test)} trazas de prueba")
     fig.tight_layout()
     fig.savefig(out, dpi=200)
     plt.close(fig)
@@ -111,7 +110,7 @@ def boundary_strip(res: dict, trace_id: str, out: Path) -> None:
     ax.set_ylim(len(rows) - 0.5, -0.5)
     ax.grid(axis="y", visible=False)
     ax.set_xlabel("Frase")
-    _title(ax, f"Fronteras de tramo en {trace_id} ({n} frases)", res["preliminary"])
+    _title(ax, f"Fronteras de tramo en {trace_id} ({n} frases)")
     fig.tight_layout()
     fig.savefig(out, dpi=200)
     plt.close(fig)
@@ -132,7 +131,7 @@ def bench_chart(bench: dict, out: Path) -> None:
     ax.set_ylabel("ms por actualización")
     ax.set_ylim(bottom=0)
     ax.legend(frameon=False, loc="upper left")
-    _title(ax, "Coste por actualización según crece el texto", False)
+    _title(ax, "Coste por actualización según crece el texto")
     fig.tight_layout()
     fig.savefig(out, dpi=200)
     plt.close(fig)
@@ -155,7 +154,7 @@ def step_type_chart(st: dict, out: Path) -> None:
     left.set_ylim(0, 1)
     left.yaxis.set_major_formatter(COMMA)
     left.grid(axis="x", visible=False)
-    _title(left, "Todos los pasos", False)
+    _title(left, "Todos los pasos")
 
     types = list(TYPES)
     for j, key in enumerate(("classifier", "rule")):
@@ -170,7 +169,7 @@ def step_type_chart(st: dict, out: Path) -> None:
     right.set_ylim(0, 1)
     right.yaxis.set_major_formatter(COMMA)
     right.grid(axis="x", visible=False)
-    _title(right, "F1 por tipo (entre paréntesis, pasos en prueba)", False)
+    _title(right, "F1 por tipo (entre paréntesis, pasos en prueba)")
     fig.legend(*left.get_legend_handles_labels(), loc="upper left", ncol=3, frameon=False,
                bbox_to_anchor=(0.005, 1.0))
     fig.tight_layout(rect=(0, 0, 1, 0.92))
@@ -196,7 +195,7 @@ def learning_curve_chart(st: dict, out: Path) -> None:
     ax.set_ylim(0, 1)
     ax.yaxis.set_major_formatter(COMMA)
     ax.legend(frameon=False, loc="upper left")
-    _title(ax, f"Curva de aprendizaje del clasificador ({st['test_traces']} trazas de prueba)", False)
+    _title(ax, f"Curva de aprendizaje del clasificador ({st['test_traces']} trazas de prueba)")
     fig.tight_layout()
     fig.savefig(out, dpi=200)
     plt.close(fig)
@@ -204,18 +203,16 @@ def learning_curve_chart(st: dict, out: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Draw the evaluation figures.")
-    parser.add_argument("--drafts", action="store_true")
     parser.add_argument("--trace", default="en-log-pets", help="test trace for the boundary strip")
     args = parser.parse_args()
-    out_dir = RESULTS_DIR / "drafts" if args.drafts else RESULTS_DIR
-    res_path = out_dir / "results.json"
+    res_path = RESULTS_DIR / "results.json"
     if res_path.exists():
         res = json.loads(res_path.read_text(encoding="utf-8"))
-        segmentation_chart(res, out_dir / "segmentation.png")
-        boundary_strip(res, args.trace, out_dir / "boundaries.png")
-        print(f"wrote segmentation.png, boundaries.png to {out_dir}")
+        segmentation_chart(res, RESULTS_DIR / "segmentation.png")
+        boundary_strip(res, args.trace, RESULTS_DIR / "boundaries.png")
+        print(f"wrote segmentation.png, boundaries.png to {RESULTS_DIR}")
     else:
-        print(f"no {res_path}: run python -m eval.run{' --drafts' if args.drafts else ''} first")
+        print(f"no {res_path}: run python -m eval.run first")
     bench_path = RESULTS_DIR / "bench.json"
     if bench_path.exists():
         bench_chart(json.loads(bench_path.read_text(encoding="utf-8")), RESULTS_DIR / "bench.png")

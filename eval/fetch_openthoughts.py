@@ -32,8 +32,8 @@ ROWS = {
     "ot-mat-trail": (47, "Jitka's hike"),
     "ot-log-krakozyabrs": (84, "Horns and wings"),
     "ot-cod-yen": (100002, "Change from 1000-yen bills"),
-    # Second batch (23/11/2026). The "puzzle" domain is common-sense multiple choice, so the logic
-    # puzzles come from the maths domain; 112008 adds a science (chemistry) calculation.
+    # The "puzzle" domain is common-sense multiple choice, so the logic puzzles
+    # come from the maths domain; 112008 adds a science (chemistry) calculation.
     "ot-log-calculator": (151, "A calculator that doubles and reverses"),
     "ot-log-board": (289, "Erasing numbers from a board"),
     "ot-cod-tasks": (100107, "Three tasks"),
@@ -41,7 +41,7 @@ ROWS = {
 }
 
 
-# Rows by domain (checked 25/11/2026): math ~0-89,999, code ~90,000-109,999,
+# Rows by domain (approximate): math ~0-89,999, code ~90,000-109,999,
 # biology ~110,000, physics ~110,500-111,500, chemistry ~111,900-112,999,
 # puzzle (common-sense multiple choice) from ~113,000.
 DOMAINS = {"math": {"math"}, "code": {"code"}, "science": {"biology", "physics", "chemistry"},

@@ -1,7 +1,7 @@
-# Build the dashboard and publish it on GitHub Pages (build-plan step 7).
-# The backend URL (the Hugging Face Space) comes from the repository variable
+# Build the dashboard and publish it on GitHub Pages.
+# The backend URL (the Cloud Run service) comes from the repository variable
 # MEDRA_BACKEND_URL (Settings → Secrets and variables → Actions → Variables),
-# e.g. https://<user>-medra.hf.space. It is a public URL, not a secret.
+# e.g. https://medra-<hash>.europe-west1.run.app. It is a public URL, not a secret.
 name: Pages
 
 on:

@@ -1,11 +1,10 @@
-"""Evaluate MeDRA against the hand annotations (build plan §8.3).
+"""Evaluate MeDRA against the annotated traces.
 
-    python -m eval.run            # corrected annotations only: the reported results
-    python -m eval.run --drafts   # also drafts: PRELIMINARY, written to eval/results/drafts/
+    python -m eval.run
 
 Writes results.json (every number, per trace) and results.md (tables) to
-eval/results/ (or eval/results/drafts/). If eval.tune has been run, the tuned
-segmenter is added, evaluated on the test traces only.
+eval/results/. Only annotations with `status: corrected` count. If eval.tune
+has been run, the tuned segmenter is added, evaluated on the test traces only.
 
 What is measured:
 - Segmentation: Pk, WindowDiff and boundary P/R/F1 (within one sentence) of
@@ -18,8 +17,7 @@ What is measured:
 - Concepts: the bubbles of the final view against the annotated concepts,
   both as lemma keys. Baseline: the 16 most frequent terms.
 - Topics: B-cubed F1 of MeDRA's Louvain topics against the annotated topics,
-  and of agglomerative clustering on the same terms (the comparison left open
-  in build plan §4.4).
+  and of agglomerative clustering on the same terms.
 """
 
 from __future__ import annotations
@@ -30,7 +28,6 @@ import statistics
 import sys
 from dataclasses import asdict, replace
 from datetime import date
-from pathlib import Path
 
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -185,8 +182,8 @@ def topic_scores(a: Annotation, m: Mined) -> dict:
 
 
 
-def load_tuned(out_dir: Path) -> SegParams | None:
-    path = out_dir / "tuned.json"
+def load_tuned() -> SegParams | None:
+    path = RESULTS_DIR / "tuned.json"
     if not path.exists():
         return None
     return SegParams(**json.loads(path.read_text(encoding="utf-8"))["params"])
@@ -197,15 +194,14 @@ def load_step_types() -> dict | None:
     path = RESULTS_DIR / "steptypes.json"
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
 
-def evaluate(drafts: bool) -> dict:
-    annotations = load_all() if drafts else load_all(status="corrected")
+def evaluate() -> dict:
+    annotations = load_all(status="corrected")
     if not annotations:
-        raise SystemExit("no corrected annotations yet (use --drafts for a preliminary run)")
-    out_dir = RESULTS_DIR / "drafts" if drafts else RESULTS_DIR
+        raise SystemExit("no corrected annotations")
     dev_ids, test_ids = split(trace_ids())
     by_id = {a.trace_id: a for a in annotations}
     dev = [by_id[i] for i in dev_ids if i in by_id] or annotations
-    ctx = {"fixed_length": fixed_length(dev), "paragraph_min": paragraph_min(dev), "tuned": load_tuned(out_dir)}
+    ctx = {"fixed_length": fixed_length(dev), "paragraph_min": paragraph_min(dev), "tuned": load_tuned()}
     methods = dict(BASELINES)
     methods["paragraphs_min"] = (f"Párrafos + mín. {ctx['paragraph_min']} frases", seg_paragraphs_min)
     if ctx["tuned"]:
@@ -228,7 +224,6 @@ def evaluate(drafts: bool) -> dict:
     return {
         "date": date.today().isoformat(),
         "commit": git_commit(),
-        "preliminary": drafts,
         "annotations": {"n": len(annotations), "corrected": sum(a.status == "corrected" for a in annotations)},
         "split": {"dev": dev_ids, "test": test_ids},
         "fixed_length": ctx["fixed_length"],
@@ -237,7 +232,6 @@ def evaluate(drafts: bool) -> dict:
         "methods": {key: label for key, (label, _) in methods.items()},
         "per_trace": per_trace,
         "step_types": load_step_types(),
-        "out_dir": str(out_dir),
     }
 
 
@@ -273,10 +267,7 @@ def report(res: dict) -> str:
     # Methods with a parameter chosen on dev are only reported on test.
     untuned = {k: v for k, v in res["methods"].items() if k not in DEV_TUNED}
     lines = ["# Resultados de la evaluación de MeDRA", ""]
-    if res["preliminary"]:
-        lines += ["> **PRELIMINAR.** Calculado sobre anotaciones que incluyen borradores sin corregir "
-                  "(`status: draft`). Sirve para probar el código; **no son resultados** y no van a la memoria.", ""]
-    lines += [f"Generado con `python -m eval.run{' --drafts' if res['preliminary'] else ''}` el {res['date']}, "
+    lines += [f"Generado con `python -m eval.run` el {res['date']}, "
               f"commit {res['commit']}. Anotaciones: {res['annotations']['n']} "
               f"({res['annotations']['corrected']} corregidas). Trazas en inglés: "
               f"{sum(r['source'] == 'deepseek' for r in rows)} de DeepSeek y "
@@ -338,12 +329,10 @@ def report(res: dict) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Evaluate MeDRA against the hand annotations.")
-    parser.add_argument("--drafts", action="store_true", help="include draft annotations (preliminary run)")
-    args = parser.parse_args()
+    argparse.ArgumentParser(description="Evaluate MeDRA against the annotated traces.").parse_args()
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # Windows consoles default to cp1252
-    res = evaluate(args.drafts)
-    out_dir = Path(res.pop("out_dir"))
+    res = evaluate()
+    out_dir = RESULTS_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "results.json").write_text(json.dumps(res, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     md = report(res)

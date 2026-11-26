@@ -1,4 +1,4 @@
-"""Efficiency benchmark (build plan §8.4): cost per update as the text grows.
+"""Efficiency benchmark: cost per update as the text grows.
 
     python -m eval.bench                # ~30,000 words
     python -m eval.bench --words 10000

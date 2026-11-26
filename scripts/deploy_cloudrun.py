@@ -1,4 +1,4 @@
-"""Deploy the backend to Google Cloud Run. Build-plan step 7.
+"""Deploy the backend to Google Cloud Run.
 
     gcloud auth login                                   # once
     .venv/Scripts/python scripts/deploy_cloudrun.py --project <project-id> --secrets
@@ -62,8 +62,8 @@ def compute_account(project: str) -> str:
 def allow_builds(project: str) -> None:
     # New projects no longer give this account build rights by default; run.builder is the
     # role Google documents for source deploys (logs, Artifact Registry, service usage).
-    # serviceUsageConsumer is the permission the first deploy of medra-515517 failed on
-    # (2026-11-22); grants can take a minute or two to apply, so a retry may be needed.
+    # Without serviceUsageConsumer the first deploy fails. Grants can take a minute or two
+    # to apply, so a retry may be needed.
     member = f"--member=serviceAccount:{compute_account(project)}"
     for role in ("roles/run.builder", "roles/serviceusage.serviceUsageConsumer"):
         gcloud("projects", "add-iam-policy-binding", project, member, f"--role={role}", "--condition=None",

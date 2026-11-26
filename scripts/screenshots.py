@@ -5,11 +5,11 @@ Playwright (`pip install -e "backend[figures]"`). It drives the Microsoft
 Edge already installed on Windows, so no browser download is needed; pass
 --channel chrome (or chromium after `playwright install chromium`) elsewhere.
 
-    python scripts/screenshots.py --prefix step1
-    python scripts/screenshots.py --prefix step5-live --source deepseek --prompt "..." --schemes light
+    python scripts/screenshots.py --prefix fig
+    python scripts/screenshots.py --prefix live --source deepseek --prompt "..." --schemes light
 
 Writes, into screenshots/ (gitignored), as full-page captures:
-    <prefix>-empty-light.png       the first page before anything plays (as in the mock-up)
+    <prefix>-empty-light.png       the first page before anything plays
     <prefix>-picker-light.png      the «Añadir visualización» picker open over the dashboard
     <prefix>-streaming-light.png   mid-stream: pending tail in grey, caret
     <prefix>-final-light.png       after the trace has finished (concept map added above the timeline)

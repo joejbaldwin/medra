@@ -1,12 +1,11 @@
-"""Tune the segmenter's parameters on the annotated traces (build plan §8, step C).
+"""Tune the segmenter's parameters on the annotated traces.
 
-    python -m eval.tune            # corrected annotations only
-    python -m eval.tune --drafts   # PRELIMINARY, writes to eval/results/drafts/
+    python -m eval.tune
 
-"Fine-tuning" in MeDRA means this: choosing the segmenter's numbers (window,
-climb, marker and paragraph weights, threshold, minimum segment length) by
-grid search against hand-annotated boundaries, instead of by hand. No model
-is trained.
+Tuning the segmenter means choosing its numbers (window, climb, marker and
+paragraph weights, threshold, minimum segment length) by grid search
+against annotated boundaries (`status: corrected` files only). The
+step-type classifier, the one trained model, is in eval/steptypes.py.
 
 Protocol:
 1. Fixed dev/test split, stratified by source model (eval.common.split, seed 0).
@@ -98,15 +97,13 @@ def best(grid: list[SegParams], wd: np.ndarray, pkk: np.ndarray, cols: list[int]
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Grid-search the segmenter's parameters.")
-    parser.add_argument("--drafts", action="store_true", help="include draft annotations (preliminary run)")
-    args = parser.parse_args()
+    argparse.ArgumentParser(description="Grid-search the segmenter's parameters.").parse_args()
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-    annotations = load_all() if args.drafts else load_all(status="corrected")
+    annotations = load_all(status="corrected")
     if not annotations:
-        raise SystemExit("no corrected annotations yet (use --drafts for a preliminary run)")
-    out_dir = RESULTS_DIR / "drafts" if args.drafts else RESULTS_DIR
+        raise SystemExit("no corrected annotations")
+    out_dir = RESULTS_DIR
     ids = [a.trace_id for a in annotations]
     dev_ids, test_ids = split(trace_ids())
     dev = [i for i, t in enumerate(ids) if t in dev_ids]
@@ -142,7 +139,6 @@ def main() -> None:
     result = {
         "date": date.today().isoformat(),
         "commit": git_commit(),
-        "preliminary": args.drafts,
         "objective": "mean WindowDiff on dev (ties: Pk, then closest to defaults)",
         "dev": [ids[i] for i in dev],
         "test": [ids[i] for i in test],
@@ -171,9 +167,7 @@ def main() -> None:
 
 def report(r: dict) -> str:
     lines = ["# Ajuste de parámetros del segmentador", ""]
-    if r["preliminary"]:
-        lines += ["> **PRELIMINAR.** Ajustado sobre borradores sin corregir: prueba del código, **no son resultados**.", ""]
-    lines += [f"`python -m eval.tune{' --drafts' if r['preliminary'] else ''}`, {r['date']}, commit {r['commit']}. "
+    lines += [f"`python -m eval.tune`, {r['date']}, commit {r['commit']}. "
               f"Búsqueda en rejilla: {r['configurations']} configuraciones × {len(r['dev']) + len(r['test'])} trazas "
               f"en {r['seconds']} s. Objetivo: {r['objective']}.", "",
               f"Dev ({len(r['dev'])}): {', '.join(r['dev'])}.  ", f"Test ({len(r['test'])}): {', '.join(r['test'])}.", "",

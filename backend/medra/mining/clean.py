@@ -1,4 +1,4 @@
-"""Step 1 of the pipeline (limpieza), done without changing any offsets.
+"""Cleaning (limpieza), done without changing any offsets.
 
 Instead of deleting code, LaTeX and <think> tags (which would shift every
 position after them and need an offset map), they are overwritten with

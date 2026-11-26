@@ -1,4 +1,4 @@
-"""Evaluation metrics (build plan §8.3). Pure functions, no MeDRA imports.
+"""Evaluation metrics. Pure functions, no MeDRA imports.
 
 Segmentation is compared sentence by sentence. A segmentation of n sentences
 is the sorted list of the sentence indexes that start a segment (0 always

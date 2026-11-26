@@ -1,4 +1,4 @@
-"""Layer 3 rules (step 3): selection, hysteresis, sizing, edges, highlights, diffs."""
+"""Layer 3 rules: selection, hysteresis, sizing, edges, highlights, diffs."""
 
 import asyncio
 
@@ -155,7 +155,7 @@ def test_ticker_reports_token_decisions():
     assert any(t.node_id == "contraseña" for t in items)
 
 
-# ---------------------------------------------------------------- topics, steps, timeline (step 4)
+# ---------------------------------------------------------------- topics, steps, timeline
 
 
 def test_topic_colour_slots_are_stable_and_reused():

@@ -30,15 +30,7 @@ from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-# 1.1 (step 3): added MiningUpdate.recent_tokens, TickerItem.pos and TickerItem.node_id.
-# 1.2 (step 4): added Sentence.words, Step.marker, Step.marker_span and Step.words.
-# 1.3 (step 5): SessionConfig gains the paste/deepseek/ollama sources (text, prompt; sample
-#     becomes optional) and SourceInfo for GET /sources.
-# 1.4 (step 6): SampleInfo.prompt, so the dashboard can show a trace's prompt before playing it.
-# 1.5 (step 7): SourceInfo.needs_code, so the dashboard asks for an access code.
-# 1.6 (25/11/2026): the ollama source is removed (live models: DeepSeek only).
-# Minor versions otherwise only add fields with defaults, so 1.0 producers stay valid.
-SCHEMA_VERSION = "1.6"
+SCHEMA_VERSION = "1.7"
 
 Span = tuple[int, int]
 """Half-open character range [start, end) into the reasoning text."""
@@ -336,13 +328,6 @@ class ViewMessage(_Model):
     view: ViewUpdate
 
 
-class MiningMessage(_Model):
-    """Optional: the raw miner output, for a debug panel."""
-
-    type: Literal["mining"] = "mining"
-    mining: MiningUpdate
-
-
 class EndMessage(_Model):
     type: Literal["end"] = "end"
     reason: Literal["completed", "cancelled", "error"] = "completed"
@@ -354,7 +339,7 @@ class ErrorMessage(_Model):
 
 
 ServerMessage = Annotated[
-    Union[HelloMessage, TextMessage, ViewMessage, MiningMessage, EndMessage, ErrorMessage],
+    Union[HelloMessage, TextMessage, ViewMessage, EndMessage, ErrorMessage],
     Field(discriminator="type"),
 ]
 

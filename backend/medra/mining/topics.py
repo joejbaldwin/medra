@@ -1,4 +1,4 @@
-"""Topics: clusters of terms (build plan §4.2 step 9).
+"""Topics: clusters of terms.
 
 Graph: one node per term mentioned at least MIN_TERM_COUNT times; an edge
 between two terms weighted by how many windows of WINDOW consecutive

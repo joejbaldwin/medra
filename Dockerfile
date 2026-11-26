@@ -1,4 +1,4 @@
-# MeDRA backend container (build-plan step 7). Deployed on Google Cloud Run
+# MeDRA backend container. Deployed on Google Cloud Run
 # with scripts/deploy_cloudrun.py; runs anywhere Docker does.
 #
 #   docker build -t medra . && docker run -p 7860:7860 --env-file .env medra
@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir --no-deps -e backend
 
 USER user
 ENV PYTHONUNBUFFERED=1 \
-    # see build plan §4.3: OpenBLAS reserves a buffer per core otherwise
+    # numpy's OpenBLAS would reserve a memory buffer per core (medra/__init__.py)
     OPENBLAS_NUM_THREADS=1
 EXPOSE 7860
 # Cloud Run sets PORT (8080); elsewhere the container listens on 7860.

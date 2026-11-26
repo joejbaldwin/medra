@@ -1,4 +1,4 @@
-"""Layer 2: the incremental text miner (pipeline steps 1-11 of the build plan).
+"""Layer 2: the incremental text miner.
 
 For each chunk:
 1. Append it to the buffer and mask code/LaTeX/<think> in the uncommitted
@@ -13,7 +13,7 @@ For each chunk:
    (segment.py), TF-IDF per segment and PMI (weights.py), topics (topics.py).
 
 Work per sentence is proportional to the sentence; the snapshot is rebuilt
-from the counts each time (measured in step 8).
+from the counts each time (cost per update: eval/bench.py).
 """
 
 from __future__ import annotations

@@ -139,7 +139,7 @@ describe("layout", () => {
     it("is drawn over the page without changing it", () => {
       expect(shown(full, ex("timeline", "row")).cells).toEqual(["map", "timeline", "steps", "timeline"]);
       expect(shown(full, ex("map", "full")).cells).toEqual(["map", "map", "map", "map"]);
-      // Over two-cell windows too (the old spans refused this).
+      // Over two-cell windows too.
       const chat = p("map", "timeline", "chat", "chat");
       expect(shown(chat, ex("map", "row")).cells).toEqual(["map", "timeline", "map", "chat"]); // chat keeps its lower half
       expect(shown(chat, ex("map", "column")).cells).toEqual(["map", "map", "chat", "chat"]);

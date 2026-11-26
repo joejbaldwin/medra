@@ -1,5 +1,4 @@
-/* Tokens follow the earlier demo (context/reference/medra-demo.html) and the
-   approved dashboard mock-ups (pale lavender page, white windows). */
+/* Design tokens: pale lavender page, white windows. */
 :root {
   --bg: #F3F2FA;
   --surface: #FFFFFF;
@@ -317,7 +316,7 @@ select {
 }
 .badge[data-mode="live"] { color: color-mix(in srgb, var(--c2) 80%, var(--fg)); background: color-mix(in srgb, var(--c2) 14%, var(--surface)); }
 .badge:empty { display: none; }
-/* while a session runs, a pulsing dot (replaces the old status strip) */
+/* while a session runs, a pulsing dot */
 .badge.running::before {
   content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%;
   background: currentColor; vertical-align: 1px; animation: pulse-dot 1.2s ease-in-out infinite;

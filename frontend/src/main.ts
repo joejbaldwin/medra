@@ -340,8 +340,6 @@ function handle(msg: ServerMessage): void {
     case "view":
       applyView(msg.view);
       break;
-    case "mining":
-      break; // debug channel, not shown yet
     case "end":
       finish();
       setStatus("done", "Terminado");
@@ -675,7 +673,7 @@ async function loadSources(): Promise<void> {
   updateComposer();
 }
 
-// The trace selected on load (Joe, 2026-11-02): «Sum of the first 100 odd numbers».
+// The trace selected on load: «Sum of the first 100 odd numbers».
 const DEFAULT_SAMPLE = "odd-sum-en";
 
 async function loadSamples(): Promise<void> {

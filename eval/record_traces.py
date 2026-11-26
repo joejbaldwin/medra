@@ -11,7 +11,7 @@ step-type classifier, which is kept apart from the evaluation traces.
 Each trace is saved as eval/traces/<id>.json in the same format as
 data/samples/, so the dashboard can replay it too. A trace is kept only if
 its reasoning is in the intended language and long enough to segment; very long ones
-are kept but flagged, since they are slow to annotate by hand.
+are kept but flagged, since they are slow to annotate.
 
 This spends a little of the group's DeepSeek credit. The key is read from
 .env like the server does and is never printed.
@@ -42,8 +42,8 @@ MAX_TOKENS = 6000  # enough room for the reasoning and the answer
 # All prompts are in English. DeepSeek's thinking is in English even when
 # asked in Spanish: 7 of 9 Spanish prompts gave English reasoning (the other 2
 # were too short to keep), and a Spanish system message did not change it on
-# deepseek-flash or deepseek-v4-pro (22/11/2026). The evaluation uses real
-# chains of thought only, so it is English (build plan §8).
+# deepseek-flash or deepseek-v4-pro. The evaluation uses real chains of
+# thought only, so it is English.
 
 # id: (title, language, prompt). Medium-difficulty problems, so the reasoning
 # has several steps (planning, checks, corrections) but stays annotatable.
@@ -94,8 +94,7 @@ PROMPTS: dict[str, tuple[str, str, str]] = {
         "Three friends, Alice, Ben and Chloe, each own a different pet (cat, dog, parrot) and live in houses "
         "numbered 1 to 3. The dog owner lives next to Alice. Ben does not own the cat. Chloe lives in house 3. "
         "The parrot owner lives in house 1. Who owns which pet and who lives where? Is the solution unique?"),
-    # Second batch (23/11/2026): more logic, to balance the domains. A bridge-and-torch puzzle was
-    # dropped: twice it hit the token limit while proving its lower bound.
+    # More logic problems, to balance the domains.
     "en-log-league": ("A four-team league", "en",
         "Four teams A, B, C and D play each other once. A win is worth 3 points, a draw 1 and a loss 0. At the "
         "end A has 7 points, B 5, C 3 and D 1. What was the result of every match? Is it the only possibility?"),

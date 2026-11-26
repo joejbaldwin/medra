@@ -1,4 +1,4 @@
-"""Segmentation into 'tramos' (build plan §4.2 step 6).
+"""Segmentation into 'tramos'.
 
 TextTiling-style lexical cohesion (Hearst 1997) with a discourse-marker
 prior. For every gap between two sentences:
@@ -21,10 +21,9 @@ once FROZEN_AFTER more sentences have arrived it can never change. That is
 what lets the dashboard draw a boundary as final while the text is still
 streaming, and makes the streamed result equal the batch one.
 
-The weights and threshold were first set by hand on the sample traces. The
-evaluation (eval/tune.py) searches them against hand-annotated boundaries
-(Pk, WindowDiff) by passing a SegParams; the live miner uses DEFAULT_PARAMS,
-built from the constants below.
+The evaluation (eval/tune.py) searches the weights and threshold against
+annotated boundaries (Pk, WindowDiff) by passing a SegParams; the live miner
+uses DEFAULT_PARAMS, built from the constants below.
 """
 
 from __future__ import annotations

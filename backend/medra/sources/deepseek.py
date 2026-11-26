@@ -58,7 +58,7 @@ class DeepSeekSource:
         self.base_url = base_url
         self.max_tokens = max_tokens
         self.transport = transport
-        self.usage: dict | None = None  # token counts reported at the end (for budgets, step 7)
+        self.usage: dict | None = None  # token counts reported at the end of the stream
         self.finish_reason: str | None = None
 
     async def stream(self) -> AsyncIterator[TextChunk]:

@@ -1,4 +1,4 @@
-"""Step 5: pasted text and the DeepSeek source.
+"""Pasted text and the DeepSeek source.
 
 The live source runs against a mocked HTTP server (httpx.MockTransport), so
 the tests spend no API credit.
@@ -210,7 +210,7 @@ def test_live_sessions_need_a_key_and_respect_the_kill_switch(monkeypatch):
     assert client.post("/sessions", json={"source": "deepseek", "prompt": "hi"}).status_code == 503
     use_settings(monkeypatch, deepseek_api_key=KEY, live_disabled=True)
     assert client.post("/sessions", json={"source": "deepseek", "prompt": "hi"}).status_code == 503
-    assert client.post("/sessions", json={"source": "ollama", "prompt": "hi"}).status_code == 422  # removed
+    assert client.post("/sessions", json={"source": "unknown", "prompt": "hi"}).status_code == 422
     # Replay and paste keep working with the kill switch on.
     assert client.post("/sessions", json={"source": "paste", "text": "Some text."}).status_code == 200
     assert client.post("/sessions", json={"source": "paste"}).status_code == 422

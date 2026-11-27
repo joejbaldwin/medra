@@ -134,7 +134,7 @@
           "type": "string"
         },
         "schema_version": {
-          "default": "1.7",
+          "default": "1.8",
           "type": "string"
         },
         "session_id": {
@@ -265,7 +265,7 @@
       "description": "Full snapshot of the miner's state after a commit.\n\nEmitted each time at least one sentence is committed. It is a snapshot,\nnot a diff: Layer 2 and 3 run in the same process, so this costs no\nnetwork traffic, and it keeps the \"incremental == batch\" test simple.\nDiffing happens in Layer 3, before the network.",
       "properties": {
         "schema_version": {
-          "default": "1.7",
+          "default": "1.8",
           "type": "string"
         },
         "session_id": {
@@ -428,11 +428,6 @@
           ],
           "default": null,
           "description": "Starting position in a 0..1 box; the force layout moves it."
-        },
-        "emphasis": {
-          "default": 0.0,
-          "description": "0..1, e.g. recently mentioned.",
-          "type": "number"
         }
       },
       "required": [
@@ -442,8 +437,7 @@
         "radius",
         "topic_id",
         "colour_slot",
-        "seed_xy",
-        "emphasis"
+        "seed_xy"
       ],
       "title": "Node",
       "type": "object"
@@ -1049,7 +1043,7 @@
       "description": "A piece of streamed text. Boundaries are arbitrary (may split a word).",
       "properties": {
         "schema_version": {
-          "default": "1.7",
+          "default": "1.8",
           "type": "string"
         },
         "session_id": {
@@ -1311,7 +1305,7 @@
       "description": "What the screen should show, as a diff against the previous update.\n\nThe first update of a session has kind=\"snapshot\". After that, each list\nholds only items that were added or changed (upsert by id), and `removed`\nlists ids to delete. `timeline` and `stats`, when present, replace the\nprevious value whole. `ticker` items are appended.",
       "properties": {
         "schema_version": {
-          "default": "1.7",
+          "default": "1.8",
           "type": "string"
         },
         "session_id": {
@@ -1494,5 +1488,5 @@
   ],
   "title": "MedraContracts",
   "type": "object",
-  "$comment": "MeDRA contracts, schema_version 1.7. Generated; do not edit."
+  "$comment": "MeDRA contracts, schema_version 1.8. Generated; do not edit."
 }

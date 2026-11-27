@@ -52,7 +52,6 @@ class ViewPresenter:
         self.steps = Keyed(lambda s: s.segment_id)
         self.slots = SlotAllocator()
         self.timeline: Timeline | None = None
-        self.counts: dict[str, int] = {}
         self.seq = 0
 
     def present(self, update: MiningUpdate) -> ViewUpdate:
@@ -87,10 +86,8 @@ class ViewPresenter:
                     topic_id=topic,
                     colour_slot=slot,
                     seed_xy=seed_for(slot),
-                    emphasis=1.0 if t.count > self.counts.get(t.id, 0) else 0.0,
                 )
             )
-        self.counts = {t.id: t.count for t in shown}
         highlights = [Highlight(kind="node", id=t.id, spans=t.spans) for t in shown]
         edges = select_edges(update.cooc, shown_ids)
         for e in edges:

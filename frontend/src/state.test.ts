@@ -4,7 +4,7 @@ import { layoutLabel } from "./conceptMap";
 import { ViewState } from "./state";
 
 const node = (id: string, count: number): Node => ({
-  id, label: id, count, radius: 20 + count, topic_id: null, colour_slot: 0, seed_xy: null, emphasis: 0,
+  id, label: id, count, radius: 20 + count, topic_id: null, colour_slot: 0, seed_xy: null,
 });
 
 function view(kind: "snapshot" | "diff", partial: Partial<ViewUpdate>): ViewUpdate {

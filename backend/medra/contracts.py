@@ -30,7 +30,7 @@ from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-SCHEMA_VERSION = "1.7"
+SCHEMA_VERSION = "1.8"
 
 Span = tuple[int, int]
 """Half-open character range [start, end) into the reasoning text."""
@@ -195,7 +195,6 @@ class Node(_Model):
     seed_xy: tuple[float, float] | None = Field(
         default=None, description="Starting position in a 0..1 box; the force layout moves it."
     )
-    emphasis: float = Field(default=0.0, description="0..1, e.g. recently mentioned.")
 
 
 class Edge(_Model):

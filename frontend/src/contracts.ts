@@ -278,10 +278,6 @@ export interface Node {
    * Starting position in a 0..1 box; the force layout moves it.
    */
   seed_xy: [number, number] | null;
-  /**
-   * 0..1, e.g. recently mentioned.
-   */
-  emphasis: number;
 }
 /**
  * This interface was referenced by `MedraContracts`'s JSON-Schema

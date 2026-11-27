@@ -1,99 +1,60 @@
 # MeDRA
 
-**Mapa de Despliegue del Razonamiento Agente**: a real-time dashboard that applies text mining
-to a model's chain-of-thought while it streams.
+Panel en tiempo real que aplica minería de textos a la cadena de pensamiento (CoT) de un modelo
+de lenguaje mientras se genera. Práctica final de *Inteligencia Artificial en las Organizaciones*
+(UC3M, 2026/27), Grupo 1.
 
-The live text sits next to a concept map, a topic timeline and a step graph, and every bubble,
-segment and topic links back to the words it came from. The mining (cleaning, lemmatisation,
-n-grams, TF-IDF per segment, co-occurrence, segmentation, topic clustering and a step-type
-classifier) runs sentence by sentence as the text arrives.
+Hay dos formas de usarlo: ejecutarlo en local o abrir la web en directo.
 
-The system has four interchangeable layers:
+## Opción 1: ejecutarlo en local
 
-1. **Source**: any text stream (an LLM API, pasted text, a recorded trace).
-2. **Mining**: source-agnostic text mining that outputs metrics and term lists with offsets into the text.
-3. **Presentation**: turns the metrics into visual decisions (bubble sizes, links, highlights).
-4. **Dashboard**: the web frontend.
+### Recursos necesarios
 
-Final project for *Inteligencia Artificial en las Organizaciones* (UC3M, 2026/27), Grupo 1.
+- Python 3.11 o superior.
+- Node.js 20 o superior.
+- Conexión a internet durante la instalación (se descargan las dependencias y los modelos de spaCy).
+- Opcional: una clave de la API de DeepSeek, solo para la fuente DeepSeek.
 
-**Live version:** https://joejbaldwin.github.io/medra/. Recorded traces and pasted text work
-without an account; the live DeepSeek source asks for an access code. The backend sleeps when
-idle, so the first request after a pause waits while it starts.
+### Instrucciones
 
-## Repository layout
+Los comandos se ejecutan desde la carpeta raíz del proyecto. En macOS o Linux, escribir
+`.venv/bin/` en lugar de `.venv/Scripts/`.
 
-| Path | What |
-|---|---|
-| `backend/medra/sources/` | Layer 1: DeepSeek API, pasted text, recorded traces |
-| `backend/medra/mining/` | Layer 2: cleaning, sentences, terms, segmentation, TF-IDF, co-occurrence, topics, step-type classifier (`models/step_types_en.json`) |
-| `backend/medra/present/` | Layer 3: bubble selection and sizes, edges, topic colours, timeline, diffs |
-| `backend/medra/server.py` | FastAPI server: REST + WebSocket, access codes |
-| `backend/medra/contracts.py` | the data contracts between layers (snapshot in `docs/contracts/`) |
-| `frontend/` | Layer 4: the dashboard (TypeScript + D3, Vite); `estudio.html` is the user-study page |
-| `data/samples/` | recorded traces the dashboard can replay |
-| `eval/` | annotated traces, metrics, segmenter tuning, classifier training, results (`eval/results/`) |
-| `eval/train/` | the training traces of the step-type classifier |
-| `scripts/` | Cloud Run deployment, browser checks of the dashboard, screenshots |
+1. Instalar (solo la primera vez):
 
-## Run locally
+   ```sh
+   python -m venv .venv
+   .venv/Scripts/python -m pip install -r backend/requirements.lock
+   .venv/Scripts/python -m pip install -e backend
+   cd frontend && npm install && cd ..
+   ```
 
-Needs Python 3.11+ and Node 20+. Commands start in the repo root; on macOS/Linux write
-`.venv/bin/` instead of `.venv/Scripts/`.
+2. Arrancar el servidor, en una terminal:
 
-```sh
-# install (once)
-python -m venv .venv
-.venv/Scripts/python -m pip install -r backend/requirements.lock
-.venv/Scripts/python -m pip install -e "backend[dev]"
-cd frontend && npm install && cd ..
-```
+   ```sh
+   .venv/Scripts/medra-serve
+   ```
 
-```sh
-# terminal 1: backend on http://127.0.0.1:8000
-.venv/Scripts/medra-serve
-```
+3. Arrancar el panel, en otra terminal:
 
-```sh
-# terminal 2: dashboard on http://localhost:5173
-cd frontend && npm run dev
-```
+   ```sh
+   cd frontend
+   npm run dev
+   ```
 
-Open http://localhost:5173, pick a trace in **Traza** and press the send button. **+ Añadir
-visualización** adds the concept map, the topic timeline or the step graph to an empty slot.
+4. Abrir http://localhost:5173, elegir una traza en **Traza** y pulsar el botón de enviar.
+   Con **Añadir visualización** se añaden el mapa de conceptos, la línea de temas o los pasos
+   del agente.
 
-The **Fuente** menu picks where the text comes from:
+Sin clave funcionan las fuentes **Traza de ejemplo** y **Pegar texto**. Para usar DeepSeek en
+local, copiar `.env.example` como `.env` y escribir la clave en `DEEPSEEK_API_KEY`.
 
-| Fuente | What it does |
-|---|---|
-| Traza de ejemplo | replays a recorded trace from `data/samples/` |
-| Pegar texto | replays pasted text (a `<think>…</think>` block is split off from the answer) |
-| DeepSeek Flash | streams a live answer from the DeepSeek API; needs `DEEPSEEK_API_KEY` in `.env` (copy `.env.example`) |
+## Opción 2: usar la web en directo (con DeepSeek)
 
-The key is read only by the backend and is never sent to the browser or logged.
+No hace falta instalar nada ni tener clave de API.
 
-## Tests
+1. Abrir https://joejbaldwin.github.io/medra/.
+2. En **Fuente**, elegir **DeepSeek Flash**.
+3. Escribir una pregunta, enviarla e introducir el código de acceso que facilita el grupo.
 
-```sh
-cd backend && ../.venv/Scripts/python -m pytest && cd ..   # backend
-.venv/Scripts/python -m pytest eval                         # metrics and annotation tools
-cd frontend && npm test && cd ..                            # dashboard
-```
-
-## Reproduce the results
-
-The results in `eval/results/` come from these commands, run from the repo root. Each output
-file records the commit and date it was produced with. Every number is deterministic except
-the timings of `eval.bench`, which depend on the machine.
-
-```sh
-.venv/Scripts/python -m pip install -e "backend[eval]"
-.venv/Scripts/python -m eval.annotations --check   # the 30 evaluation annotations match their traces
-.venv/Scripts/python -m eval.tune        # segmenter parameters: grid search on dev, scored on test
-.venv/Scripts/python -m eval.steptypes   # step-type classifier: settings by grouped CV, test scores, learning curve
-.venv/Scripts/python -m eval.run         # segmentation, concepts and topics against the baselines
-.venv/Scripts/python -m eval.bench       # cost per update as the text grows
-.venv/Scripts/python -m eval.figures     # the figures (PNG)
-```
-
-`eval/annotations/GUIDE.md` describes the annotation format and the step types.
+Si el servidor llevaba un rato inactivo, la primera petición tarda algo más mientras arranca.

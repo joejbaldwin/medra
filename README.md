@@ -55,6 +55,7 @@ No hace falta instalar nada ni tener clave de API.
 
 1. Abrir https://joejbaldwin.github.io/medra/.
 2. En **Fuente**, elegir **DeepSeek Flash**.
-3. Escribir una pregunta, enviarla e introducir el código de acceso que facilita el grupo.
+3. Escribir una pregunta y enviarla. La web pedirá un código de acceso: lo enviará Joe Baldwin
+   (100483331@alumnos.uc3m.es) por Aula Global junto con la entrega.
 
 Si el servidor llevaba un rato inactivo, la primera petición tarda algo más mientras arranca.
